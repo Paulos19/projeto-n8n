@@ -1,218 +1,145 @@
-// app/dashboard/avaliacao/[id]/page.tsx
-'use client';
+import prisma from "@/lib/prisma";
+import { notFound } from "next/navigation";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { ArrowLeft, MessageSquare, Star, ThumbsUp, ThumbsDown, User, CalendarDays, Tag, Activity } from "lucide-react";
 
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation'; // Hooks para rotas dinâmicas
-import Link from 'next/link';
-
-// Interface para os dados da avaliação (pode ser importada de um arquivo de tipos)
+// Interface para os dados da avaliação (pode ser movida para um arquivo de tipos)
 interface AvaliacaoData {
   id: string;
-  nota_cliente: number;
-  pontos_fortes: string[];
-  pontos_fracos: string[];
-  tempo_resposta: string;
-  clareza_comunicacao: string;
-  resolucao_problema: string;
-  sugestoes_melhoria: string[];
-  resumo_atendimento: string;
-  remoteJid?: string | null;
-  createdAt: string;
+  remoteJid: string | null;
+  nota_cliente: number | null;
+  pontos_fortes: string[] | null; // Changed from string | null
+  pontos_fracos: string[] | null; // Changed from string | null
+  sugestoes_melhoria: string[] | null; // Renamed from sugestoes and changed type
+  tempo_resposta: string | null; // Added
+  clareza_comunicacao: string | null; // Added
+  resolucao_problema: string | null; // Added
+  resumo_atendimento: string | null; // Added
+  // tags: string | null; // Removed as it seems missing from Prisma data
+  // sentimento_geral: string | null; // Removed as it seems missing from Prisma data
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-// Novo endpoint na API para buscar uma avaliação específica por ID
 async function fetchAvaliacaoById(id: string): Promise<AvaliacaoData | null> {
   try {
-    const response = await fetch(`/api/avaliacao/${id}`); // Novo endpoint
-    if (!response.ok) {
-      if (response.status === 404) return null;
-      throw new Error('Falha ao buscar dados da avaliação');
+    const avaliacao = await prisma.avaliacao.findUnique({
+      where: { id },
+    });
+    if (!avaliacao) {
+      return null;
     }
-    return await response.json();
+    return avaliacao;
   } catch (error) {
-    console.error("Erro ao buscar avaliação por ID:", error);
-    throw error; // Re-throw para ser pego pelo componente
+    console.error("Erro ao buscar avaliação:", error);
+    // Em um cenário real, você poderia logar este erro de forma mais robusta
+    return null;
   }
 }
 
-
-export default function AvaliacaoDetalhePage() {
-  const router = useRouter();
-  const params = useParams(); // Obtém o { id: 'valor-do-id' } da URL
-  const id = typeof params.id === 'string' ? params.id : undefined;
-
-  const [avaliacao, setAvaliacao] = useState<AvaliacaoData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (id) {
-      setIsLoading(true);
-      setError(null);
-      fetchAvaliacaoById(id)
-        .then(data => {
-          if (data) {
-            setAvaliacao(data);
-          } else {
-            setError('Avaliação não encontrada.');
-          }
-        })
-        .catch(err => {
-          setError(err.message || 'Ocorreu um erro ao buscar a avaliação.');
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    } else if (!params.id) {
-        // Este caso pode acontecer brevemente durante a renderização inicial
-        // ou se a rota for acessada sem ID (o que não deveria acontecer com uma estrutura de arquivo correta)
-        setIsLoading(false);
-        setError("ID da avaliação não fornecido na rota.");
-    }
-  }, [id, params.id]); // Dependência no 'id'
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <p className="text-xl text-slate-600">Carregando detalhes da avaliação...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-lg shadow-xl text-center max-w-md">
-          <p className="text-xl text-red-600 mb-4">Erro:</p>
-          <p className="text-slate-700 mb-6">{error}</p>
-          <Link href="/dashboard" legacyBehavior>
-            <a className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-              Voltar ao Painel
-            </a>
-          </Link>
-        </div>
-      </div>
-    );
-  }
+export default async function AvaliacaoDetalhePage({ params }: { params: { id: string } }) {
+  const avaliacao = await fetchAvaliacaoById(params.id);
+  const gradientText = "bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-teal-300 to-green-300";
 
   if (!avaliacao) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <p className="text-xl text-slate-700">Avaliação não encontrada.</p>
-         <Link href="/dashboard" legacyBehavior>
-            <a className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-              Voltar ao Painel
-            </a>
-          </Link>
-      </div>
-    );
+    notFound(); // Redireciona para a página 404 se a avaliação não for encontrada
   }
 
-  const cardClasses = "bg-white p-6 rounded-lg shadow-lg mb-6";
-  const cardTitleClasses = "text-xl font-semibold text-gray-700 mb-3 pb-2 border-b border-gray-200";
-  const listItemClasses = "text-gray-600 mb-1 ml-4 list-disc";
-  const paragraphClasses = "text-gray-600 leading-relaxed whitespace-pre-wrap";
-  const detailItemClasses = "text-gray-700 mb-2";
-  const detailLabelClasses = "font-semibold text-gray-800";
+  const getNotaBadgeVariant = (nota: number | null) => {
+    if (nota === null) return "secondary";
+    if (nota <= 2) return "destructive";
+    if (nota <= 3) return "secondary";
+    return "default";
+  };
 
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-sky-100 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto">
-        <header className="mb-8">
-            <Link href="/dashboard" legacyBehavior>
-                <a className="text-blue-600 hover:text-blue-800 hover:underline inline-flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    Voltar ao Painel
-                </a>
-            </Link>
-          <h1 className="mt-4 text-3xl font-bold text-slate-800 text-center">
-            Detalhes da Avaliação
-          </h1>
-           {avaliacao.remoteJid && (
-             <p className="text-md text-slate-600 mt-1 text-center">
-              Cliente: <span className="font-medium">{avaliacao.remoteJid.split('@')[0]}</span>
-            </p>
-          )}
-           <p className="text-sm text-slate-500 mt-1 text-center">
-            ID da Avaliação: {avaliacao.id}
-          </p>
-           <p className="text-sm text-slate-500 mt-1 text-center">
-            Registrada em: {new Date(avaliacao.createdAt).toLocaleString('pt-BR')}
-          </p>
-        </header>
-
-        <div className={cardClasses}>
-          <h2 className={cardTitleClasses}>Nota do Cliente</h2>
-          <p className="text-3xl font-bold text-blue-600 text-center py-3">
-            {avaliacao.nota_cliente} <span className="text-xl text-gray-500">/ 10</span>
-          </p>
+  const renderField = (label: string, value: string | number | string[] | null | Date, Icon?: React.ElementType, isBadge?: boolean, badgeVariant?: "default" | "secondary" | "destructive" | "outline" | null) => {
+    if (value === null || value === undefined || (typeof value === 'string' && value === "") || (Array.isArray(value) && value.length === 0)) return null;
+    
+    let displayValue: React.ReactNode;
+    if (value instanceof Date) {
+      displayValue = value.toLocaleDateString('pt-BR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    } else if (Array.isArray(value)) {
+      displayValue = (
+        <div className="flex flex-wrap gap-2">
+          {value.map((item, index) => (
+            <Badge key={index} variant={badgeVariant || "secondary"} className="text-sm">{item}</Badge>
+          ))}
         </div>
+      );
+    } else if (isBadge) {
+      displayValue = <Badge variant={badgeVariant || "secondary"} className="text-sm">{String(value)}</Badge>;
+    } else {
+      displayValue = String(value);
+    }
 
-         <div className="grid md:grid-cols-2 gap-6">
-            <div className={cardClasses}>
-                <h2 className={cardTitleClasses}>Pontos Fortes</h2>
-                {(avaliacao.pontos_fortes && avaliacao.pontos_fortes.length > 0) ? (
-                <ul>
-                    {(avaliacao.pontos_fortes || []).map((ponto, index) => (
-                    <li key={`forte-${index}`} className={listItemClasses}>{ponto}</li>
-                    ))}
-                </ul>
-                ) : (
-                <p className={paragraphClasses}>Nenhum ponto forte informado.</p>
-                )}
-            </div>
-
-            <div className={cardClasses}>
-                <h2 className={cardTitleClasses}>Pontos Fracos</h2>
-                {(avaliacao.pontos_fracos && avaliacao.pontos_fracos.length > 0) ? (
-                <ul>
-                    {(avaliacao.pontos_fracos || []).map((ponto, index) => (
-                    <li key={`fraco-${index}`} className={listItemClasses}>{ponto}</li>
-                    ))}
-                </ul>
-                ) : (
-                <p className={paragraphClasses}>Nenhum ponto fraco informado.</p>
-                )}
-            </div>
-        </div>
-
-
-        <div className={cardClasses}>
-          <h2 className={cardTitleClasses}>Métricas de Atendimento</h2>
-           <div className="space-y-2">
-            <p className={detailItemClasses}>
-              <span className={detailLabelClasses}>Tempo de Resposta:</span> {avaliacao.tempo_resposta || 'Não informado'}
-            </p>
-            <p className={detailItemClasses}>
-              <span className={detailLabelClasses}>Clareza na Comunicação:</span> {avaliacao.clareza_comunicacao || 'Não informado'}
-            </p>
-            <p className={detailItemClasses}>
-              <span className={detailLabelClasses}>Resolução do Problema:</span> {avaliacao.resolucao_problema || 'Não informado'}
-            </p>
-          </div>
-        </div>
-
-        <div className={cardClasses}>
-          <h2 className={cardTitleClasses}>Sugestões de Melhoria</h2>
-          {(avaliacao.sugestoes_melhoria && avaliacao.sugestoes_melhoria.length > 0) ? (
-            <ul>
-              {(avaliacao.sugestoes_melhoria || []).map((sugestao, index) => (
-                <li key={`sugestao-${index}`} className={listItemClasses}>{sugestao}</li>
-              ))}
-            </ul>
-          ) : (
-            <p className={paragraphClasses}>Nenhuma sugestão de melhoria informada.</p>
-          )}
-        </div>
-
-        <div className={cardClasses}>
-          <h2 className={cardTitleClasses}>Resumo do Atendimento</h2>
-          <p className={paragraphClasses}>{avaliacao.resumo_atendimento || 'Resumo não disponível.'}</p>
+    return (
+      <div className="flex items-start space-x-3 py-3 border-b border-gray-700 last:border-b-0">
+        {Icon && <Icon className="h-5 w-5 mt-1 text-blue-400 flex-shrink-0" />}
+        <div className="flex-grow">
+          <p className="text-sm font-medium text-gray-400">{label}</p>
+          <p className="text-gray-200">{displayValue}</p>
         </div>
       </div>
+    );
+  };
+
+  return (
+    <div className="space-y-6">
+      <Button asChild variant="outline" className="border-blue-500 text-blue-400 hover:bg-blue-700 hover:text-white">
+        <Link href="/dashboard/avaliacoes">
+          <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Avaliações
+        </Link>
+      </Button>
+
+      <Card className="bg-gray-800 border-gray-700 text-white shadow-xl">
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+            <div>
+              <CardTitle className={`text-2xl font-bold ${gradientText}`}>
+                Detalhes da Avaliação
+              </CardTitle>
+              <CardDescription className="text-gray-400">
+                ID: {avaliacao.id}
+              </CardDescription>
+            </div>
+            {avaliacao.nota_cliente !== null && (
+                <Badge variant={getNotaBadgeVariant(avaliacao.nota_cliente)} className="text-lg px-3 py-1 mt-2 sm:mt-0">
+                  Nota: {avaliacao.nota_cliente}/10
+                </Badge>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="divide-y divide-gray-700">
+          {renderField("Cliente (JID)", avaliacao.remoteJid ? avaliacao.remoteJid.split('@')[0] : 'N/A', User)}
+          {renderField("Nota do Cliente", avaliacao.nota_cliente, Star, true, getNotaBadgeVariant(avaliacao.nota_cliente))}
+          {renderField("Pontos Fortes", avaliacao.pontos_fortes, ThumbsUp, true, "default")}
+          {renderField("Pontos Fracos", avaliacao.pontos_fracos, ThumbsDown, true, "destructive")}
+          {renderField("Sugestões de Melhoria", avaliacao.sugestoes_melhoria, MessageSquare, true, "secondary")}
+          {renderField("Tempo de Resposta", avaliacao.tempo_resposta, Activity)}
+          {renderField("Clareza na Comunicação", avaliacao.clareza_comunicacao, Activity)}
+          {renderField("Resolução do Problema", avaliacao.resolucao_problema, Activity)}
+          {renderField("Resumo do Atendimento", avaliacao.resumo_atendimento, Activity)}
+          {/* 
+            The following fields seem to be missing from your Prisma model based on the TS error.
+            If they do exist in schema.prisma and are optional, you might need to adjust the AvaliacaoData interface.
+          */}
+          {/* {renderField("Tags", avaliacao.tags, Tag, true, "outline")} */}
+          {/* {renderField("Sentimento Geral", avaliacao.sentimento_geral, Activity, true, 
+            avaliacao.sentimento_geral?.toLowerCase() === 'positivo' ? 'default' : 
+            avaliacao.sentimento_geral?.toLowerCase() === 'negativo' ? 'destructive' : 'secondary'
+          )} */}
+          {renderField("Data de Criação", avaliacao.createdAt, CalendarDays)}
+          {renderField("Última Atualização", avaliacao.updatedAt, CalendarDays)}
+        </CardContent>
+        <CardFooter className="pt-6">
+          <p className="text-xs text-gray-500">
+            Gerenciado pelo sistema R.A.I.O.
+          </p>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

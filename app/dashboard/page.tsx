@@ -1,139 +1,157 @@
-// app/dashboard/page.tsx (Painel de Administração)
-'use client';
-
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-// A interface AvaliacaoData pode vir do endpoint ou ser definida localmente
-// Idealmente, você teria um arquivo de tipos compartilhado (ex: types/index.ts)
-interface AvaliacaoData {
-  id: string; // Agora temos ID do banco
-  nota_cliente: number;
-  pontos_fortes: string[];
-  pontos_fracos: string[];
-  tempo_resposta: string;
-  clareza_comunicacao: string;
-  resolucao_problema: string;
-  sugestoes_melhoria: string[];
-  resumo_atendimento: string;
-  remoteJid?: string | null;
-  createdAt: string; // Prisma retorna Date, mas JSON stringifica para string
-}
-
-// Componente Card (pode ser movido para um arquivo separado)
-const AvaliacaoCard = ({ avaliacao }: { avaliacao: AvaliacaoData }) => {
-  return (
-    <Link href={`/dashboard/avaliacao/${avaliacao.id}`} legacyBehavior>
-      <a className="block bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200 ease-in-out transform hover:-translate-y-1">
-        <div className="flex justify-between items-start mb-3">
-          <h3 className="text-xl font-semibold text-slate-800">
-            Avaliação: {avaliacao.remoteJid ? avaliacao.remoteJid.split('@')[0] : 'ID N/A'}
-          </h3>
-          <span className={`px-3 py-1 text-sm font-semibold rounded-full text-white ${
-            avaliacao.nota_cliente >= 8 ? 'bg-green-500' : avaliacao.nota_cliente >= 5 ? 'bg-yellow-500' : 'bg-red-500'
-          }`}>
-            Nota: {avaliacao.nota_cliente}/10
-          </span>
-        </div>
-        <p className="text-gray-600 text-sm mb-3">
-          Recebida em: {new Date(avaliacao.createdAt).toLocaleString('pt-BR')}
-        </p>
-        <p className="text-gray-700 truncate">
-          {avaliacao.resumo_atendimento}
-        </p>
-        <div className="mt-4 text-right">
-            <span className="text-blue-600 hover:text-blue-800 font-medium">Ver Detalhes &rarr;</span>
-        </div>
-      </a>
-    </Link>
-  );
-};
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Activity, ArrowUpRight, Users, MessageSquareText, BarChart2, Settings } from "lucide-react"; // DollarSign removido
+import Link from "next/link";
+import prisma from "@/lib/prisma"; // Adicionado Prisma Client
+import { Avaliacao } from "@prisma/client"; // Adicionado tipo Avaliacao
 
 
-export default function AdminDashboardPage() {
-  const [avaliacoes, setAvaliacoes] = useState<AvaliacaoData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export default async function DashboardPage() { // Modificado para async
+  const gradientText = "bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-teal-300 to-green-300";
 
-  const fetchAvaliacoes = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch('/api/receber-avaliacao'); // Chama o GET endpoint
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: `Falha ao buscar dados: ${response.statusText}` }));
-        throw new Error(errorData.message || `Falha ao buscar dados: ${response.statusText}`);
-      }
-      const data: AvaliacaoData[] = await response.json();
-      console.log("Avaliações recebidas no painel:", data);
-      setAvaliacoes(data);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Ocorreu um erro desconhecido.';
-      setError(errorMessage);
-      console.error("Erro ao buscar avaliações:", err);
-    } finally {
-      setIsLoading(false);
+  // Lógica para buscar dados do Prisma
+  const oneMonthAgo = new Date();
+  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+  const totalAvaliacoes = await prisma.avaliacao.count();
+
+  const avaliacoesUltimoMes = await prisma.avaliacao.findMany({
+    where: { createdAt: { gte: oneMonthAgo } },
+    select: { remoteJid: true },
+  });
+
+  const novosClientesMesSet = new Set<string>();
+  avaliacoesUltimoMes.forEach(av => {
+    if (av.remoteJid) {
+      novosClientesMesSet.add(av.remoteJid);
     }
-  };
+  });
+  const novosClientesMes = novosClientesMesSet.size;
 
-  useEffect(() => {
-    fetchAvaliacoes();
-    // Opcional: configurar um intervalo para buscar novas avaliações periodicamente
-    // ou implementar WebSockets/SSE para atualizações em tempo real.
-    // const intervalId = setInterval(fetchAvaliacoes, 30000); // A cada 30 segundos
-    // return () => clearInterval(intervalId);
-  }, []);
+  const satisfacaoMediaData = await prisma.avaliacao.aggregate({
+    _avg: { nota_cliente: true },
+  });
+  const satisfacaoMedia = satisfacaoMediaData._avg.nota_cliente !== null 
+    ? satisfacaoMediaData._avg.nota_cliente.toFixed(1) + "/10" 
+    : "N/A";
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <p className="text-xl text-slate-600">Carregando avaliações...</p>
-      </div>
-    );
-  }
+  const numAvaliacoesEsteMes = await prisma.avaliacao.count({
+    where: { createdAt: { gte: oneMonthAgo } },
+  });
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-lg shadow-xl text-center max-w-md">
-          <p className="text-xl text-red-600 mb-4">Erro ao carregar avaliações:</p>
-          <p className="text-slate-700 mb-6">{error}</p>
-          <button
-            onClick={fetchAvaliacoes}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          >
-            Tentar Novamente
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // Dados para os cards de estatísticas
+  const stats = [
+    { title: "Total de Avaliações", value: totalAvaliacoes.toString(), icon: MessageSquareText },
+    { title: "Novos Clientes (Mês)", value: novosClientesMes.toString(), icon: Users },
+    { title: "Satisfação Média", value: satisfacaoMedia, icon: Activity },
+    { title: "Avaliações este Mês", value: numAvaliacoesEsteMes.toString(), icon: ArrowUpRight },
+  ];
+
+  // Dados para atividades recentes
+  const recentAvaliacoesData = await prisma.avaliacao.findMany({
+    orderBy: { createdAt: 'desc' },
+    take: 5,
+    select: { id: true, remoteJid: true, createdAt: true },
+  });
+
+  const recentActivities = recentAvaliacoesData.map(avaliacao => ({
+    id: avaliacao.id,
+    description: `Nova avaliação ${avaliacao.remoteJid ? `de ${avaliacao.remoteJid.split('@')[0]}` : `(ID: ${avaliacao.id.substring(0, 8)})`}`,
+    time: new Date(avaliacao.createdAt).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+    type: "avaliacao", // Usado para estilizar o ponto colorido
+  }));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-sky-100 py-8 px-4 sm:px-6 lg:px-8">
-      <header className="mb-10 text-center">
-        <h1 className="text-4xl font-bold text-slate-800">Painel de Avaliações</h1>
-      </header>
+    <div className="space-y-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+        <div>
+          <h1 className={`text-3xl font-bold ${gradientText}`}>Visão Geral do Dashboard</h1>
+          <p className="text-gray-400">Bem-vindo de volta! Aqui está um resumo da sua atividade.</p>
+        </div>
+        <Button asChild className="bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white font-semibold shadow-md transition-all duration-300 ease-in-out transform hover:scale-105">
+          <Link href="/dashboard/avaliacoes/nova">Nova Avaliação</Link>
+        </Button>
+      </div>
 
-      {avaliacoes.length === 0 ? (
-        <div className="bg-white p-8 rounded-lg shadow-xl text-center max-w-lg mx-auto">
-            <p className="text-xl text-slate-700 mb-6">Nenhuma avaliação encontrada no banco de dados.</p>
-            <p className="text-sm text-slate-500">Aguardando novas avaliações do N8N...</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {avaliacoes.map((avaliacao) => (
-            <AvaliacaoCard key={avaliacao.id} avaliacao={avaliacao} />
-          ))}
-        </div>
-      )}
-       <div className="mt-12 text-center">
-          <button
-            onClick={fetchAvaliacoes}
-            className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-150 ease-in-out"
-          >
-            Atualizar Lista de Avaliações
-          </button>
-        </div>
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {stats.map((stat) => (
+          <Card key={stat.title} className="bg-gray-800 border-gray-700 text-white">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-300">{stat.title}</CardTitle>
+              <stat.icon className="h-5 w-5 text-blue-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{stat.value}</div>
+              {/* Removida a linha de mudança percentual, pois não temos dados históricos fáceis aqui
+              <p className={`text-xs ${stat.changeType === 'positive' ? 'text-green-400' : 'text-red-400'} pt-1`}>
+                {stat.change} desde o último mês
+              </p>
+              */}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Recent Activity & Quick Actions */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card className="bg-gray-800 border-gray-700 text-white">
+          <CardHeader>
+            <CardTitle className={`text-xl ${gradientText}`}>Atividade Recente</CardTitle>
+            <CardDescription className="text-gray-400">Últimas avaliações recebidas.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-1">
+            {recentActivities.map((activity) => (
+              <Link key={activity.id} href={`/dashboard/avaliacao/${activity.id}`} passHref>
+                <div className="block p-3 rounded-md hover:bg-gray-700 transition-colors">
+                  <div className="flex items-start space-x-3">
+                    <div className={`mt-1 flex-shrink-0 h-3 w-3 rounded-full ${activity.type === 'alerta' ? 'bg-red-500' : 'bg-blue-500'}`}></div>
+                    <div>
+                      <p className="text-sm text-gray-200">{activity.description}</p>
+                      <p className="text-xs text-gray-500">{activity.time}</p>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+            {recentActivities.length === 0 && (
+              <p className="text-sm text-gray-400">Nenhuma atividade recente.</p>
+            )}
+            <Button asChild variant="outline" className="w-full mt-4 border-blue-500 text-blue-400 hover:bg-blue-700 hover:text-white">
+              <Link href="/dashboard/avaliacoes">Ver todas as atividades</Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gray-800 border-gray-700 text-white">
+          <CardHeader>
+            <CardTitle className={`text-xl ${gradientText}`}>Ações Rápidas</CardTitle>
+            <CardDescription className="text-gray-400">Acessos diretos às funcionalidades.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Button asChild variant="default" className="w-full bg-blue-600 hover:bg-blue-700 text-white justify-start space-x-2">
+              <Link href="/dashboard/avaliacoes">
+                <MessageSquareText size={18}/> <span>Ver Avaliações</span>
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="w-full border-teal-500 text-teal-400 hover:bg-teal-700 hover:text-white justify-start space-x-2">
+              <Link href="/dashboard/clientes">
+                <Users size={18}/> <span>Gerenciar Clientes</span>
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="w-full border-indigo-500 text-indigo-400 hover:bg-indigo-700 hover:text-white justify-start space-x-2">
+              <Link href="/dashboard/relatorios">
+                <BarChart2 size={18}/> <span>Gerar Relatório</span>
+              </Link>
+            </Button>
+             <Button asChild variant="outline" className="w-full border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white justify-start space-x-2">
+              <Link href="/dashboard/configuracoes">
+                <Settings size={18}/> <span>Configurações</span>
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
