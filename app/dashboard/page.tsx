@@ -1,67 +1,104 @@
-// app/dashboard/page.tsx
+// app/dashboard/page.tsx (Painel de Administração)
 'use client';
 
 import { useEffect, useState } from 'react';
-// Importa a interface do arquivo da API para manter consistência
-import type { AvaliacaoData } from '../api/receber-avaliacao/route';
+import Link from 'next/link';
+// A interface AvaliacaoData pode vir do endpoint ou ser definida localmente
+// Idealmente, você teria um arquivo de tipos compartilhado (ex: types/index.ts)
+interface AvaliacaoData {
+  id: string; // Agora temos ID do banco
+  nota_cliente: number;
+  pontos_fortes: string[];
+  pontos_fracos: string[];
+  tempo_resposta: string;
+  clareza_comunicacao: string;
+  resolucao_problema: string;
+  sugestoes_melhoria: string[];
+  resumo_atendimento: string;
+  remoteJid?: string | null;
+  createdAt: string; // Prisma retorna Date, mas JSON stringifica para string
+}
 
-export default function DashboardPage() {
-  const [avaliacao, setAvaliacao] = useState<AvaliacaoData | null>(null);
+// Componente Card (pode ser movido para um arquivo separado)
+const AvaliacaoCard = ({ avaliacao }: { avaliacao: AvaliacaoData }) => {
+  return (
+    <Link href={`/dashboard/avaliacao/${avaliacao.id}`} legacyBehavior>
+      <a className="block bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200 ease-in-out transform hover:-translate-y-1">
+        <div className="flex justify-between items-start mb-3">
+          <h3 className="text-xl font-semibold text-slate-800">
+            Avaliação: {avaliacao.remoteJid ? avaliacao.remoteJid.split('@')[0] : 'ID N/A'}
+          </h3>
+          <span className={`px-3 py-1 text-sm font-semibold rounded-full text-white ${
+            avaliacao.nota_cliente >= 8 ? 'bg-green-500' : avaliacao.nota_cliente >= 5 ? 'bg-yellow-500' : 'bg-red-500'
+          }`}>
+            Nota: {avaliacao.nota_cliente}/10
+          </span>
+        </div>
+        <p className="text-gray-600 text-sm mb-3">
+          Recebida em: {new Date(avaliacao.createdAt).toLocaleString('pt-BR')}
+        </p>
+        <p className="text-gray-700 truncate">
+          {avaliacao.resumo_atendimento}
+        </p>
+        <div className="mt-4 text-right">
+            <span className="text-blue-600 hover:text-blue-800 font-medium">Ver Detalhes &rarr;</span>
+        </div>
+      </a>
+    </Link>
+  );
+};
+
+
+export default function AdminDashboardPage() {
+  const [avaliacoes, setAvaliacoes] = useState<AvaliacaoData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchAvaliacao = async () => {
+  const fetchAvaliacoes = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/receber-avaliacao');
+      const response = await fetch('/api/receber-avaliacao'); // Chama o GET endpoint
       if (!response.ok) {
-        if (response.status === 404) {
-          setAvaliacao(null);
-        } else {
-          const errorData = await response.json().catch(() => ({ message: `Falha ao buscar dados: ${response.statusText}` }));
-          throw new Error(errorData.message || `Falha ao buscar dados: ${response.statusText}`);
-        }
-      } else {
-        const data: AvaliacaoData = await response.json();
-        console.log("Dados da avaliação recebidos no frontend:", data);
-        setAvaliacao(data);
+        const errorData = await response.json().catch(() => ({ message: `Falha ao buscar dados: ${response.statusText}` }));
+        throw new Error(errorData.message || `Falha ao buscar dados: ${response.statusText}`);
       }
+      const data: AvaliacaoData[] = await response.json();
+      console.log("Avaliações recebidas no painel:", data);
+      setAvaliacoes(data);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Ocorreu um erro desconhecido.';
       setError(errorMessage);
-      console.error("Erro ao buscar avaliação:", err);
+      console.error("Erro ao buscar avaliações:", err);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchAvaliacao();
-    // Para atualizações automáticas, considere WebSockets ou Server-Sent Events em vez de polling para produção.
-    // const intervalId = setInterval(fetchAvaliacao, 15000); // Ex: a cada 15 segundos
+    fetchAvaliacoes();
+    // Opcional: configurar um intervalo para buscar novas avaliações periodicamente
+    // ou implementar WebSockets/SSE para atualizações em tempo real.
+    // const intervalId = setInterval(fetchAvaliacoes, 30000); // A cada 30 segundos
     // return () => clearInterval(intervalId);
   }, []);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-lg shadow-xl text-center">
-          <p className="text-xl text-gray-700">Carregando avaliação...</p>
-          {/* Você pode adicionar um spinner aqui */}
-        </div>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <p className="text-xl text-slate-600">Carregando avaliações...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
         <div className="bg-white p-8 rounded-lg shadow-xl text-center max-w-md">
-          <p className="text-xl text-red-600 mb-4">Erro ao carregar avaliação:</p>
-          <p className="text-gray-700 mb-6">{error}</p>
+          <p className="text-xl text-red-600 mb-4">Erro ao carregar avaliações:</p>
+          <p className="text-slate-700 mb-6">{error}</p>
           <button
-            onClick={fetchAvaliacao}
+            onClick={fetchAvaliacoes}
             className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
             Tentar Novamente
@@ -71,120 +108,32 @@ export default function DashboardPage() {
     );
   }
 
-  if (!avaliacao) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-lg shadow-xl text-center">
-          <p className="text-xl text-gray-700 mb-6">Nenhuma avaliação recebida ainda.</p>
-          <button
-            onClick={fetchAvaliacao}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          >
-            Verificar Novamente
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const cardClasses = "bg-white p-6 rounded-lg shadow-lg mb-6";
-  const cardTitleClasses = "text-2xl font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200";
-  const listItemClasses = "text-gray-700 mb-1 ml-5 list-disc";
-  const paragraphClasses = "text-gray-700 leading-relaxed whitespace-pre-wrap";
-  const detailItemClasses = "text-gray-700 mb-2";
-  const detailLabelClasses = "font-semibold text-gray-800";
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 to-sky-100 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
-        <header className="mb-10 text-center">
-          <h1 className="text-4xl font-bold text-slate-800">
-            Detalhes da Última Avaliação de Atendimento
-          </h1>
-          {avaliacao.remoteJid && (
-             <p className="text-md text-slate-600 mt-2">
-              Cliente: <span className="font-medium">{avaliacao.remoteJid.split('@')[0]}</span>
-            </p>
-          )}
-        </header>
+      <header className="mb-10 text-center">
+        <h1 className="text-4xl font-bold text-slate-800">Painel de Avaliações</h1>
+      </header>
 
-        <div className={cardClasses}>
-          <h2 className={cardTitleClasses}>Nota do Cliente</h2>
-          <p className="text-4xl font-bold text-blue-600 text-center py-4">
-            {avaliacao.nota_cliente} <span className="text-2xl text-gray-500">/ 10</span>
-          </p>
+      {avaliacoes.length === 0 ? (
+        <div className="bg-white p-8 rounded-lg shadow-xl text-center max-w-lg mx-auto">
+            <p className="text-xl text-slate-700 mb-6">Nenhuma avaliação encontrada no banco de dados.</p>
+            <p className="text-sm text-slate-500">Aguardando novas avaliações do N8N...</p>
         </div>
-
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className={cardClasses}>
-            <h2 className={cardTitleClasses}>Pontos Fortes</h2>
-            {(avaliacao.pontos_fortes && avaliacao.pontos_fortes.length > 0) ? (
-              <ul className="space-y-1">
-                {(avaliacao.pontos_fortes || []).map((ponto, index) => (
-                  <li key={`forte-${index}`} className={listItemClasses}>{ponto}</li>
-                ))}
-              </ul>
-            ) : (
-              <p className={paragraphClasses}>Nenhum ponto forte informado.</p>
-            )}
-          </div>
-
-          <div className={cardClasses}>
-            <h2 className={cardTitleClasses}>Pontos Fracos</h2>
-            {(avaliacao.pontos_fracos && avaliacao.pontos_fracos.length > 0) ? (
-              <ul className="space-y-1">
-                {(avaliacao.pontos_fracos || []).map((ponto, index) => (
-                  <li key={`fraco-${index}`} className={listItemClasses}>{ponto}</li>
-                ))}
-              </ul>
-            ) : (
-              <p className={paragraphClasses}>Nenhum ponto fraco informado.</p>
-            )}
-          </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          {avaliacoes.map((avaliacao) => (
+            <AvaliacaoCard key={avaliacao.id} avaliacao={avaliacao} />
+          ))}
         </div>
-
-        <div className={cardClasses}>
-          <h2 className={cardTitleClasses}>Métricas de Atendimento</h2>
-          <div className="space-y-2">
-            <p className={detailItemClasses}>
-              <span className={detailLabelClasses}>Tempo de Resposta:</span> {avaliacao.tempo_resposta || 'Não informado'}
-            </p>
-            <p className={detailItemClasses}>
-              <span className={detailLabelClasses}>Clareza na Comunicação:</span> {avaliacao.clareza_comunicacao || 'Não informado'}
-            </p>
-            <p className={detailItemClasses}>
-              <span className={detailLabelClasses}>Resolução do Problema:</span> {avaliacao.resolucao_problema || 'Não informado'}
-            </p>
-          </div>
-        </div>
-
-        <div className={cardClasses}>
-          <h2 className={cardTitleClasses}>Sugestões de Melhoria</h2>
-          {(avaliacao.sugestoes_melhoria && avaliacao.sugestoes_melhoria.length > 0) ? (
-            <ul className="space-y-1">
-              {(avaliacao.sugestoes_melhoria || []).map((sugestao, index) => (
-                <li key={`sugestao-${index}`} className={listItemClasses}>{sugestao}</li>
-              ))}
-            </ul>
-          ) : (
-            <p className={paragraphClasses}>Nenhuma sugestão de melhoria informada.</p>
-          )}
-        </div>
-
-        <div className={cardClasses}>
-          <h2 className={cardTitleClasses}>Resumo do Atendimento</h2>
-          <p className={paragraphClasses}>{avaliacao.resumo_atendimento || 'Resumo não disponível.'}</p>
-        </div>
-
-        <div className="mt-8 text-center">
+      )}
+       <div className="mt-12 text-center">
           <button
-            onClick={fetchAvaliacao}
+            onClick={fetchAvaliacoes}
             className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-150 ease-in-out"
           >
-            Atualizar Avaliação
+            Atualizar Lista de Avaliações
           </button>
         </div>
-      </div>
     </div>
   );
 }

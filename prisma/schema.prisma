@@ -1,0 +1,27 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Avaliacao {
+  id                  String    @id @default(cuid()) // ID único para cada avaliação
+  nota_cliente        Int
+  pontos_fortes       String[]  // Armazena como um array de strings
+  pontos_fracos        String[]
+  tempo_resposta      String
+  clareza_comunicacao String
+  resolucao_problema  String
+  sugestoes_melhoria  String[]
+  resumo_atendimento  String    @db.Text // Para textos mais longos
+  remoteJid           String?   // ID do cliente, opcional
+  createdAt           DateTime  @default(now()) // Data de criação do registro
+  updatedAt           DateTime  @updatedAt // Data da última atualização
+
+  @@map("avaliacoes") // Mapeia para a tabela "avaliacoes" no banco
+}
