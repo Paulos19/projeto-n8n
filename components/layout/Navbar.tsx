@@ -4,7 +4,8 @@ import Link from "next/link";
 import Image from "next/image"; // Adicionado para usar o componente Image do Next.js
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Sun, Moon } from "lucide-react"; // Adicionado Sun e Moon
+import { useTheme } from "next-themes"; // Importado useTheme
 
 const navLinks = [
   { href: "#beneficios", label: "Benefícios" },
@@ -15,6 +16,7 @@ const navLinks = [
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const { theme, setTheme } = useTheme(); // Hook para gerenciar o tema
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -30,8 +32,23 @@ export default function Navbar() {
     visible: { opacity: 1, y: 0 },
   };
 
+  // Novas cores
+  const corDestaque = "#84C1FA";
+  const corTexto = "#091C53";
+  const corBackground = "#E8EEFC";
+  // Cor para hover em links, um pouco mais escura que o background ou um tom do destaque
+  const corHoverLinkBg = "#DDE7F7"; // Um tom mais escuro do background
+  const corHoverBotaoDestaque = "#67B3F9"; // Um tom mais escuro do destaque
+
+  // Cores para o modo escuro (exemplo, ajuste conforme seu design anterior)
+  const corDestaqueDark = "#3B82F6"; // Um azul mais vibrante para o modo escuro
+  const corTextoDark = "#E5E7EB"; // cinza claro para texto
+  const corBackgroundDark = "#111827"; // cinza bem escuro para o fundo
+  const corHoverLinkBgDark = "#1F2937"; // cinza um pouco mais claro para hover de links
+  const corHoverBotaoDestaqueDark = "#2563EB"; // azul um pouco mais escuro para hover de botão
+
   return (
-    <nav className="sticky top-0 z-50 bg-gradient-to-r from-gray-900 via-blue-900 to-blue-800 text-white shadow-lg">
+    <nav className={`sticky top-0 z-50 shadow-lg bg-[${corBackground}] text-[${corTexto}] dark:bg-[${corBackgroundDark}] dark:text-[${corTextoDark}]`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <motion.div
@@ -39,23 +56,23 @@ export default function Navbar() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Link href="/" className="flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-sm"> {/* Adicionado space-x-2 para espaçamento entre logo e texto */}
+            <Link href="/" className={`flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-[${corDestaque}] dark:focus:ring-[${corDestaqueDark}] rounded-sm`}>
               <Image
-                src="/logo.svg"
+                src="/logo.svg" // Assumindo que o logo.svg já foi atualizado ou está ok com a cor interna
                 alt="R.A.I.O Logo"
-                width={32} // Ajustado para um tamanho menor para melhor alinhamento com o texto
+                width={32} 
                 height={32} 
-                className="h-8 w-8" // Usando w-8 para manter proporção quadrada, ajuste se necessário
+                className="h-8 w-8"
                 priority 
               />
-              <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-teal-300 to-green-300">
+              <span className={`text-2xl font-bold text-[${corDestaque}] dark:text-[${corDestaqueDark}]`}> {/* Removido gradiente, usando cor de destaque */}
                 R.A.I.O
               </span>
             </Link>
           </motion.div>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-6">
+          <div className="hidden md:flex items-center space-x-4"> {/* Ajustado space-x-6 para space-x-4 para acomodar o botão de tema */}
             {navLinks.map((link) => (
               <motion.div
                 key={link.href}
@@ -64,7 +81,7 @@ export default function Navbar() {
               >
                 <Link
                   href={link.href}
-                  className="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+                  className={`px-3 py-2 rounded-md text-sm font-medium hover:bg-[${corHoverLinkBg}] dark:hover:bg-[${corHoverLinkBgDark}] transition-colors`}
                 >
                   {link.label}
                 </Link>
@@ -72,19 +89,37 @@ export default function Navbar() {
             ))}
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link
-                href="/dashboard" // Ou sua rota de login/dashboard
-                className="bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105"
+                href="/dashboard"
+                className={`bg-[${corDestaque}] hover:bg-[${corHoverBotaoDestaque}] text-[${corTexto}] dark:bg-[${corDestaqueDark}] dark:hover:bg-[${corHoverBotaoDestaqueDark}] dark:text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105`}
               >
                 Acessar Dashboard
               </Link>
             </motion.div>
+            {/* Botão de Alternar Tema */}
+            <motion.button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className={`p-2 rounded-md hover:bg-[${corHoverLinkBg}] dark:hover:bg-[${corHoverLinkBgDark}] transition-colors`}
+              aria-label="Alternar tema"
+              whileTap={{ scale: 0.9 }}
+            >
+              {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+            </motion.button>
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center">
+          <div className="md:hidden flex items-center space-x-2">
+             {/* Botão de Alternar Tema para Mobile */}
+            <motion.button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className={`p-2 rounded-md text-[${corTexto}] dark:text-[${corTextoDark}] hover:bg-[${corHoverLinkBg}] dark:hover:bg-[${corHoverLinkBgDark}] focus:outline-none`}
+              aria-label="Alternar tema"
+              whileTap={{ scale: 0.9 }}
+            >
+              {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+            </motion.button>
             <motion.button
               onClick={toggleMenu}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-300 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+              className={`inline-flex items-center justify-center p-2 rounded-md text-[${corTexto}] dark:text-[${corTextoDark}] hover:bg-[${corHoverLinkBg}] dark:hover:bg-[${corHoverLinkBgDark}] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[${corDestaque}] dark:focus:ring-[${corDestaqueDark}]`}
               aria-label="Menu principal"
               whileTap={{ scale: 0.9 }}
             >
@@ -98,7 +133,7 @@ export default function Navbar() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="md:hidden absolute top-20 left-0 right-0 bg-gray-800 bg-opacity-95 backdrop-blur-sm shadow-lg pb-3"
+            className={`md:hidden absolute top-20 left-0 right-0 bg-[${corBackground}] bg-opacity-95 dark:bg-[${corBackgroundDark}] dark:bg-opacity-95 backdrop-blur-sm shadow-lg pb-3`}
             initial="hidden"
             animate="visible"
             exit="hidden"
@@ -109,8 +144,8 @@ export default function Navbar() {
                 <motion.div key={link.href} variants={menuItemVariants}>
                   <Link
                     href={link.href}
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700"
-                    onClick={() => setIsOpen(false)} // Fecha o menu ao clicar
+                    className={`block px-3 py-2 rounded-md text-base font-medium text-[${corTexto}] dark:text-[${corTextoDark}] hover:bg-[${corHoverLinkBg}] dark:hover:bg-[${corHoverLinkBgDark}]`}
+                    onClick={() => setIsOpen(false)}
                   >
                     {link.label}
                   </Link>
@@ -118,8 +153,8 @@ export default function Navbar() {
               ))}
               <motion.div variants={menuItemVariants} className="pt-2">
                 <Link
-                  href="/dashboard" // Ou sua rota de login/dashboard
-                  className="block w-full text-center bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white font-semibold px-4 py-3 rounded-lg shadow-md transition-all duration-300 ease-in-out"
+                  href="/dashboard"
+                  className={`block w-full text-center bg-[${corDestaque}] hover:bg-[${corHoverBotaoDestaque}] text-[${corTexto}] dark:bg-[${corDestaqueDark}] dark:hover:bg-[${corHoverBotaoDestaqueDark}] dark:text-white font-semibold px-4 py-3 rounded-lg shadow-md transition-all duration-300 ease-in-out`}
                   onClick={() => setIsOpen(false)}
                 >
                   Acessar Dashboard

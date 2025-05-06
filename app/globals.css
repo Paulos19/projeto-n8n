@@ -113,6 +113,17 @@
 }
 
 @layer base {
+  body {
+    /* Cores do modo claro (sua paleta atual) */
+    @apply bg-[#E8EEFC] text-[#091C53];
+  }
+
+  .dark body {
+    @apply bg-gray-900 text-gray-200;
+  }
+}
+
+@layer base {
   * {
     @apply border-border outline-ring/50;
   }
