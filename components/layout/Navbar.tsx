@@ -14,6 +14,8 @@ const navLinks = [
   { href: "#contato", label: "Contato" },
 ];
 
+const corHoverBotaoDestaqueDark = "#2563EB"; // azul um pouco mais escuro para hover de botão
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { theme, setTheme } = useTheme(); // Hook para gerenciar o tema
@@ -48,7 +50,7 @@ export default function Navbar() {
   const corHoverBotaoDestaqueDark = "#2563EB"; // azul um pouco mais escuro para hover de botão
 
   return (
-    <nav className={`sticky top-0 z-50 shadow-lg bg-[${corBackground}] text-[${corTexto}] dark:bg-[${corBackgroundDark}] dark:text-[${corTextoDark}]`}>
+    <nav className={`sticky top-0 z-50 shadow-lg bg-[${corBackground}] bg-opacity-95 dark:bg-[${corBackgroundDark}] dark:bg-opacity-95 backdrop-blur-md text-[${corTexto}] dark:text-[${corTextoDark}]`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <motion.div
@@ -133,11 +135,12 @@ export default function Navbar() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className={`md:hidden absolute top-20 left-0 right-0 bg-[${corBackground}] bg-opacity-95 dark:bg-[${corBackgroundDark}] dark:bg-opacity-95 backdrop-blur-sm shadow-lg pb-3`}
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            variants={menuVariants}
+            className={`md:hidden absolute top-20 left-0 right-0 bg-[${corBackground}] bg-opacity-95 dark:bg-[${corBackgroundDark}] dark:bg-opacity-95 backdrop-blur-md shadow-lg pb-3`}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2 }}
+            variants={menuVariants} // Reutilizando menuVariants para consistência se aplicável
           >
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
               {navLinks.map((link) => (
