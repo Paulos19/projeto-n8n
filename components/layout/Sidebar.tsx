@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, BarChart2, MessageSquare, Users, Settings, FileText, LogOut } from "lucide-react"; // Adicionado FileText
+import { Home, BarChart2, MessageSquare, Users, Settings, FileText, LogOut, MessageCircle } from "lucide-react"; // Adicionado FileText e MessageCircle
 import Image from "next/image";
 
 // Definição das cores para uso no componente
@@ -16,7 +16,8 @@ const corTextoAtivo = corTexto; // Texto escuro no item ativo para contraste com
 const navItems = [
   { href: "/dashboard", label: "Início", icon: Home },
   { href: "/dashboard/avaliacoes", label: "Avaliações", icon: MessageSquare },
-  { href: "/dashboard/relatorios", label: "Relatórios", icon: FileText }, // Ícone atualizado
+  { href: "/dashboard/conversas", label: "Conversas n8n", icon: MessageCircle }, // Novo item
+  { href: "/dashboard/relatorios", label: "Relatórios", icon: FileText },
   { href: "/dashboard/clientes", label: "Clientes", icon: Users },
   // { href: "/dashboard/configuracoes", label: "Configurações", icon: Settings },
 ];

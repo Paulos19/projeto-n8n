@@ -25,3 +25,19 @@ model Avaliacao {
 
   @@map("avaliacoes") // Mapeia para a tabela "avaliacoes" no banco
 }
+
+model ChatInteraction {
+  id                String    @id @default(cuid())
+  remoteJid         String
+  customerName      String
+  chatHistory       Json      // Armazena o array chat_history
+  analysisSummary   String?   // Armazena analysis.summary
+  analysisKeywords  String[]  // Armazena analysis.keywords
+  eventTimestamp    DateTime  // Armazena o timestamp do evento n8n
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([remoteJid])
+  @@index([eventTimestamp])
+  @@map("chat_interactions") // Mapeia para a tabela "chat_interactions"
+}
