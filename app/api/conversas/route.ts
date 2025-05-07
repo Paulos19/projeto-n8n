@@ -4,7 +4,7 @@ import prisma from '@/lib/prisma';
 
 interface N8nMessagePayload {
   remoteJid: string;
-  chat_history: Array<{
+  chat_history: Array<{ // Este é o campo que corresponde ao seu parâmetro n8n
     sender: string;
     senderName: string;
     text: string;
