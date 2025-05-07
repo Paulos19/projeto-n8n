@@ -1,33 +1,63 @@
- // Será atualizado abaixo
-import Sidebar from "@/components/layout/Sidebar";
-import { Toaster } from "sonner";
+"use client";
 
-// Definição das cores para uso no componente
-const corDestaque = "#84C1FA";
-const corTexto = "#091C53";
-const corBackgroundDashboard = "#FFFFFF"; // Usar branco puro para a área de conteúdo do dashboard para melhor leitura
-const corBackgroundLayout = "#E8EEFC"; // Cor de fundo geral do layout, se diferente da área de conteúdo
+import React, { useState } from 'react';
+import Sidebar from '@/components/layout/Sidebar'; // Ajuste o caminho se necessário
+import { Menu, X } from 'lucide-react';
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
-    <div className={`flex h-screen bg-[${corBackgroundLayout}] text-[${corTexto}]`}>
-      <Sidebar /> {/* Sidebar será atualizada para a nova paleta */}
+    <div className="flex h-screen bg-background"> {/* Alterado para bg-background */}
+      {/* Sidebar */}
+      <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
+
+      {/* Conteúdo Principal */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header do Dashboard (se você tiver um separado da Navbar principal) */}
-        {/* Exemplo:
-        <header className={`bg-[${corBackgroundDashboard}] shadow p-4`}>
-          <h1 className={`text-xl font-semibold text-[${corTexto}]`}>Dashboard Header</h1>
+        {/* Barra Superior para o botão de toggle em dispositivos móveis */}
+        <header className="bg-card shadow md:hidden print:hidden"> {/* Alterado para bg-card ou bg-background */}
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center">
+                <span className="font-semibold text-xl text-foreground">R.A.I.O</span> {/* Alterado para text-foreground */}
+              </div>
+              <div className="flex md:hidden">
+                <button
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  type="button"
+                  className="inline-flex items-center justify-center p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary" // Ajustado para cores semânticas
+                  aria-controls="mobile-menu"
+                  aria-expanded={sidebarOpen}
+                >
+                  <span className="sr-only">Abrir menu principal</span>
+                  {sidebarOpen ? (
+                    <X className="block h-6 w-6" aria-hidden="true" />
+                  ) : (
+                    <Menu className="block h-6 w-6" aria-hidden="true" />
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
         </header>
-        */}
-        <main className={`flex-1 overflow-x-hidden overflow-y-auto bg-[${corBackgroundDashboard}] p-6`}>
+
+        {/* Conteúdo da Página */}
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-muted/30 dark:bg-muted/10 p-4 md:p-6 lg:p-8"> {/* Ex: bg-muted ou uma variação sutil */}
           {children}
         </main>
       </div>
-      <Toaster />
+
+      {/* Overlay para fechar a sidebar em dispositivos móveis */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-20 bg-black opacity-50 md:hidden print:hidden"
+          onClick={() => setSidebarOpen(false)}
+        ></div>
+      )}
     </div>
   );
 }
