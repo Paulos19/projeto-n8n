@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft, MessageSquare, Star, ThumbsUp, ThumbsDown, User, CalendarDays, Tag, Activity } from "lucide-react";
+import { getServerSession } from "next-auth/next"; // Adicionado
+import { authOptions } from "@/auth"; // Adicionado
 
 // Interface para os dados da avaliação (pode ser movida para um arquivo de tipos)
 interface AvaliacaoData {
@@ -24,15 +26,21 @@ interface AvaliacaoData {
   updatedAt: Date;
 }
 
-async function fetchAvaliacaoById(id: string): Promise<AvaliacaoData | null> {
+async function fetchAvaliacaoById(id: string, userId: string): Promise<AvaliacaoData | null> {
   try {
-    const avaliacao = await prisma.avaliacao.findUnique({
-      where: { id },
+    const avaliacao = await prisma.avaliacao.findFirst({ // Modificado para findFirst
+      where: { 
+        id: id,
+        userId: userId, // Adicionado filtro por userId
+      },
     });
     if (!avaliacao) {
       return null;
     }
-    return avaliacao;
+    // Garantir que todos os campos esperados pela interface AvaliacaoData estejam presentes
+    // ou sejam tratados como opcionais/nulos se assim for no schema.
+    // O Prisma Client já deve retornar os tipos corretos baseados no schema.
+    return avaliacao as AvaliacaoData; // Ajuste o casting se necessário, mas o tipo inferido deve ser compatível
   } catch (error) {
     console.error("Erro ao buscar avaliação:", error);
     // Em um cenário real, você poderia logar este erro de forma mais robusta
@@ -41,7 +49,12 @@ async function fetchAvaliacaoById(id: string): Promise<AvaliacaoData | null> {
 }
 
 export default async function AvaliacaoDetalhePage({ params }: { params: { id: string } }) {
-  const avaliacao = await fetchAvaliacaoById(params.id);
+  const session = await getServerSession(authOptions); // Adicionado
+  if (!session?.user?.id) {
+    notFound(); // Ou outra forma de tratamento de não autorizado
+  }
+
+  const avaliacao = await fetchAvaliacaoById(params.id, session.user.id); // Passar userId
   const gradientText = "bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-teal-300 to-green-300";
 
   if (!avaliacao) {

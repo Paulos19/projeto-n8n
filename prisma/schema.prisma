@@ -10,34 +10,100 @@ datasource db {
 }
 
 model Avaliacao {
-  id                  String    @id @default(cuid()) // ID único para cada avaliação
+  id                  String    @id @default(cuid())
   nota_cliente        Int
-  pontos_fortes       String[]  // Armazena como um array de strings
+  pontos_fortes       String[]
   pontos_fracos        String[]
   tempo_resposta      String
   clareza_comunicacao String
   resolucao_problema  String
   sugestoes_melhoria  String[]
-  resumo_atendimento  String    @db.Text // Para textos mais longos
-  remoteJid           String?   // ID do cliente, opcional
-  createdAt           DateTime  @default(now()) // Data de criação do registro
-  updatedAt           DateTime  @updatedAt // Data da última atualização
+  resumo_atendimento  String    @db.Text
+  remoteJid           String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
-  @@map("avaliacoes") // Mapeia para a tabela "avaliacoes" no banco
+  userId              String? // Adicionado para relacionar com o User
+  user                User?     @relation(fields: [userId], references: [id]) // Adicionado
+
+  @@index([userId]) // Adicionado
+  @@map("avaliacoes")
 }
 
 model ChatInteraction {
   id                String    @id @default(cuid())
   remoteJid         String
   customerName      String
-  chatHistory       Json      // Armazena o array chat_history
-  analysisSummary   String?   // Armazena analysis.summary
-  analysisKeywords  String[]  // Armazena analysis.keywords
-  eventTimestamp    DateTime  // Armazena o timestamp do evento n8n
+  chatHistory       Json
+  analysisSummary   String?
+  analysisKeywords  String[]
+  eventTimestamp    DateTime
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
+  userId            String? // Adicionado para relacionar com o User
+  user              User?     @relation(fields: [userId], references: [id]) // Adicionado
+
   @@index([remoteJid])
   @@index([eventTimestamp])
-  @@map("chat_interactions") // Mapeia para a tabela "chat_interactions"
+  @@index([userId]) // Adicionado
+  @@map("chat_interactions")
+}
+
+// Modelos para NextAuth.js / Auth.js
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  identifier    String?   @unique
+  passwordHash  String?
+  webhookApiKey String?   @unique // Chave para identificar o webhook do usuário
+
+  accounts      Account[]
+  sessions      Session[]
+  avaliacoes    Avaliacao[]       // Adicionado: Relação inversa
+  chatInteractions ChatInteraction[] // Adicionado: Relação inversa
+
+  @@map("users")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
 }

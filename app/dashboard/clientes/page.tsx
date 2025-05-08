@@ -12,6 +12,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserPlus, Users, Eye } from "lucide-react";
+import { getServerSession } from "next-auth/next"; // Adicionado
+import { authOptions } from "@/auth"; // Adicionado
 
 export const dynamic = 'force-dynamic'; // Garante que os dados sejam sempre frescos
 
@@ -23,15 +25,21 @@ interface ClienteInfo {
 }
 
 async function getClientes(): Promise<ClienteInfo[]> {
+  const session = await getServerSession(authOptions); // Adicionado
+  if (!session?.user?.id) {
+    return []; // Retorna vazio se não houver sessão
+  }
+  const userId = session.user.id;
+
   const avaliacoes = await prisma.avaliacao.findMany({
-    select: {
-      remoteJid: true,
-      createdAt: true,
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
+    where: { userId: userId }, // Adicionado filtro por userId
+    select: { remoteJid: true, createdAt: true },
+    orderBy: { createdAt: 'desc' },
   });
+
+  if (avaliacoes.length === 0) {
+    return [];
+  }
 
   const clientesMap = new Map<string, { totalAvaliacoes: number; ultimaAvaliacao: Date | null }>();
 

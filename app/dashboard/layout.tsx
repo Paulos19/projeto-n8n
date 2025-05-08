@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Sidebar from '@/components/layout/Sidebar'; // Ajuste o caminho se necessário
 import { Menu, X } from 'lucide-react';
+import { Toaster } from '@/components/ui/sonner'; // ou 'sonner' diretamente
 
 export default function DashboardLayout({
   children,
@@ -47,7 +48,10 @@ export default function DashboardLayout({
 
         {/* Conteúdo da Página */}
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-muted/30 dark:bg-muted/10 p-4 md:p-6 lg:p-8"> {/* Usando bg-muted com opacidade para um fundo sutil */}
-          {children}
+          <>
+            {children}
+            <Toaster richColors position="top-right" />
+          </>
         </main>
       </div>
 

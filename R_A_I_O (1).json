@@ -1,0 +1,1440 @@
+{
+  "name": "R.A.I.O",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "avaliacao-atendimento-webhook",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        10700,
+        4640
+      ],
+      "id": "be5796a1-515d-40a0-a148-3af4e8660d9f",
+      "name": "Webhook Entrada",
+      "webhookId": "d918ace9-297b-4fcf-809c-4e41c6db9c5d"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "746f8499-1e77-473a-b034-43164efaa7c7",
+              "name": "data.remoteJid",
+              "value": "={{ $json.body.data.key.remoteJid }}",
+              "type": "string"
+            },
+            {
+              "id": "e4482dd4-a6dc-4328-ad4d-8b7612008227",
+              "name": "data.fromMe",
+              "value": "={{ $json.body.data.key.fromMe }}",
+              "type": "boolean"
+            },
+            {
+              "id": "2eb3c8b8-4bda-4d71-b8ab-c5a61333b3d9",
+              "name": "data.id",
+              "value": "={{ $json.body.data.key.id }}",
+              "type": "string"
+            },
+            {
+              "id": "d0ce3ce8-2dee-44af-b279-4faad7e1fbb6",
+              "name": "data.text",
+              "value": "={{ $json.body.data.message.conversation || $json.body.data.message.extendedTextMessage?.text }}",
+              "type": "string"
+            },
+            {
+              "id": "f67db619-80c0-4591-accf-e7d6e8a8d71f",
+              "name": "data.source",
+              "value": "={{ $json.body.data.source }}",
+              "type": "string"
+            },
+            {
+              "id": "a7862074-5f44-4fb7-9e84-0a34778523c7",
+              "name": "evo.server_url",
+              "value": "={{ $json.body.server_url }}",
+              "type": "string"
+            },
+            {
+              "id": "cbbc1ab6-6f6c-4cb3-bf2a-bf5a968140bc",
+              "name": "evo.instance",
+              "value": "={{ $json.body.instance }}",
+              "type": "string"
+            },
+            {
+              "id": "fa5b858d-8682-43d6-b143-908b6003dbcd",
+              "name": "evo.apikey",
+              "value": "={{ $json.body.apikey }}",
+              "type": "string"
+            },
+            {
+              "id": "9fb78ed9-936f-420b-8c90-6252d74afe59",
+              "name": "data.messageType",
+              "value": "={{ $json.body.data.messageType }}",
+              "type": "string"
+            },
+            {
+              "id": "8d7af79a-150b-4ed7-b37e-5b91e6833e5d",
+              "name": "data.mediaUrl",
+              "value": "={{ $json.body.data.message?.audioMessage?.mediaUrl || $json.body.data.message?.mediaUrl }}",
+              "type": "string"
+            },
+            {
+              "id": "a1b2c3d4-e5f6-4g7h-8i9j-0k1l2m3n4o5p",
+              "name": "data.sender",
+              "value": "={{ $json.body.sender }}",
+              "type": "string"
+            },
+            {
+              "id": "b1c2d3e4-f5g6-h7i8-j9k0-l1m2n3o4p5q6",
+              "name": "data.pushName",
+              "value": "={{ $json.body.data.pushName }}",
+              "type": "string"
+            },
+            {
+              "id": "c1d2e3f4-g5h6-i7j8-k9l0-m1n2o3p4q5r6",
+              "name": "data.messageTimestamp",
+              "value": "={{ $json.body.data.messageTimestamp }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        11000,
+        4640
+      ],
+      "id": "d6bec517-8123-42fb-bce7-2fbc07dd3779",
+      "name": "Processar Mensagem"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d7c8f2a1-e3b4-4d5a-a6f7-g8h9i0j1k2l3",
+              "leftValue": "={{ $json.data.messageType }}",
+              "rightValue": "audioMessage",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        11240,
+        4640
+      ],
+      "id": "1c4d52a1-5b10-4098-a03e-3b678b99fea5",
+      "name": "Verificar se é Áudio"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.data.mediaUrl }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        11440,
+        4260
+      ],
+      "id": "68ac81ca-07aa-4ea5-a626-03051c546f91",
+      "name": "Baixar Arquivo de Áudio",
+      "notes": "Baixa o áudio da mediaUrl para transcrição"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1b2c3d4-new-data-object-fix",
+              "name": "data",
+              "type": "json",
+              "value": "={{ ({ ...JSON.parse(JSON.stringify($('Processar Mensagem').item.json.data)), text: $('OpenAI').item.json.text, messageType: 'audio_transcribed', is_transcribed: true }) }}"
+            },
+            {
+              "id": "e5f6g7h8-new-evo-object-fix",
+              "name": "evo",
+              "type": "json",
+              "value": "={{ $('Processar Mensagem').item.json.evo }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        12020,
+        4260
+      ],
+      "id": "35fd221d-bbb4-4676-87d8-9c877e29e2c4",
+      "name": "Atualizar Mensagem com Transcrição"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "daa4b9b5-87a2-4f28-b4bd-ba88cc3ab4ed",
+              "leftValue": "={{ $json.data.remoteJid }}",
+              "rightValue": "@s.whatsapp.net",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        11500,
+        4640
+      ],
+      "id": "a9bb586b-08ef-47a8-a7a4-3e84800edb35",
+      "name": "Filtrar Chats Individuais"
+    },
+    {
+      "parameters": {
+        "amount": 15
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        11740,
+        4540
+      ],
+      "id": "bc686b4f-62c9-411e-be64-c76edfd96e57",
+      "name": "Aguardar Mensagens",
+      "webhookId": "24da4e40-c742-414e-91c5-ddb6ee1dfc83",
+      "notes": "Aguarda 15 segundos coletando todas as mensagens recebidas neste período"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Agrupar todas as mensagens recebidas durante o período de espera\nconst messages = $input.all();\nconst groupedMessages = {};\n\n// Função para extrair dados de forma segura\nconst getSafe = (obj, path, defaultValue = null) => {\n  return path.split('.').reduce((acc, key) => {\n    try {\n      return acc && acc[key] !== undefined ? acc[key] : defaultValue;\n    } catch (e) {\n      return defaultValue;\n    }\n  }, obj);\n};\n\n// Agrupar mensagens por remoteJid\nmessages.forEach(msg => {\n  try {\n    // Extrair dados com tratamento de erros\n    const remoteJid = getSafe(msg, 'json.data.remoteJid');\n    const fromMe = getSafe(msg, 'json.data.fromMe', false);\n    let text = getSafe(msg, 'json.data.text', ''); // Este texto pode ser a transcrição\n    const messageType = getSafe(msg, 'json.data.messageType', 'unknown');\n    const isTranscribed = getSafe(msg, 'json.data.is_transcribed', false);\n\n    if (messageType === 'audio' && !isTranscribed) {\n        text = '[MENSAGEM DE ÁUDIO NÃO TRANSCRITA]'; // Fallback se algo falhar na transcrição\n    } else if (!text && messageType === 'audio_transcribed') {\n        text = '[TRANSCRIÇÃO VAZIA OU FALHOU]';\n    } else if (!text) {\n        text = '[MENSAGEM SEM TEXTO]';\n    }\n\n    const instance = getSafe(msg, 'json.evo.instance');\n    const pushName = getSafe(msg, 'json.data.pushName', 'Cliente'); // Usar o pushName de 'Processar Mensagem'\n    const messageId = getSafe(msg, 'json.data.id');\n    const timestamp = getSafe(msg, 'json.data.messageTimestamp', Date.now() / 1000); // Usar o timestamp de 'Processar Mensagem'\n\n    if (!remoteJid) {\n      console.log('Mensagem sem remoteJid, ignorando:', msg);\n      return;\n    }\n\n    const sender = fromMe ? 'Vendedor' : 'Cliente';\n    const senderId = fromMe ? instance : remoteJid;\n\n    if (!groupedMessages[remoteJid]) {\n      groupedMessages[remoteJid] = {\n        messages: [],\n        senders: {},\n        sellers: {},\n        customers: {}\n      };\n    }\n\n    // Registrar informações do vendedor\n    if (fromMe && instance && !groupedMessages[remoteJid].sellers[instance]) {\n      groupedMessages[remoteJid].sellers[instance] = {\n        name: 'Vendedor (' + instance + ')', // Adicionar nome da instância ao vendedor\n        instance: instance\n      };\n    }\n\n    // Registrar informações do cliente\n    if (!fromMe && !groupedMessages[remoteJid].customers[remoteJid]) {\n      groupedMessages[remoteJid].customers[remoteJid] = {\n        name: pushName || 'Cliente',\n        number: remoteJid\n      };\n    }\n\n    // Adicionar mensagem ao histórico\n    groupedMessages[remoteJid].messages.push({\n      text: text,\n      fromMe: fromMe,\n      sender: sender,\n      senderId: senderId,\n      timestamp: timestamp,\n      messageId: messageId,\n      messageType: messageType, // Guardar o tipo original ou 'audio_transcribed'\n      isTranscribed: isTranscribed,\n      rawData: msg.json // Pode ser útil para debug\n    });\n  } catch (error) {\n    console.error('Erro ao processar mensagem:', error, 'Mensagem:', msg);\n  }\n});\n\n// Preparar saída formatada\nconst output = [];\nfor (const remoteJid in groupedMessages) {\n  try {\n    output.push({\n      json: {\n        remoteJid: remoteJid,\n        messages: groupedMessages[remoteJid].messages,\n        senders: {\n          ...groupedMessages[remoteJid].sellers,\n          ...groupedMessages[remoteJid].customers\n        },\n        sellers: groupedMessages[remoteJid].sellers,\n        customers: groupedMessages[remoteJid].customers,\n        formattedMessages: groupedMessages[remoteJid].messages.map(msg => {\n          return {\n            sender: msg.sender,\n            senderId: msg.senderId,\n            text: msg.text,\n            timestamp: msg.timestamp,\n            messageId: msg.messageId,\n            messageType: msg.messageType\n          };\n        }),\n        conversationContext: {\n          seller: groupedMessages[remoteJid].sellers ? Object.values(groupedMessages[remoteJid].sellers)[0] : null,\n          customer: groupedMessages[remoteJid].customers ? Object.values(groupedMessages[remoteJid].customers)[0] : null\n        }\n      }\n    });\n  } catch (error) {\n    console.error('Erro ao formatar saída para remoteJid:', remoteJid, error);\n  }\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        11980,
+        4540
+      ],
+      "id": "f7e10a9c-baa9-47f9-a121-e22a71b8b4e1",
+      "name": "Agrupar e Format Mensagens"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "existing_chat_object_string",
+        "key": "=chat:{{ $('Agrupar e Format Mensagens').item.json.remoteJid }}:full",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        11980,
+        4720
+      ],
+      "id": "d2f73f7b-ef7e-4b9d-9f31-11894b5c7568",
+      "name": "Obter Histórico de Chat Existente",
+      "credentials": {
+        "redis": {
+          "id": "N86fzX8xrhosKiMf",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const newMessagesBundle = $('Agrupar e Format Mensagens').item.json;\nconst currentBatchOfMessages = newMessagesBundle.messages || [];\nconst remoteJid = newMessagesBundle.remoteJid;\n\nlet historicMessagesArray = [];\n// O nó Redis GET está configurado para não falhar em erro, então precisamos checar se 'existing_chat_object_string' existe\nconst existingChatObjectString = $input.item.json.existing_chat_object_string;\n\nif (existingChatObjectString) {\n  try {\n    const existingChatObject = JSON.parse(existingChatObjectString);\n    if (existingChatObject && Array.isArray(existingChatObject.messages)) {\n      historicMessagesArray = existingChatObject.messages;\n    } else {\n      console.warn('Campo messages não encontrado ou não é array no objeto do Redis para: ' + remoteJid);\n    }\n  } catch (e) {\n    console.warn('Falha ao parsear objeto de chat existente do Redis para: ' + remoteJid, e);\n  }\n}\n\nconst combinedMessages = historicMessagesArray.concat(currentBatchOfMessages);\n\n// Opcional: Deduplicação (exemplo básico, pode precisar de lógica mais robusta)\nconst uniqueMessages = [];\nconst seenIds = new Set();\nfor (const msg of combinedMessages) {\n  if (msg.messageId) {\n    if (!seenIds.has(msg.messageId)) {\n      uniqueMessages.push(msg);\n      seenIds.add(msg.messageId);\n    }\n  } else {\n    uniqueMessages.push(msg); // Adiciona mensagens sem ID, pode causar duplicatas\n  }\n}\n\n// Opcional: Limitar o tamanho do histórico\nconst MAX_HISTORY_SIZE = 500; // Defina o tamanho máximo desejado\nconst finalMessageArray = uniqueMessages.length > MAX_HISTORY_SIZE ? uniqueMessages.slice(-MAX_HISTORY_SIZE) : uniqueMessages;\n\nconst finalStorageObject = {\n    messages: finalMessageArray, \n    senders: newMessagesBundle.senders,\n    sellers: newMessagesBundle.sellers,\n    customers: newMessagesBundle.customers,\n    timestamp: Date.now()\n};\n\nreturn [{\n  json: {\n    remoteJid: remoteJid,\n    stringified_updated_storage_object: JSON.stringify(finalStorageObject)\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        11980,
+        4900
+      ],
+      "id": "14888e7c-f63a-449a-9213-b077f504cc70",
+      "name": "Anexar Novas Mensagens ao Histórico de Chat"
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "=chat:{{ $json.remoteJid }}:full",
+        "value": "={{ $json.stringified_updated_storage_object }}",
+        "keyType": "string"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        12240,
+        4900
+      ],
+      "id": "c579c422-215d-4f9b-b973-d6fe01f25d8c",
+      "name": "Armazenar Mensagens (Atualizado)",
+      "credentials": {
+        "redis": {
+          "id": "N86fzX8xrhosKiMf",
+          "name": "Redis account"
+        }
+      },
+      "notes": "Armazena todo o histórico da conversa (acumulado) com expiração de 24h (se configurado no Redis)"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5e0b4011-da9c-4094-afb7-8e208d0329e1",
+              "leftValue": "={{ $('Processar Mensagem').item.json.data.fromMe }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "7da6fa53-575a-445e-ac2d-345324724468",
+              "leftValue": "={{ $('Processar Mensagem').item.json.data.text }}",
+              "rightValue": "Me avalie",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        12500,
+        4520
+      ],
+      "id": "603e638f-54c1-483f-8559-e6c5f7809d68",
+      "name": "Verificar Mensagem Avaliação"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Processar Mensagem').item.json.evo.server_url }}/message/sendText/{{ $('Processar Mensagem').item.json.evo.instance }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $('Processar Mensagem').item.json.evo.apikey }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "number",
+              "value": "={{ $('Processar Mensagem').item.json.data.remoteJid }}"
+            },
+            {
+              "name": "text",
+              "value": "Por favor, avalie meu atendimento de 0 a 10."
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        12740,
+        4520
+      ],
+      "id": "38bd87df-c564-4841-a0ed-255b455d3ed7",
+      "name": "Enviar Pedido Avaliação"
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "avaliacao:pendente:{{ $('Processar Mensagem').item.json.data.remoteJid }}",
+        "value": "true"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        13000,
+        4520
+      ],
+      "id": "a62d804d-7af8-4314-a04d-507cc9cae070",
+      "name": "Marcar Avaliação Pendente",
+      "credentials": {
+        "redis": {
+          "id": "N86fzX8xrhosKiMf",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 15
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        13260,
+        4520
+      ],
+      "id": "3665143d-e228-4ce3-8f91-7df184f60726",
+      "name": "Aguardar Resposta",
+      "webhookId": "avaliacao-atendimento-timer"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5e0b4011-da9c-4094-afb7-8e208d0329e1",
+              "leftValue": "={{ $('Processar Mensagem').item.json.data.fromMe }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        12500,
+        4900
+      ],
+      "id": "8c0e0f5e-8e12-4d85-8dc4-0f59a57895a7",
+      "name": "Verificar Mensagem Cliente"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "avaliacao_pendente",
+        "key": "avaliacao:pendente:{{ $('Processar Mensagem').item.json.data.remoteJid }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        12740,
+        4840
+      ],
+      "id": "f7230f61-d795-4e90-822e-1eb90ae1ecbe",
+      "name": "Verificar Avaliação Pendente",
+      "credentials": {
+        "redis": {
+          "id": "N86fzX8xrhosKiMf",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b73026c5-67be-4cc9-885e-205620a1356f",
+              "leftValue": "={{ $json.avaliacao_pendente }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        13000,
+        4840
+      ],
+      "id": "f212eade-8a2f-4e5e-8ace-8972e108973c",
+      "name": "É Resposta Avaliação"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Verificar se a mensagem do cliente é um número de 0 a 10\nconst texto = $('Processar Mensagem').first().json.data.text;\nconst nota = parseInt(texto.trim());\n\nif (!isNaN(nota) && nota >= 0 && nota <= 10) {\n  // É uma avaliação válida\n  return [\n    {\n      json: {\n        avaliacao_valida: true,\n        nota: nota,\n        remoteJid: $('Processar Mensagem').first().json.data.remoteJid\n      }\n    }\n  ];\n} else {\n  // Não é uma avaliação válida\n  return [\n    {\n      json: {\n        avaliacao_valida: false,\n        remoteJid: $('Processar Mensagem').first().json.data.remoteJid\n      }\n    }\n  ];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        13260,
+        4840
+      ],
+      "id": "bfb915e1-0616-4cf5-a91c-787c8868b5b8",
+      "name": "Validar Nota Avaliação"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b73026c5-67be-4cc9-885e-205620a1356f",
+              "leftValue": "={{ $json.avaliacao_valida }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        13480,
+        4840
+      ],
+      "id": "7d307e20-789e-468c-b8b9-199d2608b5af",
+      "name": "Verificar Nota Válida"
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "avaliacao:nota:{{ $json.remoteJid }}",
+        "value": "={{ $json.nota }}",
+        "keyType": "string"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        13720,
+        4740
+      ],
+      "id": "9f832e8b-ddb8-4953-8963-05b5d6395d8b",
+      "name": "Armazenar Nota Avaliação",
+      "credentials": {
+        "redis": {
+          "id": "N86fzX8xrhosKiMf",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "avaliacao:pendente:{{ $json.remoteJid }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        14000,
+        4740
+      ],
+      "id": "7b2129e1-3310-42b6-b053-5ff5b6001548",
+      "name": "Remover Pendência",
+      "credentials": {
+        "redis": {
+          "id": "N86fzX8xrhosKiMf",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "historico_chat_raw",
+        "key": "chat:{{ $json.remoteJid }}:full",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        14500,
+        4740
+      ],
+      "id": "49ca1b56-2a7a-4445-aafe-05c3384dbfc4",
+      "name": "Obter Histórico Chat (Avaliação)",
+      "credentials": {
+        "redis": {
+          "id": "N86fzX8xrhosKiMf",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Processar o histórico do chat para enviar para a OpenAI\nlet historico = {};\ntry {\n  // Agora o 'historico_chat_raw' já contém o array de mensagens acumulado\n  const chatObject = JSON.parse($('Obter Histórico Chat (Avaliação)').first().json.historico_chat_raw || '{}');\n  historico = chatObject; // O objeto inteiro é o histórico\n} catch (e) {\n  console.error(\"Erro ao parsear historico_chat_raw para avaliação:\", e);\n  historico = { messages: [], sellers: {}, customers: {} };\n}\n\nconst nota = $('Armazenar Nota Avaliação').first().json.nota;\nconst remoteJid = $('Validar Nota Avaliação').first().json.remoteJid;\n\nconst getSellerName = () => {\n  try {\n    if (historico.sellers && Object.keys(historico.sellers).length > 0) {\n      return Object.values(historico.sellers)[0].name || 'Vendedor';\n    }\n    return 'Vendedor (Não identificado)';\n  } catch (e) { return 'Vendedor (Erro ao identificar)'; }\n};\n\nconst getCustomerName = () => {\n  try {\n    if (historico.customers && Object.keys(historico.customers).length > 0) {\n      return Object.values(historico.customers)[0].name || 'Cliente';\n    }\n    return 'Cliente (Não identificado)';\n  } catch (e) { return 'Cliente (Erro ao identificar)'; }\n};\n\nlet chatFormatado = 'Nenhum histórico disponível';\ntry {\n  if (historico.messages && Array.isArray(historico.messages)) {\n    chatFormatado = historico.messages.map(msg => {\n      const remetente = msg.fromMe ? \n        `Vendedor (${getSellerName()})` : \n        `Cliente (${getCustomerName()})`;\n      const timestamp = msg.timestamp ? new Date(msg.timestamp * 1000).toISOString() : 'Data não disponível';\n      let textContent = msg.text || '';\n      if (msg.messageType === 'audio_transcribed' && msg.isTranscribed) {\n        textContent = msg.text;\n      } else if (msg.messageType === 'audio' && !msg.isTranscribed) {\n        textContent = '[MENSAGEM DE ÁUDIO]';\n      } else if (!msg.text) {\n        textContent = '[MENSAGEM SEM TEXTO]';\n      }\n      return `${remetente}: ${textContent} [${timestamp}]`;\n    }).join('\\n');\n  }\n} catch (e) {\n  console.error('Erro ao formatar mensagens para avaliação:', e);\n  chatFormatado = 'Erro ao formatar o histórico de mensagens para avaliação';\n}\n\nconst contexto = `\\n\\nCONTEXTO:\\n` +\n  `Vendedor: ${getSellerName()}\\n` +\n  `Cliente: ${getCustomerName()}\\n` +\n  `Número do Cliente: ${remoteJid || 'Não identificado'}\\n`;\n\nreturn [\n  {\n    json: {\n      historico_formatado: chatFormatado + contexto,\n      nota_avaliacao: nota,\n      remoteJid: remoteJid,\n      contexto_completo: historico // O objeto de histórico completo\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        14760,
+        4740
+      ],
+      "id": "e195093e-cb50-4bd4-9cbe-dd7be09692a9",
+      "name": "Formatar Histórico (Avaliação)"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Você é um assistente especializado em análise de atendimento ao cliente. Analise a conversa abaixo entre um vendedor e um cliente. O cliente deu uma nota {{$json.nota_avaliacao}} (de 0 a 10) para o atendimento.\n\nCONVERSA:\n{{$json.historico_formatado}}\n\nCom base na conversa e na nota dada pelo cliente {{ $json.remoteJid }}, crie um formulário de avaliação de desempenho do vendedor no formato JSON com os seguintes campos:\n\n1. nota_cliente: a nota numérica dada pelo cliente ({{$json.nota_avaliacao}})\n2. pontos_fortes: array com 3 pontos fortes identificados no atendimento\n3. pontos_fracos: array com 3 pontos que podem ser melhorados\n4. tempo_resposta: avaliação do tempo de resposta (\"Excelente\", \"Bom\", \"Regular\" ou \"Ruim\")\n5. clareza_comunicacao: avaliação da clareza na comunicação (\"Excelente\", \"Bom\", \"Regular\" ou \"Ruim\")\n6. resolucao_problema: avaliação da capacidade de resolver o problema (\"Excelente\", \"Bom\", \"Regular\" ou \"Ruim\")\n7. sugestoes_melhoria: array com 2 sugestões concretas para melhorar o atendimento\n8. resumo_atendimento: um parágrafo resumindo o atendimento\n9. contexto_conversa: um resumo do contexto geral da conversa\n\nRetorne APENAS o objeto JSON, sem explicações adicionais.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        15040,
+        4740
+      ],
+      "id": "18bbd158-bf41-45fc-be7d-20b4bf98f6d0",
+      "name": "Analisar Atendimento"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        15020,
+        4940
+      ],
+      "id": "7964d7a1-ce04-4004-a578-60ed5f9330bc",
+      "name": "OpenAI Chat Model (Avaliação)",
+      "credentials": {
+        "openAiApi": {
+          "id": "mKkCNH6DQU9B3zlU",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Nó \"Formatar Formulário\"\n\n// Pega a string JSON encapsulada da saída do nó \"Analisar Atendimento\"\nconst stringJsonComBloco = items[0].json.output;\nlet jsonExtraido = stringJsonComBloco;\n\n// 1. Remove os marcadores de bloco de código\nif (typeof jsonExtraido === 'string') {\n  if (jsonExtraido.startsWith('```json\\n')) {\n    jsonExtraido = jsonExtraido.substring(7);\n  } else if (jsonExtraido.startsWith('```json')) {\n    jsonExtraido = jsonExtraido.substring(6);\n  } else if (jsonExtraido.startsWith('```')) {\n    jsonExtraido = jsonExtraido.substring(3);\n  }\n\n  if (jsonExtraido.endsWith('\\n```')) {\n    jsonExtraido = jsonExtraido.substring(0, jsonExtraido.length - 4);\n  } else if (jsonExtraido.endsWith('```')) {\n    jsonExtraido = jsonExtraido.substring(0, jsonExtraido.length - 3);\n  }\n  jsonExtraido = jsonExtraido.trim();\n}\n\nlet objetoJson;\ntry {\n  // 2. Analisa (Parse) a string JSON para um objeto JavaScript\n  if (typeof jsonExtraido === 'string') {\n    objetoJson = JSON.parse(jsonExtraido);\n  } else if (typeof jsonExtraido === 'object' && objetoJson !== null) {\n    objetoJson = jsonExtraido;\n  } else {\n    throw new Error(\"Não foi possível determinar o formato do JSON para parse.\");\n  }\n} catch (error) {\n  console.error(\"Erro ao fazer parse do JSON extraído: \", error.message);\n  console.error(\"JSON extraído que causou o erro: \", jsonExtraido);\n  return [{ json: { error: \"Falha ao analisar o JSON do LLM\", details: error.message, problematicJsonString: String(jsonExtraido) } }];\n}\n\n// 3. Normaliza e garante que os campos existam e tenham os tipos corretos\nobjetoJson.nota_cliente = objetoJson.nota_cliente !== undefined && !isNaN(Number(objetoJson.nota_cliente)) ? Number(objetoJson.nota_cliente) : 0;\nobjetoJson.pontos_fortes = Array.isArray(objetoJson.pontos_fortes) ? objetoJson.pontos_fortes : [];\nobjetoJson.pontos_fracos = Array.isArray(objetoJson.pontos_fracos) ? objetoJson.pontos_fracos : [];\nobjetoJson.sugestoes_melhoria = Array.isArray(objetoJson.sugestoes_melhoria) ? objetoJson.sugestoes_melhoria : [];\n\nobjetoJson.tempo_resposta = String(objetoJson.tempo_resposta || \"Não informado\");\nobjetoJson.clareza_comunicacao = String(objetoJson.clareza_comunicacao || \"Não informado\");\nobjetoJson.resolucao_problema = String(objetoJson.resolucao_problema || \"Não informado\");\nobjetoJson.resumo_atendimento = String(objetoJson.resumo_atendimento || \"Não informado\");\nobjetoJson.contexto_conversa = String(objetoJson.contexto_conversa || \"Não informado\");\n\n// 4. Adiciona o remoteJid e contexto\nlet remoteJidValue = \"Não informado\";\ntry {\n  const formatarHistoricoNodeOutput = $('Formatar Histórico (Avaliação)').item.json;\n  if (formatarHistoricoNodeOutput && formatarHistoricoNodeOutput.remoteJid) {\n    remoteJidValue = formatarHistoricoNodeOutput.remoteJid;\n    objetoJson.remoteJid = remoteJidValue;\n    objetoJson.contexto_completo = formatarHistoricoNodeOutput.contexto_completo || {};\n  }\n} catch (e) {\n  console.warn(\"Não foi possível obter remoteJid de nós anteriores. Erro:\", e.message);\n}\n\n// 5. Formata (Stringify) o objeto JSON de volta para uma string bonita e legível\nconst jsonFormatadoLegivel = JSON.stringify(objetoJson, null, 2);\n\n// Retorna o JSON formatado e normalizado\nreturn [{ json: { formulario_formatado: jsonFormatadoLegivel, raw_formulario: objetoJson } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        15500,
+        4740
+      ],
+      "id": "a11a51ef-0f4f-459c-af59-1a1b65732ef0",
+      "name": "Formatar Formulário (Avaliação)"
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "avaliacao:formulario:{{ $('Formatar Histórico (Avaliação)').item.json.remoteJid }}",
+        "value": "={{ $('Formatar Formulário (Avaliação)').item.json.formulario_formatado }}",
+        "keyType": "string"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        15780,
+        4740
+      ],
+      "id": "ecafa836-5a35-4ca2-a55a-b2eaba9e57c4",
+      "name": "Armazenar Formulário (Avaliação)",
+      "credentials": {
+        "redis": {
+          "id": "N86fzX8xrhosKiMf",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=[https://projeto-n8n.vercel.app/api/receber-avaliacao](https://projeto-n8n.vercel.app/api/receber-avaliacao)",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "={{ $('Formatar Formulário (Avaliação)').item.json.formulario_formatado }}"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        16080,
+        4740
+      ],
+      "id": "a4fd4664-9fa4-423a-8b55-e0fc28c3732f",
+      "name": "Notificar Conclusão Avaliação"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "chat_data_raw_dashboard",
+        "key": "=chat:{{ $('Armazenar Mensagens (Atualizado)').item.json.remoteJid }}:full",
+        "keyType": "string",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        12500,
+        4160
+      ],
+      "id": "5ef66276-27b4-41c1-bf3f-a8708372a8e6",
+      "name": "Obter Conversa Completa p/ Dashboard",
+      "credentials": {
+        "redis": {
+          "id": "N86fzX8xrhosKiMf",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const chatDataRaw = $json.chat_data_raw_dashboard;\nlet parsedChatData = { \n  messages: [],\n  sellers: {},\n  customers: {}\n};\n\n// 1. Safely parse the chat data\ntry {\n  if (chatDataRaw && typeof chatDataRaw === 'string') {\n    parsedChatData = JSON.parse(chatDataRaw) || parsedChatData;\n  } else if (chatDataRaw && typeof chatDataRaw === 'object') {\n    parsedChatData = chatDataRaw;\n  }\n} catch (e) {\n  console.error(\"Error parsing chat data for dashboard:\", e);\n}\n\n// 2. Ensure required properties exist\nif (!parsedChatData.messages) parsedChatData.messages = [];\nif (!parsedChatData.sellers) parsedChatData.sellers = {};\nif (!parsedChatData.customers) parsedChatData.customers = {};\n\n// O remoteJid deve vir do item que disparou esta ramificação, que é o 'Armazenar Mensagens (Atualizado)'\nconst remoteJid = $('Armazenar Mensagens (Atualizado)').item.json.remoteJid;\n\nconst getDynamicName = (isFromMe, defaultName) => {\n    try {\n        if (isFromMe) {\n            return (parsedChatData.sellers && Object.values(parsedChatData.sellers)[0] ? \n                   Object.values(parsedChatData.sellers)[0].name : null) || defaultName;\n        } else {\n            return (parsedChatData.customers && Object.values(parsedChatData.customers)[0] ? \n                   Object.values(parsedChatData.customers)[0].name : null) || defaultName;\n        }\n    } catch (e) {\n        console.error(\"Error in getDynamicName for dashboard:\", e);\n        return defaultName;\n    }\n}\n\nconst conversationForIa = (parsedChatData.messages || []).map(msg => {\n  try {\n    const senderName = getDynamicName(msg.fromMe, msg.fromMe ? 'Vendedor' : 'Cliente');\n    let textContent = msg.text || '';\n    \n    if (msg.messageType === 'audio_transcribed' && msg.isTranscribed) {\n      textContent = msg.text;\n    } else if (msg.messageType === 'audio' && !msg.isTranscribed) {\n      textContent = '[MENSAGEM DE ÁUDIO]';\n    } else if (!msg.text && msg.messageType !== 'image' && \n               msg.messageType !== 'video' && msg.messageType !== 'sticker' && \n               msg.messageType !== 'document') {\n      textContent = '[MENSAGEM SEM TEXTO]';\n    }\n    \n    return `${senderName}: ${textContent}`;\n  } catch (e) {\n    console.error(\"Error processing message for dashboard IA:\", e, \"Message:\", msg);\n    return '[ERRO AO PROCESSAR MENSAGEM]';\n  }\n}).join('\\n');\n\nconst fullChatHistoryArray = (parsedChatData.messages || []).map(msg => {\n  try {\n    return {\n      sender: msg.fromMe ? 'Vendedor' : 'Cliente',\n      senderName: getDynamicName(msg.fromMe, msg.fromMe ? 'Vendedor' : 'Cliente'),\n      text: msg.text || (msg.messageType === 'audio' && !msg.isTranscribed ? '[AUDIO]' : \n            (msg.messageType !== 'conversation' && msg.messageType !== 'extendedTextMessage' && \n             msg.messageType !== 'audio_transcribed' ? `[${msg.messageType || 'MIDIA'}]` : \n             '[CONTEÚDO INDISPONÍVEL]')),\n      timestamp: msg.timestamp,\n      messageType: msg.messageType,\n      fromMe: msg.fromMe\n    };\n  } catch (e) {\n    console.error(\"Error formatting message for dashboard history:\", e);\n    return {\n      sender: 'Erro',\n      senderName: 'Erro',\n      text: '[ERRO AO FORMATAR MENSAGEM]',\n      timestamp: Date.now(),\n      messageType: 'error',\n      fromMe: false\n    };\n  }\n});\n\nreturn [{ \n  json: {\n    remoteJid: remoteJid,\n    conversation_for_ia: conversationForIa,\n    full_chat_history_array: fullChatHistoryArray,\n    raw_chat_data: parsedChatData // Para o payload do dashboard, se necessário\n  } \n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        12740,
+        4160
+      ],
+      "id": "1ab50b52-38c4-4e9c-8c2e-55441ab7c764",
+      "name": "Formatar Histórico p/ Dashboard e IA"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Você é um assistente de análise de conversas. Analise o seguinte histórico de chat:\nCONVERSA:\n{{ $json.conversation_for_ia }}\n\nCom base na conversa, gere um resumo conciso e identifique até 5 palavras-chave ou tópicos principais discutidos.\nRetorne APENAS um objeto JSON com as seguintes chaves:\n- \"resumo_chat\": (string) um parágrafo resumindo a conversa.\n- \"topicos_principais\": (array de strings) com as palavras-chave ou tópicos.\n\nExemplo de saída:\n{\n  \"resumo_chat\": \"O cliente entrou em contato para saber sobre o status do pedido X e o vendedor forneceu informações de rastreamento.\",\n  \"topicos_principais\": [\"status do pedido\", \"rastreamento\", \"pedido X\"]\n}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        13000,
+        4160
+      ],
+      "id": "0d99831a-d859-4893-8021-c22886e71bdc",
+      "name": "Analisar Chat p/ Dashboard (IA)"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        12960,
+        4340
+      ],
+      "id": "8adb5b9e-bb68-4973-9697-9671d3793cbc",
+      "name": "OpenAI Chat Model (Dashboard)",
+      "credentials": {
+        "openAiApi": {
+          "id": "mKkCNH6DQU9B3zlU",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const agentOutputString = items[0].json.output; \nconst previousData = $('Formatar Histórico p/ Dashboard e IA').item.json;\nlet agentJson = {};\n\ntry {\n  let cleanJsonString = agentOutputString.replace(/^```json\\n?/, '').replace(/\\n?```$/, '');\n  agentJson = JSON.parse(cleanJsonString);\n} catch (e) {\n  console.error(\"Erro ao parsear JSON do agente para dashboard:\", e, \"String Original:\", agentOutputString);\n  agentJson = {\n    resumo_chat: \"Não foi possível gerar o resumo do chat.\",\n    topicos_principais: []\n  };\n}\n\nconst customerData = previousData.raw_chat_data && previousData.raw_chat_data.customers ? Object.values(previousData.raw_chat_data.customers)[0] : { name: 'Desconhecido', number: previousData.remoteJid || 'Desconhecido' };\n\nconst conversationObject = {\n  remoteJid: previousData.remoteJid,\n  chat_history: previousData.full_chat_history_array,\n  analysis: {\n    summary: agentJson.resumo_chat || \"Resumo não fornecido pela IA.\",\n    keywords: Array.isArray(agentJson.topicos_principais) ? agentJson.topicos_principais : []\n  },\n  customer: customerData,\n  timestamp: new Date().toISOString()\n};\n\nreturn [{ json: conversationObject }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        13460,
+        4160
+      ],
+      "id": "92304bb2-9cdd-418d-b98e-42fc26bfe614",
+      "name": "Formatar Saída Agente Dashboard"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        11740,
+        4260
+      ],
+      "id": "0951494a-19ec-48ca-b32e-89c6e1dbc12d",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "mKkCNH6DQU9B3zlU",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "=dashboard_payload:{{ $json.remoteJid }}",
+        "value": "={{ JSON.stringify($json) }}",
+        "keyType": "string"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        13680,
+        4160
+      ],
+      "id": "bcbeec34-edfc-423a-b0db-db28ed529e5e",
+      "name": "Armazenar Saída Formatada Dashboard",
+      "credentials": {
+        "redis": {
+          "id": "N86fzX8xrhosKiMf",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Processar Mensagem').item.json.evo.server_url }}/message/sendText/{{ $('Processar Mensagem').item.json.evo.instance }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $('Processar Mensagem').item.json.evo.apikey }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "number",
+              "value": "={{ $json.remoteJid }}"
+            },
+            {
+              "name": "text",
+              "value": "Obrigado pela sua avaliação! Sua nota foi registrada com sucesso."
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        14240,
+        4740
+      ],
+      "id": "52ca1352-3f65-4786-9ada-611bd398d78a",
+      "name": "Confirmar Avaliação Cliente"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://projeto-n8n.vercel.app/api/conversas",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ [$json] }}",
+        "options": {}
+      },
+      "name": "Enviar Conversas Formatadas para API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        13680,
+        4360
+      ],
+      "id": "36933935-2e6b-4214-8022-fb568a37ab78"
+    }
+  ],
+  "pinData": {
+    "Webhook Entrada": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n-n8n.lwr5mp.easypanel.host",
+            "user-agent": "axios/1.7.9",
+            "content-length": "867",
+            "accept-encoding": "gzip, compress, deflate, br",
+            "content-type": "application/json",
+            "x-forwarded-for": "172.18.0.1",
+            "x-forwarded-host": "n8n-n8n.lwr5mp.easypanel.host",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "f0c35f83d344",
+            "x-real-ip": "172.18.0.1"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "event": "messages.upsert",
+            "instance": "Paulo Henrique",
+            "data": {
+              "key": {
+                "remoteJid": "556192184615@s.whatsapp.net",
+                "fromMe": false,
+                "id": "4284EF2829CCCC6E79325D0D21218EC6"
+              },
+              "pushName": "Glenda",
+              "status": "DELIVERY_ACK",
+              "message": {
+                "conversation": "0",
+                "messageContextInfo": {
+                  "deviceListMetadata": {
+                    "recipientKeyHash": "qSJecuiedfjRvg==",
+                    "recipientTimestamp": "1746617916"
+                  },
+                  "deviceListMetadataVersion": 2,
+                  "messageSecret": "2QUqTFk2ujKSNWU/ClH6uFvF4PmT+9joNZLj4iIES0I="
+                }
+              },
+              "messageType": "conversation",
+              "messageTimestamp": 1746635911,
+              "instanceId": "d54b371c-67ed-4c0d-82d9-6b66dea0c990",
+              "source": "android"
+            },
+            "destination": "[https://n8n-n8n.lwr5mp.easypanel.host/webhook/avaliacao-atendimento-webhook](https://n8n-n8n.lwr5mp.easypanel.host/webhook/avaliacao-atendimento-webhook)",
+            "date_time": "2025-05-07T13:38:31.967Z",
+            "sender": "556186446934@s.whatsapp.net",
+            "server_url": "[https://evolution-evolution.lwr5mp.easypanel.host](https://evolution-evolution.lwr5mp.easypanel.host)",
+            "apikey": "948D0A6EDFA1-4BC3-AFFD-70CE70DD89D7"
+          },
+          "webhookUrl": "[https://n8n-n8n.lwr5mp.easypanel.host/webhook/avaliacao-atendimento-webhook](https://n8n-n8n.lwr5mp.easypanel.host/webhook/avaliacao-atendimento-webhook)",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook Entrada": {
+      "main": [
+        [
+          {
+            "node": "Processar Mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Processar Mensagem": {
+      "main": [
+        [
+          {
+            "node": "Verificar se é Áudio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar se é Áudio": {
+      "main": [
+        [
+          {
+            "node": "Baixar Arquivo de Áudio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Filtrar Chats Individuais",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Mensagem com Transcrição": {
+      "main": [
+        [
+          {
+            "node": "Aguardar Mensagens",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar Chats Individuais": {
+      "main": [
+        [
+          {
+            "node": "Aguardar Mensagens",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aguardar Mensagens": {
+      "main": [
+        [
+          {
+            "node": "Agrupar e Format Mensagens",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agrupar e Format Mensagens": {
+      "main": [
+        [
+          {
+            "node": "Obter Histórico de Chat Existente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obter Histórico de Chat Existente": {
+      "main": [
+        [
+          {
+            "node": "Anexar Novas Mensagens ao Histórico de Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anexar Novas Mensagens ao Histórico de Chat": {
+      "main": [
+        [
+          {
+            "node": "Armazenar Mensagens (Atualizado)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Armazenar Mensagens (Atualizado)": {
+      "main": [
+        [
+          {
+            "node": "Verificar Mensagem Avaliação",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Verificar Mensagem Cliente",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Obter Conversa Completa p/ Dashboard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Mensagem Avaliação": {
+      "main": [
+        [
+          {
+            "node": "Enviar Pedido Avaliação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Pedido Avaliação": {
+      "main": [
+        [
+          {
+            "node": "Marcar Avaliação Pendente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marcar Avaliação Pendente": {
+      "main": [
+        [
+          {
+            "node": "Aguardar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Mensagem Cliente": {
+      "main": [
+        [
+          {
+            "node": "Verificar Avaliação Pendente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Avaliação Pendente": {
+      "main": [
+        [
+          {
+            "node": "É Resposta Avaliação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "É Resposta Avaliação": {
+      "main": [
+        [
+          {
+            "node": "Validar Nota Avaliação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Nota Avaliação": {
+      "main": [
+        [
+          {
+            "node": "Verificar Nota Válida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Nota Válida": {
+      "main": [
+        [
+          {
+            "node": "Armazenar Nota Avaliação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Armazenar Nota Avaliação": {
+      "main": [
+        [
+          {
+            "node": "Remover Pendência",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remover Pendência": {
+      "main": [
+        [
+          {
+            "node": "Confirmar Avaliação Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obter Histórico Chat (Avaliação)": {
+      "main": [
+        [
+          {
+            "node": "Formatar Histórico (Avaliação)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar Histórico (Avaliação)": {
+      "main": [
+        [
+          {
+            "node": "Analisar Atendimento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analisar Atendimento": {
+      "main": [
+        [
+          {
+            "node": "Formatar Formulário (Avaliação)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model (Avaliação)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analisar Atendimento",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar Formulário (Avaliação)": {
+      "main": [
+        [
+          {
+            "node": "Armazenar Formulário (Avaliação)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Armazenar Formulário (Avaliação)": {
+      "main": [
+        [
+          {
+            "node": "Notificar Conclusão Avaliação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obter Conversa Completa p/ Dashboard": {
+      "main": [
+        [
+          {
+            "node": "Formatar Histórico p/ Dashboard e IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar Histórico p/ Dashboard e IA": {
+      "main": [
+        [
+          {
+            "node": "Analisar Chat p/ Dashboard (IA)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analisar Chat p/ Dashboard (IA)": {
+      "main": [
+        [
+          {
+            "node": "Formatar Saída Agente Dashboard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model (Dashboard)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analisar Chat p/ Dashboard (IA)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Baixar Arquivo de Áudio": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Mensagem com Transcrição",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar Saída Agente Dashboard": {
+      "main": [
+        [
+          {
+            "node": "Armazenar Saída Formatada Dashboard",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Enviar Conversas Formatadas para API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirmar Avaliação Cliente": {
+      "main": [
+        [
+          {
+            "node": "Obter Histórico Chat (Avaliação)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b67e2262-a7ab-4842-a13c-02e4aeea07d2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "13bc83b253b227bcad46beb8869279f45f1be61c89bdea526a2d396efe853401"
+  },
+  "id": "nbhszVoGfRJ9VRmt",
+  "tags": [
+    {
+      "name": "dashboard-chat",
+      "id": "AknaoY9DgpcxL0H0",
+      "createdAt": "2025-05-07T12:52:01.478Z",
+      "updatedAt": "2025-05-07T12:52:01.478Z"
+    },
+    {
+      "createdAt": "2025-05-02T20:44:26.750Z",
+      "updatedAt": "2025-05-02T20:44:26.750Z",
+      "id": "HJh2aycXpkW4R6K1",
+      "name": "evolution-api"
+    },
+    {
+      "name": "audio-transcription",
+      "id": "I8lZORu9kLFyvast",
+      "createdAt": "2025-05-07T12:52:01.473Z",
+      "updatedAt": "2025-05-07T12:52:01.473Z"
+    },
+    {
+      "createdAt": "2025-05-02T19:16:14.348Z",
+      "updatedAt": "2025-05-02T19:16:14.348Z",
+      "id": "TiEqPiDEbKjRurRg",
+      "name": "evaluation"
+    },
+    {
+      "createdAt": "2025-05-02T19:16:14.335Z",
+      "updatedAt": "2025-05-02T19:16:14.335Z",
+      "id": "VSbAyMF7ZHJmXGRs",
+      "name": "chat"
+    },
+    {
+      "createdAt": "2025-05-02T19:16:14.343Z",
+      "updatedAt": "2025-05-02T19:16:14.343Z",
+      "id": "nrXOO1OLR4Csgx6x",
+      "name": "whatsapp"
+    }
+  ]
+}

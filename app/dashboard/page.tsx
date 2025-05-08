@@ -1,22 +1,45 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Activity, ArrowUpRight, Users, MessageSquareText, BarChart2, Settings } from "lucide-react";
+import { Activity, ArrowUpRight, Users, MessageSquareText, BarChart2, Settings, Copy } from "lucide-react"; // Adicionado Copy
 import Link from "next/link";
 import prisma from "@/lib/prisma";
-import { Avaliacao } from "@prisma/client";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/auth";
+import { CopyToClipboardButton } from "@/components/ui/copy-to-clipboard-button"; // Adicionado
+// Removido import não utilizado de Avaliacao se não for usado diretamente como tipo aqui
+// import { Avaliacao } from "@prisma/client";
 
 
 export default async function DashboardPage() {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.id) {
+    // Idealmente, redirecionar para login ou mostrar mensagem de não autorizado
+    // Por enquanto, para evitar erros, podemos retornar um estado vazio ou mensagem.
+    return (
+      <div>
+        <h1 className="text-2xl font-bold">Acesso Negado</h1>
+        <p>Você precisa estar logado para ver o dashboard.</p>
+      </div>
+    );
+  }
+  const userId = session.user.id;
+  const webhookApiKey = session.user.webhookApiKey; // Obter a chave da sessão
+
   const gradientText = "bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-teal-300 to-green-300";
 
-  // Lógica para buscar dados do Prisma
   const oneMonthAgo = new Date();
   oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
-  const totalAvaliacoes = await prisma.avaliacao.count();
+  const totalAvaliacoes = await prisma.avaliacao.count({
+    where: { userId: userId }, // Adicionado filtro
+  });
 
   const avaliacoesUltimoMes = await prisma.avaliacao.findMany({
-    where: { createdAt: { gte: oneMonthAgo } },
+    where: { 
+      createdAt: { gte: oneMonthAgo },
+      userId: userId, // Adicionado filtro
+    },
     select: { remoteJid: true },
   });
 
@@ -30,13 +53,17 @@ export default async function DashboardPage() {
 
   const satisfacaoMediaData = await prisma.avaliacao.aggregate({
     _avg: { nota_cliente: true },
+    where: { userId: userId }, // Adicionado filtro
   });
   const satisfacaoMedia = satisfacaoMediaData._avg.nota_cliente !== null
     ? satisfacaoMediaData._avg.nota_cliente.toFixed(1) + "/10"
     : "N/A";
 
   const numAvaliacoesEsteMes = await prisma.avaliacao.count({
-    where: { createdAt: { gte: oneMonthAgo } },
+    where: { 
+      createdAt: { gte: oneMonthAgo },
+      userId: userId, // Adicionado filtro
+    },
   });
 
   // Dados para os cards de estatísticas
@@ -49,6 +76,7 @@ export default async function DashboardPage() {
 
   // Dados para atividades recentes
   const recentAvaliacoesData = await prisma.avaliacao.findMany({
+    where: { userId: userId }, // Adicionado filtro
     orderBy: { createdAt: 'desc' },
     take: 5,
     select: { id: true, remoteJid: true, createdAt: true },
@@ -56,7 +84,11 @@ export default async function DashboardPage() {
 
   const recentActivities = recentAvaliacoesData.map(avaliacao => ({
     id: avaliacao.id,
-    description: `Nova avaliação ${avaliacao.remoteJid ? `de ${avaliacao.remoteJid.split('@')[0]}` : `(ID: ${avaliacao.id.substring(0, 8)})`}`,
+    description: `Nova avaliação ${
+      avaliacao.remoteJid
+        ? `de ${avaliacao.remoteJid.split('@')[0]}`
+        : (avaliacao.id && typeof avaliacao.id === 'string' ? `(ID: ${avaliacao.id.substring(0, 8)})` : '(ID: Indisponível)')
+    }`,
     time: new Date(avaliacao.createdAt).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
     type: "avaliacao", // Usado para estilizar o ponto colorido
   }));
@@ -68,9 +100,12 @@ export default async function DashboardPage() {
           <h1 className={`text-3xl font-bold ${gradientText}`}>Visão Geral do Dashboard</h1>
           <p className="text-muted-foreground">Bem-vindo de volta! Aqui está um resumo da sua atividade.</p>
         </div>
-        <Button asChild className="bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white font-semibold shadow-md transition-all duration-300 ease-in-out transform hover:scale-105">
-          <Link href="/dashboard/avaliacoes/nova">Nova Avaliação</Link>
-        </Button>
+        <div className="flex flex-col sm:flex-row items-center gap-4 mt-4 md:mt-0">
+          {/* O webhookApiKey foi movido para baixo */}
+          <Button asChild className="bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white font-semibold shadow-md transition-all duration-300 ease-in-out transform hover:scale-105">
+            <Link href="/dashboard/avaliacoes/nova">Nova Avaliação</Link>
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -157,6 +192,35 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Webhook API Key Card - Movido para cá */}
+      {webhookApiKey && (
+        <Card>
+          <CardHeader>
+            <CardTitle className={`text-xl ${gradientText}`}>Sua Chave de API Webhook</CardTitle>
+            <CardDescription className="text-muted-foreground">
+              Use esta chave para integrar com serviços externos como o N8N.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between gap-2 p-3 border rounded-md bg-muted/30 dark:bg-muted/50">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">API Key:</span>
+                <span className="font-mono text-sm">
+                  {webhookApiKey.substring(0, 6)}...{webhookApiKey.substring(webhookApiKey.length - 6)}
+                </span>
+              </div>
+              <CopyToClipboardButton textToCopy={webhookApiKey} />
+            </div>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Lembre-se de que sua URL para o N8N enviar dados será: 
+              <code className="font-mono bg-gray-200 dark:bg-gray-700 p-1 rounded text-xs">
+                https://SEU_DOMINIO/api/receber-avaliacao/{webhookApiKey.substring(0,4)}...
+              </code>
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider"; // Importe o ThemeProvider
+// Remove direct imports of SessionProvider and ThemeProvider if they were here
+import { Providers } from "@/components/providers"; // Import the new Providers component
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "R.A.I.O | Análise Inteligente de Avaliações",
-  description: "Plataforma de IA para análise e gestão de feedback de clientes.",
+export const metadata: Metadata = { // Ensure Metadata type is used if imported
+  title: "R.A.I.O Dashboard",
+  description: "Dashboard de Análise e Interações",
 };
 
 export default function RootLayout({
@@ -18,13 +19,9 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem={true}
-        >
+        <Providers> {/* Use the Providers component to wrap children */}
           {children}
-        </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );
