@@ -8,6 +8,7 @@ import bcrypt from "bcryptjs";
 // This helps ensure the object shape is correct.
 type AuthorizeUserType = NextAuthUser & {
   identifier?: string | null;
+  webhookApiKey?: string | null; // Adicionado
 };
 
 export const authOptions: NextAuthOptions = {
@@ -51,6 +52,7 @@ export const authOptions: NextAuthOptions = {
           email: dbUser.email,
           image: dbUser.image,
           identifier: dbUser.identifier, // Custom field
+          webhookApiKey: dbUser.webhookApiKey, // Adicionado
         };
         return authorizedUser;
       }
@@ -63,6 +65,7 @@ export const authOptions: NextAuthOptions = {
         const u = user as AuthorizeUserType; // Cast to ensure access to identifier
         token.id = u.id;
         token.identifier = u.identifier;
+        token.webhookApiKey = u.webhookApiKey; // Adicionado
         // Optionally map to standard JWT claims if needed elsewhere
         token.name = u.name;
         token.email = u.email;
@@ -81,6 +84,7 @@ export const authOptions: NextAuthOptions = {
         // Assign custom 'identifier' property to session.user
         // This relies on Session.user in next-auth.d.ts being augmented
         session.user.identifier = token.identifier as (string | null | undefined);
+        session.user.webhookApiKey = token.webhookApiKey as (string | null | undefined); // Adicionado
       }
       return session;
     },
