@@ -11,11 +11,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { MessageCircle, User, Calendar, ExternalLink, Eye } from "lucide-react"; // Adicionado Eye
 import { ChatInteraction } from "@prisma/client"; // Importe o tipo gerado
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/auth";
 
 export const dynamic = 'force-dynamic';
 
-async function getConversas(): Promise<ChatInteraction[]> {
+async function getConversas(userId: string): Promise<ChatInteraction[]> {
   const conversas = await prisma.chatInteraction.findMany({
+    where: {
+      userId: userId,
+    },
     orderBy: {
       eventTimestamp: 'desc',
     },
@@ -24,7 +29,17 @@ async function getConversas(): Promise<ChatInteraction[]> {
 }
 
 export default async function ConversasPage() {
-  const conversas = await getConversas();
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return (
+      <div>
+        <h1 className="text-2xl font-bold">Access Denied</h1>
+        <p>You must be logged in to view your conversations.</p>
+      </div>
+    );
+  }
+  const userId = session.user.id;
+  const conversas = await getConversas(userId);
   const gradientText = "bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400"; // Mantido para o efeito de gradiente específico
 
   return (
