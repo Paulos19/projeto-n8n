@@ -28,22 +28,19 @@ interface AvaliacaoData {
 
 async function fetchAvaliacaoById(id: string, userId: string): Promise<AvaliacaoData | null> {
   try {
-    const avaliacao = await prisma.avaliacao.findFirst({ // Modificado para findFirst
-      where: { 
-        id: id,
-        userId: userId, // Adicionado filtro por userId
-      },
+    const avaliacao = await prisma.avaliacao.findUnique({
+      where: { id },
     });
     if (!avaliacao) {
       return null;
     }
-    // Garantir que todos os campos esperados pela interface AvaliacaoData estejam presentes
-    // ou sejam tratados como opcionais/nulos se assim for no schema.
-    // O Prisma Client já deve retornar os tipos corretos baseados no schema.
-    return avaliacao as AvaliacaoData; // Ajuste o casting se necessário, mas o tipo inferido deve ser compatível
+    // Verifica se a avaliação pertence ao usuário logado
+    if (avaliacao.userId !== userId) {
+      return null;
+    }
+    return avaliacao as AvaliacaoData;
   } catch (error) {
     console.error("Erro ao buscar avaliação:", error);
-    // Em um cenário real, você poderia logar este erro de forma mais robusta
     return null;
   }
 }

@@ -13,11 +13,16 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Eye, PlusCircle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/auth";
 
 export const dynamic = 'force-dynamic'; // Garante que os dados sejam sempre frescos
 
-async function getAvaliacoes() {
+async function getAvaliacoes(userId: string) {
   const avaliacoes = await prisma.avaliacao.findMany({
+    where: {
+      userId: userId,
+    },
     orderBy: {
       createdAt: 'desc',
     },
@@ -27,7 +32,19 @@ async function getAvaliacoes() {
 }
 
 export default async function AvaliacoesPage() {
-  const avaliacoes = await getAvaliacoes();
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return (
+      <div>
+        <h1 className="text-2xl font-bold">Acesso Negado</h1>
+        <p>Você precisa estar logado para ver suas avaliações.</p>
+      </div>
+    );
+  }
+  const userId = session.user.id;
+  const webhookApiKey = session.user.webhookApiKey;
+
+  const avaliacoes = await getAvaliacoes(userId);
   const gradientText = "bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-teal-300 to-green-300";
 
   const getNotaBadgeVariant = (nota: number | null) => {
@@ -36,7 +53,6 @@ export default async function AvaliacoesPage() {
     if (nota <= 3) return "secondary"; // Amarelo/Laranja seria ideal, mas ShadCN default não tem. Usando secondary.
     return "default"; // Verde para notas boas (default é azulado/verdeado no tema)
   };
-
 
   return (
     <div className="space-y-8">
@@ -102,6 +118,33 @@ export default async function AvaliacoesPage() {
           </Table>
         </CardContent>
       </Card>
+      {webhookApiKey && (
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle className={`text-xl ${gradientText}`}>Sua Chave de API Webhook</CardTitle>
+            <CardDescription className="text-muted-foreground">
+              Use esta chave para integrar com serviços externos como o N8N.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between gap-2 p-3 border rounded-md bg-muted/30 dark:bg-muted/50">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">API Key:</span>
+                <span className="font-mono text-sm">
+                  {webhookApiKey.substring(0, 6)}...{webhookApiKey.substring(webhookApiKey.length - 6)}
+                </span>
+              </div>
+              {/* Substitua por seu componente de copiar se desejar */}
+            </div>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Lembre-se de que sua URL para o N8N enviar dados será: 
+              <code className="font-mono bg-gray-200 dark:bg-gray-700 p-1 rounded text-xs">
+                https://SEU_DOMINIO/api/receber-avaliacao/{webhookApiKey.substring(0,4)}...
+              </code>
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
