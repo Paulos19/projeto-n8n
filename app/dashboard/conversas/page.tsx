@@ -32,8 +32,7 @@ export default async function ConversasPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
         <div>
           <h1 className={`text-3xl font-bold ${gradientText}`}>
-            {/* O ícone pode usar uma cor primária do tema, ou manter a cor do gradiente se preferir */}
-            <MessageCircle className="inline-block text-primary mr-1 h-8 w-8" /> 
+            {/* O ícone pode usar uma cor primária do tema, ou manter a cor do gradiente se preferir */} 
             Conversas Recebidas (n8n)
           </h1>
           <p className="text-muted-foreground mt-2">Visualize as interações e análises recebidas via n8n.</p>
@@ -88,7 +87,7 @@ export default async function ConversasPage() {
             <CardFooter className="flex flex-col gap-2 pt-4 w-full">
               <Button asChild variant="outline" className="w-full text-primary border-primary hover:bg-primary hover:text-primary-foreground">
                 <Link href={`/dashboard/conversas/${conversa.id}`}>
-                  <span> {/* Envolver com span para o Link */}
+                  <span className="flex items-center justify-center"> {/* Adicionado flex, items-center, justify-center */}
                     <Eye className="mr-2 h-4 w-4" /> Ver Detalhes da Conversa
                   </span>
                 </Link>
@@ -98,7 +97,7 @@ export default async function ConversasPage() {
                   {/* Para cores específicas como 'sky', você pode precisar de variáveis CSS personalizadas ou manter classes específicas se o tema padrão não cobrir */}
                   {/* Exemplo mantendo cores sky, mas com variantes dark. Se quiser usar cores do tema, seria algo como text-accent-foreground border-accent... */}
                   <Link href={`/dashboard/clientes/${conversa.remoteJid.replace('@', '_')}`}>
-                    <span> {/* Envolver com span para o Link */}
+                    <span className="flex items-center justify-center"> {/* Adicionado flex, items-center, justify-center */}
                       <ExternalLink className="mr-2 h-4 w-4" /> Ver Perfil do Cliente
                     </span>
                   </Link>

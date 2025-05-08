@@ -2,18 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, MessageSquare, Users, FileText, LogOut, MessageCircle, X } from "lucide-react";
+import { Home, MessageSquare, Users, FileText, LogOut, MessageCircle, X, Sun, Moon } from "lucide-react"; // Added Sun, Moon
 import Image from "next/image";
-import React from "react";
+import React, { useState, useEffect } from "react"; // Added useState, useEffect
+import { useTheme } from "next-themes";
 
-// ATENÇÃO: Classes Tailwind dinâmicas como `bg-[${cor...}]` podem não funcionar
-// sem configuração adicional (CSS variables ou substituição por classes estáticas).
-const corDestaque = "#84C1FA"; // Ex: substitua por 'text-blue-400'
-const corTexto = "#091C53";    // Ex: substitua por 'text-slate-800'
-const corBackgroundSidebar = "#DDE7F7"; // Ex: substitua por 'bg-slate-100'
-const corTextoHover = corDestaque; // Ex: substitua por 'hover:text-blue-400'
-const corBackgroundAtivo = corDestaque; // Ex: substitua por 'bg-blue-400'
-const corTextoAtivo = corTexto; // Ex: substitua por 'text-slate-800'
+// Remova ou comente as variáveis de cor JavaScript que não serão mais usadas para o fundo.
+// const corBackgroundSidebar = "#DDE7F7"; // Exemplo de variável a ser removida para o fundo
+
+// As outras variáveis de cor (corDestaque, corTexto, etc.) para os itens de navegação
+// também deveriam ser migradas para usar variáveis CSS do tema para consistência total.
+// Por exemplo, em vez de text-[${corTexto}], usar text-[var(--sidebar-foreground)].
+// No entanto, focaremos no fundo e no blur conforme solicitado.
 
 const navItems = [
   { href: "/dashboard", label: "Início", icon: Home },
@@ -21,7 +21,6 @@ const navItems = [
   { href: "/dashboard/conversas", label: "Conversas n8n", icon: MessageCircle },
   { href: "/dashboard/relatorios", label: "Relatórios", icon: FileText },
   { href: "/dashboard/clientes", label: "Clientes", icon: Users },
-  // { href: "/dashboard/configuracoes", label: "Configurações", icon: Settings },
 ];
 
 interface SidebarProps {
@@ -31,20 +30,25 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const pathname = usePathname();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false); // State to track if component is mounted
 
-  // Classes base da sidebar
+  // useEffect runs only on the client, after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const sidebarBaseClasses = `w-64 p-6 flex flex-col shadow-lg transition-transform duration-300 ease-in-out z-30 print:hidden`;
-  // Classes para mobile: fixa, fora da tela inicialmente, desliza para dentro
   const mobileClasses = `fixed inset-y-0 left-0 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'}`;
-  // Classes para desktop: estática, parte do layout
   const desktopClasses = `md:relative md:translate-x-0 md:flex`;
   
-  // Esta classe dinâmica precisa ser um nome de classe Tailwind válido ou usar CSS var.
-  // Exemplo: const dynamicBgClass = 'bg-slate-100';
-  const dynamicBgClass = `bg-[${corBackgroundSidebar}]`; 
+  // Usando variáveis CSS para o fundo da sidebar (já estava correto)
+  // bg-[var(--sidebar-transparent-bg)] backdrop-blur-md
 
   return (
-    <aside className={`${sidebarBaseClasses} ${dynamicBgClass} ${mobileClasses} ${desktopClasses}`}>
+    <aside 
+      className={`${sidebarBaseClasses} bg-[var(--sidebar-transparent-bg)] backdrop-blur-md ${mobileClasses} ${desktopClasses}`}
+    >
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <Image
@@ -54,13 +58,11 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             height={32}
             className="h-8 w-8"
           />
-          {/* Esta classe dinâmica precisa ser um nome de classe Tailwind válido ou usar CSS var. */}
-          <span className={`text-2xl font-bold text-[${corDestaque}]`}>R.A.I.O</span>
+          <span className="text-2xl font-bold text-sidebar-primary">R.A.I.O</span> {/* Usando text-sidebar-primary */}
         </div>
-        {/* Botão de fechar para mobile */}
         <button
             onClick={() => setIsOpen(false)}
-            className="md:hidden p-1 text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white"
+            className="md:hidden p-1 text-muted-foreground hover:text-foreground" 
             aria-label="Fechar menu"
         >
             <X size={24} />
@@ -70,21 +72,18 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
         <ul>
           {navItems.map((item) => {
             const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
-            // Estas classes dinâmicas precisam ser nomes de classes Tailwind válidos ou usar CSS vars.
-            const activeClasses = `bg-[${corBackgroundAtivo}] text-[${corTextoAtivo}] font-medium shadow-sm`;
-            const inactiveClasses = `text-[${corTexto}] hover:bg-[${corDestaque}] hover:text-[${corTextoAtivo}]`;
-            const iconActiveColor = `text-[${corTextoAtivo}]`;
-            const iconInactiveColor = `text-[${corTexto}] group-hover:text-[${corTextoAtivo}]`;
+            const activeClasses = `bg-sidebar-primary text-sidebar-primary-foreground font-medium shadow-sm`; // Usando variáveis da sidebar
+            const inactiveClasses = `text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground`; // Usando variáveis da sidebar
 
             return (
               <li key={item.label} className="mb-2">
                 <Link
                   href={item.href}
-                  onClick={() => { if (window.innerWidth < 768) setIsOpen(false); }} // Fecha sidebar no clique em mobile
+                  onClick={() => { if (window.innerWidth < 768) setIsOpen(false); }}
                   className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-colors group
                     ${isActive ? activeClasses : inactiveClasses}`}
                 >
-                  <item.icon className={`h-5 w-5 ${isActive ? iconActiveColor : iconInactiveColor}`} />
+                  <item.icon className={`h-5 w-5 ${isActive ? 'text-sidebar-primary-foreground' : 'text-sidebar-foreground group-hover:text-sidebar-accent-foreground'}`} /> {/* Ajuste de cor do ícone */}
                   <span>{item.label}</span>
                 </Link>
               </li>
@@ -92,11 +91,20 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           })}
         </ul>
       </nav>
-      <div>
+      <div className="mt-auto space-y-2"> {/* Added mt-auto and space-y-2 for spacing */}
         <button
-          // onClick={() => signOut()} // Implementar logout
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-colors w-full text-left
-                     text-[${corTexto}] hover:bg-[${corDestaque}] hover:text-[${corTextoAtivo}]`}
+                     text-sidebar-foreground cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground`}
+          aria-label="Alternar tema"
+          disabled={!mounted} // Disable button until mounted to prevent interaction before hydration
+        >
+          {mounted ? (theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />) : <div className="h-5 w-5" /> /* Placeholder */}
+          <span>Alternar Tema</span>
+        </button>
+        <button
+          className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-colors w-full text-left
+                     text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground`} // Usando variáveis da sidebar
         >
           <LogOut className="h-5 w-5" />
           <span>Sair</span>

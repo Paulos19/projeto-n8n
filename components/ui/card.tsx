@@ -1,21 +1,18 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
-// --- Definição das Cores para Cards (alinhado com a paleta do projeto) ---
+// --- Removidas as definições de cores JavaScript ---
+// const cardBgLight = "#FFFFFF";
+// const cardFgLight = "#091C53";
+// const cardBorderLight = "#DDE7F7";
+// const cardMutedFgLight = "rgba(9, 28, 83, 0.7)";
+// const cardHeaderFooterBgLight = "#E8EEFC";
 
-// Modo Claro
-const cardBgLight = "#FFFFFF";        // corCardBackground
-const cardFgLight = "#091C53";        // corTexto
-const cardBorderLight = "#DDE7F7";    // corCardBorda
-const cardMutedFgLight = "rgba(9, 28, 83, 0.7)"; // corTexto com opacidade para descrições
-const cardHeaderFooterBgLight = "#E8EEFC"; // corBackground (para cabeçalho/rodapé se diferenciado)
-
-// Modo Escuro
-const cardBgDark = "#1F2937";         // corCardBackgroundDark
-const cardFgDark = "#E5E7EB";         // corTextoDark
-const cardBorderDark = "#374151";     // corCardBordaDark
-const cardMutedFgDark = "rgba(229, 231, 235, 0.7)"; // corTextoDark com opacidade para descrições
-const cardHeaderFooterBgDark = "#111827"; // corBackgroundSecaoAlternativaDark (para cabeçalho/rodapé se diferenciado)
+// const cardBgDark = "#1F2937";
+// const cardFgDark = "#E5E7EB";
+// const cardBorderDark = "#374151";
+// const cardMutedFgDark = "rgba(229, 231, 235, 0.7)";
+// const cardHeaderFooterBgDark = "#111827";
 
 
 const Card = React.forwardRef<
@@ -25,9 +22,7 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-lg border shadow-sm",
-      `bg-[${cardBgLight}] text-[${cardFgLight}] border-[${cardBorderLight}]`,
-      `dark:bg-[${cardBgDark}] dark:text-[${cardFgDark}] dark:border-[${cardBorderDark}]`,
+      "rounded-lg border bg-card text-card-foreground shadow-sm", // Usando variáveis CSS via Tailwind
       className
     )}
     {...props}
@@ -43,8 +38,7 @@ const CardHeader = React.forwardRef<
     ref={ref}
     className={cn(
       "flex flex-col space-y-1.5 p-6",
-      // Opcional: diferenciar fundo do header
-      // `bg-[${cardHeaderFooterBgLight}] dark:bg-[${cardHeaderFooterBgDark}] rounded-t-lg`, 
+      // Opcional: diferenciar fundo do header - geralmente não é necessário se o card já tem bg-card
       className
     )}
     {...props}
@@ -59,8 +53,7 @@ const CardTitle = React.forwardRef<
   <h3
     ref={ref}
     className={cn(
-      "text-2xl font-semibold leading-none tracking-tight",
-      // A cor do título já é herdada de Card (cardFgLight/Dark)
+      "text-2xl font-semibold leading-none tracking-tight", // A cor é herdada de Card (text-card-foreground)
       className
     )}
     {...props}
@@ -75,8 +68,7 @@ const CardDescription = React.forwardRef<
   <p
     ref={ref}
     className={cn(
-      "text-sm",
-      `text-[${cardMutedFgLight}] dark:text-[${cardMutedFgDark}]`,
+      "text-sm text-muted-foreground", // Usando text-muted-foreground
       className
     )}
     {...props}

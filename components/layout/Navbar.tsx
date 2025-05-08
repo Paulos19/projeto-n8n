@@ -34,8 +34,8 @@ export default function Navbar() {
     visible: { opacity: 1, y: 0 },
   };
 
-  // Novas cores
-  const corDestaque = "#84C1FA";
+  // Removidas as constantes de cor JavaScript
+  // const corDestaque = "#84C1FA";
   const corTexto = "#091C53";
   const corBackground = "#E8EEFC";
   // Cor para hover em links, um pouco mais escura que o background ou um tom do destaque
@@ -50,7 +50,7 @@ export default function Navbar() {
   const corHoverBotaoDestaqueDark = "#2563EB"; // azul um pouco mais escuro para hover de botão
 
   return (
-    <nav className={`sticky top-0 z-50 shadow-lg bg-[${corBackground}] bg-opacity-95 dark:bg-[${corBackgroundDark}] dark:bg-opacity-95 backdrop-blur-md text-[${corTexto}] dark:text-[${corTextoDark}]`}>
+    <nav className="sticky top-0 z-50 shadow-lg bg-background/95 dark:bg-background/95 backdrop-blur-md text-foreground"> {/* Usando variáveis CSS */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <motion.div
@@ -58,23 +58,23 @@ export default function Navbar() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Link href="/" className={`flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-[${corDestaque}] dark:focus:ring-[${corDestaqueDark}] rounded-sm`}>
+            <Link href="/" className="flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary rounded-sm">
               <Image
-                src="/logo.svg" // Assumindo que o logo.svg já foi atualizado ou está ok com a cor interna
+                src="/logo.svg"
                 alt="R.A.I.O Logo"
-                width={32} 
-                height={32} 
+                width={32}
+                height={32}
                 className="h-8 w-8"
-                priority 
+                priority
               />
-              <span className={`text-2xl font-bold text-[${corDestaque}] dark:text-[${corDestaqueDark}]`}> {/* Removido gradiente, usando cor de destaque */}
+              <span className="text-2xl font-bold text-primary dark:text-primary"> {/* Usando cor primária do tema */}
                 R.A.I.O
               </span>
             </Link>
           </motion.div>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-4"> {/* Ajustado space-x-6 para space-x-4 para acomodar o botão de tema */}
+          <div className="hidden md:flex items-center space-x-4">
             {navLinks.map((link) => (
               <motion.div
                 key={link.href}
@@ -83,7 +83,7 @@ export default function Navbar() {
               >
                 <Link
                   href={link.href}
-                  className={`px-3 py-2 rounded-md text-sm font-medium hover:bg-[${corHoverLinkBg}] dark:hover:bg-[${corHoverLinkBgDark}] transition-colors`}
+                  className="px-3 py-2 rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors" // Usando accent para hover
                 >
                   {link.label}
                 </Link>
@@ -92,7 +92,7 @@ export default function Navbar() {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link
                 href="/dashboard"
-                className={`bg-[${corDestaque}] hover:bg-[${corHoverBotaoDestaque}] text-[${corTexto}] dark:bg-[${corDestaqueDark}] dark:hover:bg-[${corHoverBotaoDestaqueDark}] dark:text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105`}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-4 py-2 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105" // Usando cores primárias
               >
                 Acessar Dashboard
               </Link>
@@ -100,7 +100,7 @@ export default function Navbar() {
             {/* Botão de Alternar Tema */}
             <motion.button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className={`p-2 rounded-md hover:bg-[${corHoverLinkBg}] dark:hover:bg-[${corHoverLinkBgDark}] transition-colors`}
+              className="p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors" // Usando accent para hover
               aria-label="Alternar tema"
               whileTap={{ scale: 0.9 }}
             >
@@ -110,10 +110,9 @@ export default function Navbar() {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center space-x-2">
-             {/* Botão de Alternar Tema para Mobile */}
             <motion.button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className={`p-2 rounded-md text-[${corTexto}] dark:text-[${corTextoDark}] hover:bg-[${corHoverLinkBg}] dark:hover:bg-[${corHoverLinkBgDark}] focus:outline-none`}
+              className="p-2 rounded-md text-foreground hover:bg-accent hover:text-accent-foreground focus:outline-none" // Usando accent para hover
               aria-label="Alternar tema"
               whileTap={{ scale: 0.9 }}
             >
@@ -121,7 +120,7 @@ export default function Navbar() {
             </motion.button>
             <motion.button
               onClick={toggleMenu}
-              className={`inline-flex items-center justify-center p-2 rounded-md text-[${corTexto}] dark:text-[${corTextoDark}] hover:bg-[${corHoverLinkBg}] dark:hover:bg-[${corHoverLinkBgDark}] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[${corDestaque}] dark:focus:ring-[${corDestaqueDark}]`}
+              className="inline-flex items-center justify-center p-2 rounded-md text-foreground hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary" // Usando accent e primary
               aria-label="Menu principal"
               whileTap={{ scale: 0.9 }}
             >
@@ -135,7 +134,7 @@ export default function Navbar() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className={`md:hidden absolute top-20 left-0 right-0 bg-[${corBackground}] bg-opacity-95 dark:bg-[${corBackgroundDark}] dark:bg-opacity-95 backdrop-blur-md shadow-lg pb-3`}
+            className="md:hidden absolute top-20 left-0 right-0 bg-background shadow-lg pb-3" // Usando bg-background
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
@@ -147,7 +146,7 @@ export default function Navbar() {
                 <motion.div key={link.href} variants={menuItemVariants}>
                   <Link
                     href={link.href}
-                    className={`block px-3 py-2 rounded-md text-base font-medium text-[${corTexto}] dark:text-[${corTextoDark}] hover:bg-[${corHoverLinkBg}] dark:hover:bg-[${corHoverLinkBgDark}]`}
+                    className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-accent hover:text-accent-foreground" // Usando accent para hover
                     onClick={() => setIsOpen(false)}
                   >
                     {link.label}
@@ -157,7 +156,7 @@ export default function Navbar() {
               <motion.div variants={menuItemVariants} className="pt-2">
                 <Link
                   href="/dashboard"
-                  className={`block w-full text-center bg-[${corDestaque}] hover:bg-[${corHoverBotaoDestaque}] text-[${corTexto}] dark:bg-[${corDestaqueDark}] dark:hover:bg-[${corHoverBotaoDestaqueDark}] dark:text-white font-semibold px-4 py-3 rounded-lg shadow-md transition-all duration-300 ease-in-out`}
+                  className="block w-full text-center bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-4 py-3 rounded-lg shadow-md transition-all duration-300 ease-in-out" // Usando cores primárias
                   onClick={() => setIsOpen(false)}
                 >
                   Acessar Dashboard

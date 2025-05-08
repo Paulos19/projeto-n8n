@@ -12,14 +12,14 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-background"> {/* Alterado para bg-background */}
+    <div className="flex h-screen bg-background"> {/* Já usa bg-background, correto */}
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
 
       {/* Conteúdo Principal */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Barra Superior para o botão de toggle em dispositivos móveis */}
-        <header className="bg-card shadow md:hidden print:hidden"> {/* Alterado para bg-card ou bg-background */}
+        <header className="bg-card shadow md:hidden print:hidden"> {/* Alterado para bg-card */}
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center">
@@ -29,7 +29,7 @@ export default function DashboardLayout({
                 <button
                   onClick={() => setSidebarOpen(!sidebarOpen)}
                   type="button"
-                  className="inline-flex items-center justify-center p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary" // Ajustado para cores semânticas
+                  className="inline-flex items-center justify-center p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary" // Cores semânticas
                   aria-controls="mobile-menu"
                   aria-expanded={sidebarOpen}
                 >
@@ -46,7 +46,7 @@ export default function DashboardLayout({
         </header>
 
         {/* Conteúdo da Página */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-muted/30 dark:bg-muted/10 p-4 md:p-6 lg:p-8"> {/* Ex: bg-muted ou uma variação sutil */}
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-muted/30 dark:bg-muted/10 p-4 md:p-6 lg:p-8"> {/* Usando bg-muted com opacidade para um fundo sutil */}
           {children}
         </main>
       </div>
