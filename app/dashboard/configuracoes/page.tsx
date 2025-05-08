@@ -53,7 +53,7 @@ export default async function ConfiguracoesPage() {
               https://projeto-n8n.vercel.app/api/receber-avaliacao/{webhookApiKey ? `${webhookApiKey.substring(0,4)}...` : '[SUA_API_KEY]'}
               </code>
               <br/>
-              <span className="text-red-500">Lembre-se de substituir SEU_DOMINIO pelo domínio real da sua aplicação.</span>
+             
             </p>
         </CardContent>
       </Card>

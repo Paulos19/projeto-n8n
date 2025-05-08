@@ -92,14 +92,6 @@ export function SignInFormActual() {
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="text-sm text-center flex flex-col space-y-2">
-          <p>
-            Não tem uma conta?{" "}
-            <Link href="/auth/signup" className="font-semibold text-primary hover:underline">
-              Cadastre-se
-            </Link>
-          </p>
-        </CardFooter>
       </Card>
     </div>
   );

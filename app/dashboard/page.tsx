@@ -192,35 +192,6 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Webhook API Key Card - Movido para cá */}
-      {webhookApiKey && (
-        <Card>
-          <CardHeader>
-            <CardTitle className={`text-xl ${gradientText}`}>Sua Chave de API Webhook</CardTitle>
-            <CardDescription className="text-muted-foreground">
-              Use esta chave para integrar com serviços externos como o N8N.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between gap-2 p-3 border rounded-md bg-muted/30 dark:bg-muted/50">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">API Key:</span>
-                <span className="font-mono text-sm">
-                  {webhookApiKey.substring(0, 6)}...{webhookApiKey.substring(webhookApiKey.length - 6)}
-                </span>
-              </div>
-              <CopyToClipboardButton textToCopy={webhookApiKey} />
-            </div>
-            <p className="mt-3 text-xs text-muted-foreground">
-              Lembre-se de que sua URL para o N8N enviar dados será: 
-              <code className="font-mono bg-gray-200 dark:bg-gray-700 p-1 rounded text-xs">
-                https://SEU_DOMINIO/api/receber-avaliacao/{webhookApiKey.substring(0,4)}...
-              </code>
-            </p>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

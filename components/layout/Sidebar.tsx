@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, MessageSquare, Users, FileText, LogOut, MessageCircle, X, Sun, Moon } from "lucide-react"; // Added Sun, Moon
+import { Home, MessageSquare, Users, FileText, LogOut, MessageCircle, X, Sun, Moon, Settings } from "lucide-react"; // Added Sun, Moon
 import Image from "next/image";
 import React, { useState, useEffect } from "react"; // Added useState, useEffect
 import { useTheme } from "next-themes";
@@ -21,6 +21,7 @@ const navItems = [
   { href: "/dashboard/conversas", label: "Conversas n8n", icon: MessageCircle },
   { href: "/dashboard/relatorios", label: "Relatórios", icon: FileText },
   { href: "/dashboard/clientes", label: "Clientes", icon: Users },
+  { href: "/dashboard/configuracoes", label: "Configurações", icon: Settings },
 ];
 
 interface SidebarProps {
