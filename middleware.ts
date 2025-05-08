@@ -30,6 +30,15 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard', req.url));
   }
 
+  // Adicione após a verificação inicial do token
+  if (token && pathname.startsWith('/dashboard')) {
+    const url = req.nextUrl.clone();
+    // Impede acesso a IDs que não pertencem ao usuário
+    if (url.pathname.includes('/avaliacao/') && !url.pathname.endsWith(`/${token.id}`)) {
+      return NextResponse.redirect(new URL('/dashboard', req.url));
+    }
+  }
+
   return NextResponse.next();
 }
 
