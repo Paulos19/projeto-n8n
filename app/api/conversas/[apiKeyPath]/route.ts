@@ -1,6 +1,8 @@
 // app/api/conversas/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/auth";
 
 interface N8nMessagePayload {
   remoteJid: string;
@@ -23,10 +25,22 @@ interface N8nMessagePayload {
   timestamp: string; // ISO 8601 date string
 }
 
-export async function POST(request: NextRequest) {
+interface RouteContext {
+  params: {
+    apiKeyPath?: string;
+  };
+}
+
+export async function POST(request: NextRequest, context: RouteContext) {
   try {
+    const { params } = context;
+    const apiKeyPath = params.apiKeyPath;
+
+    if (!apiKeyPath) {
+      return NextResponse.json({ message: "API Key path é obrigatório na URL." }, { status: 400 });
+    }
+
     const payloadArray: N8nMessagePayload[] = await request.json();
-    console.log('Payload recebido pela API (/api/conversas):', payloadArray);
 
     if (!Array.isArray(payloadArray) || payloadArray.length === 0) {
       return NextResponse.json(
@@ -35,12 +49,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const user = await prisma.user.findUnique({
+      where: { webhookApiKey: apiKeyPath },
+    });
+
+    if (!user) {
+      return NextResponse.json({ message: "Webhook API Key (path) inválida ou usuário não encontrado." }, { status: 403 });
+    }
+
     const results = [];
 
     for (const item of payloadArray) {
-      // Validação básica para cada item
       if (!item.remoteJid || !item.chat_history || !item.analysis || !item.customer || !item.timestamp) {
-        console.warn('Item inválido no payload, pulando:', item);
         results.push({ success: false, message: 'Item inválido, dados faltando.', item });
         continue;
       }
@@ -48,32 +68,31 @@ export async function POST(request: NextRequest) {
       const dataToSave = {
         remoteJid: item.remoteJid,
         customerName: item.customer.name,
-        chatHistory: item.chat_history as any, // Prisma espera Json
+        chatHistory: item.chat_history as any,
         analysisSummary: item.analysis.summary,
         analysisKeywords: item.analysis.keywords,
         eventTimestamp: new Date(item.timestamp),
+        userId: user.id,
       };
 
       const newInteraction = await prisma.chatInteraction.create({
         data: dataToSave,
       });
       results.push({ success: true, data: newInteraction });
-      console.log('Nova interação de chat salva no banco:', newInteraction);
     }
 
     const allSuccessful = results.every(r => r.success);
-    const status = allSuccessful ? 201 : (results.some(r => r.success) ? 207 : 400); // 207 Multi-Status if some succeed
+    const status = allSuccessful ? 201 : (results.some(r => r.success) ? 207 : 400);
 
     return NextResponse.json(
-      { 
+      {
         message: allSuccessful ? 'Todas as interações foram salvas com sucesso!' : 'Processamento concluído com alguns erros/avisos.',
-        results 
-      }, 
+        results
+      },
       { status }
     );
 
   } catch (error) {
-    console.error('Erro ao processar a requisição POST (/api/conversas):', error);
     let errorMessage = 'Erro desconhecido ao processar dados.';
     if (error instanceof SyntaxError) {
       errorMessage = 'Erro de parsing do JSON. Verifique se o corpo da requisição é um JSON array válido.';
@@ -85,15 +104,21 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.id) {
+    return NextResponse.json({ message: 'Não autorizado' }, { status: 401 });
+  }
+
   try {
     const interactions = await prisma.chatInteraction.findMany({
+      where: { userId: session.user.id },
       orderBy: {
         eventTimestamp: 'desc',
       },
     });
     return NextResponse.json(interactions, { status: 200 });
   } catch (error) {
-    console.error('Erro ao buscar interações (GET /api/conversas):', error);
     return NextResponse.json({ message: 'Erro ao buscar interações', error: (error as Error).message }, { status: 500 });
   }
 }
