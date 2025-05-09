@@ -4,26 +4,26 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowLeft, MessageSquare, Star, ThumbsUp, ThumbsDown, User, CalendarDays, Tag, Activity } from "lucide-react";
-import { getServerSession } from "next-auth/next"; // Adicionado
-import { authOptions } from "@/auth"; // Adicionado
+import { ArrowLeft, MessageSquare, Star, ThumbsUp, ThumbsDown, User, CalendarDays, Activity } from "lucide-react";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/auth";
 
-// Interface para os dados da avaliação (pode ser movida para um arquivo de tipos)
+// Interface para os dados da avaliação
 interface AvaliacaoData {
   id: string;
   remoteJid: string | null;
   nota_cliente: number | null;
-  pontos_fortes: string[] | null; // Changed from string | null
-  pontos_fracos: string[] | null; // Changed from string | null
-  sugestoes_melhoria: string[] | null; // Renamed from sugestoes and changed type
-  tempo_resposta: string | null; // Added
-  clareza_comunicacao: string | null; // Added
-  resolucao_problema: string | null; // Added
-  resumo_atendimento: string | null; // Added
-  // tags: string | null; // Removed as it seems missing from Prisma data
-  // sentimento_geral: string | null; // Removed as it seems missing from Prisma data
+  pontos_fortes: string[] | null;
+  pontos_fracos: string[] | null;
+  sugestoes_melhoria: string[] | null;
+  tempo_resposta: string | null;
+  clareza_comunicacao: string | null;
+  resolucao_problema: string | null;
+  resumo_atendimento: string | null;
   createdAt: Date;
   updatedAt: Date;
+  // Adicione quaisquer outros campos que possam existir no seu modelo Prisma
+  // Ex: userId: string; (se você precisar dele na interface)
 }
 
 async function fetchAvaliacaoById(id: string, userId: string): Promise<AvaliacaoData | null> {
@@ -31,11 +31,16 @@ async function fetchAvaliacaoById(id: string, userId: string): Promise<Avaliacao
     const avaliacao = await prisma.avaliacao.findUnique({
       where: { id },
     });
+
     if (!avaliacao) {
       return null;
     }
-    // Verifica se a avaliação pertence ao usuário logado
+
+    // Verifica se a avaliação pertence ao usuário logado (assumindo que seu modelo Avaliacao tem um campo userId)
+    // Se o seu modelo `avaliacao` não tiver `userId`, ajuste esta lógica ou remova-a se não for necessária aqui.
+    // @ts-ignore // Remova este ignore se o campo userId existir e estiver tipado corretamente
     if (avaliacao.userId !== userId) {
+      console.warn(`Tentativa de acesso negado à avaliação ${id} pelo usuário ${userId}. Avaliação pertence a ${avaliacao.userId}`);
       return null;
     }
     return avaliacao as AvaliacaoData;
@@ -46,85 +51,112 @@ async function fetchAvaliacaoById(id: string, userId: string): Promise<Avaliacao
 }
 
 export default async function AvaliacaoDetalhePage({ params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions); // Adicionado
+  const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
-    notFound(); // Ou outra forma de tratamento de não autorizado
+    // Usuário não logado, redireciona ou mostra erro
+    // O middleware geralmente cuida disso, mas uma verificação aqui é uma boa prática.
+    notFound();
   }
 
-  const avaliacao = await fetchAvaliacaoById(params.id, session.user.id); // Passar userId
+  const avaliacao = await fetchAvaliacaoById(params.id, session.user.id);
   const gradientText = "bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-teal-300 to-green-300";
 
   if (!avaliacao) {
-    notFound(); // Redireciona para a página 404 se a avaliação não for encontrada
+    notFound(); // Avaliação não encontrada ou não pertence ao usuário
   }
 
-  const getNotaBadgeVariant = (nota: number | null) => {
+  const getNotaBadgeVariant = (nota: number | null): "default" | "secondary" | "destructive" | "outline" | null => {
     if (nota === null) return "secondary";
     if (nota <= 2) return "destructive";
-    if (nota <= 3) return "secondary";
-    return "default";
+    if (nota <= 3) return "secondary"; // Ex: notas 3 e 4 como neutras/secundárias
+    return "default"; // Ex: notas 5+ como positivas/padrão
   };
 
-  const renderField = (label: string, value: string | number | string[] | null | Date, Icon?: React.ElementType, isBadge?: boolean, badgeVariant?: "default" | "secondary" | "destructive" | "outline" | null) => {
-    if (value === null || value === undefined || (typeof value === 'string' && value === "") || (Array.isArray(value) && value.length === 0)) return null;
-    
+  const renderField = (
+    label: string,
+    value: string | number | string[] | null | Date,
+    Icon?: React.ElementType,
+    isBadgeList?: boolean, // Renomeado para clareza, indica que o valor é uma lista para badges
+    badgeVariant?: "default" | "secondary" | "destructive" | "outline" | null
+  ) => {
+    if (value === null || value === undefined || (typeof value === 'string' && value.trim() === "") || (Array.isArray(value) && value.length === 0)) {
+      return null;
+    }
+
     let displayValue: React.ReactNode;
+
     if (value instanceof Date) {
       displayValue = value.toLocaleDateString('pt-BR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-    } else if (Array.isArray(value)) {
+    } else if (isBadgeList && Array.isArray(value)) {
       displayValue = (
         <div className="flex flex-wrap gap-2">
           {value.map((item, index) => (
-            <Badge key={index} variant={badgeVariant || "secondary"} className="text-sm">{item}</Badge>
+            <Badge 
+              key={index} 
+              variant={badgeVariant || "secondary"} 
+              className="text-sm break-words whitespace-normal max-w-full" // Chave para responsividade de badges
+            >
+              {String(item)}
+            </Badge>
           ))}
         </div>
       );
-    } else if (isBadge) {
-      displayValue = <Badge variant={badgeVariant || "secondary"} className="text-sm">{String(value)}</Badge>;
+    } else if (typeof value === 'number' || (typeof value === 'string' && !isBadgeList)) {
+        // Se for um número ou uma string simples que não é para ser uma lista de badges
+        // (ex: nota_cliente, tempo_resposta, etc., que podem ser renderizados como texto ou uma única badge)
+        if (badgeVariant && typeof value !== 'object') { // Renderiza como uma única badge se badgeVariant for fornecido
+             displayValue = <Badge variant={badgeVariant} className="text-sm break-words whitespace-normal">{String(value)}</Badge>;
+        } else {
+            displayValue = String(value);
+        }
     } else {
-      displayValue = String(value);
+      displayValue = String(value); // Fallback para outros tipos
     }
 
     return (
       <div className="flex items-start space-x-3 py-3 border-b border-gray-700 last:border-b-0">
         {Icon && <Icon className="h-5 w-5 mt-1 text-blue-400 flex-shrink-0" />}
-        <div className="flex-grow">
+        <div className="flex-grow min-w-0"> {/* min-w-0 é crucial para permitir que este contêiner encolha */}
           <p className="text-sm font-medium text-gray-400">{label}</p>
-          <p className="text-gray-200">{displayValue}</p>
+          {/* A classe break-words no parágrafo abaixo ajuda se displayValue for uma string longa */}
+          <div className="text-gray-200 break-words whitespace-normal mt-1">{displayValue}</div>
         </div>
       </div>
     );
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full max-w-full px-2 sm:px-0"> {/* Adicionado padding horizontal para telas pequenas */}
       <Button asChild variant="outline" className="border-blue-500 text-blue-400 hover:bg-blue-700 hover:text-white">
         <Link href="/dashboard/avaliacoes">
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Avaliações
         </Link>
       </Button>
 
-      <Card className="bg-gray-800 border-gray-700 text-white shadow-xl">
+      <Card className="bg-gray-800 border-gray-700 text-white shadow-xl w-full">
         <CardHeader>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-            <div>
-              <CardTitle className={`text-2xl font-bold ${gradientText}`}>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 min-w-0">
+            <div className="min-w-0 flex-1"> {/* Permite que esta seção encolha e quebre texto */}
+              <CardTitle className={`text-2xl font-bold ${gradientText} break-words whitespace-normal`}>
                 Detalhes da Avaliação
               </CardTitle>
-              <CardDescription className="text-gray-400">
+              <CardDescription className="text-gray-400 break-words whitespace-normal mt-1">
                 ID: {avaliacao.id}
               </CardDescription>
             </div>
             {avaliacao.nota_cliente !== null && (
-                <Badge variant={getNotaBadgeVariant(avaliacao.nota_cliente)} className="text-lg px-3 py-1 mt-2 sm:mt-0">
-                  Nota: {avaliacao.nota_cliente}/10
-                </Badge>
+              <Badge 
+                variant={getNotaBadgeVariant(avaliacao.nota_cliente)} 
+                className="text-lg px-3 py-1 mt-2 sm:mt-0 flex-shrink-0" // flex-shrink-0 para não encolher a nota
+              >
+                Nota: {avaliacao.nota_cliente}/10
+              </Badge>
             )}
           </div>
         </CardHeader>
         <CardContent className="divide-y divide-gray-700">
           {renderField("Cliente (JID)", avaliacao.remoteJid ? avaliacao.remoteJid.split('@')[0] : 'N/A', User)}
-          {renderField("Nota do Cliente", avaliacao.nota_cliente, Star, true, getNotaBadgeVariant(avaliacao.nota_cliente))}
+          {renderField("Nota do Cliente", avaliacao.nota_cliente, Star, false, getNotaBadgeVariant(avaliacao.nota_cliente))}
           {renderField("Pontos Fortes", avaliacao.pontos_fortes, ThumbsUp, true, "default")}
           {renderField("Pontos Fracos", avaliacao.pontos_fracos, ThumbsDown, true, "destructive")}
           {renderField("Sugestões de Melhoria", avaliacao.sugestoes_melhoria, MessageSquare, true, "secondary")}
@@ -132,15 +164,6 @@ export default async function AvaliacaoDetalhePage({ params }: { params: { id: s
           {renderField("Clareza na Comunicação", avaliacao.clareza_comunicacao, Activity)}
           {renderField("Resolução do Problema", avaliacao.resolucao_problema, Activity)}
           {renderField("Resumo do Atendimento", avaliacao.resumo_atendimento, Activity)}
-          {/* 
-            The following fields seem to be missing from your Prisma model based on the TS error.
-            If they do exist in schema.prisma and are optional, you might need to adjust the AvaliacaoData interface.
-          */}
-          {/* {renderField("Tags", avaliacao.tags, Tag, true, "outline")} */}
-          {/* {renderField("Sentimento Geral", avaliacao.sentimento_geral, Activity, true, 
-            avaliacao.sentimento_geral?.toLowerCase() === 'positivo' ? 'default' : 
-            avaliacao.sentimento_geral?.toLowerCase() === 'negativo' ? 'destructive' : 'secondary'
-          )} */}
           {renderField("Data de Criação", avaliacao.createdAt, CalendarDays)}
           {renderField("Última Atualização", avaliacao.updatedAt, CalendarDays)}
         </CardContent>

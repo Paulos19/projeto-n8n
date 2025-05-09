@@ -144,3 +144,60 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Novas animações e utilitários */
+@layer utilities {
+  @keyframes pulse-glow {
+    0%, 100% {
+      opacity: 0;
+      transform: scale(0.5) rotate(0deg);
+    }
+    50% {
+      opacity: 0.5; /* Sutil */
+      transform: scale(1.2) rotate(15deg);
+    }
+    75% {
+      opacity: 0.3;
+      transform: scale(0.9) rotate(-10deg);
+    }
+  }
+
+  @keyframes subtle-float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-12px);
+    }
+  }
+
+  .luminous-spot {
+    @apply absolute rounded-full pointer-events-none blur-xl;
+    /* Cor base para modo claro, pode ser ajustada */
+    background-image: radial-gradient(circle, hsl(var(--primary) / 0.3) 0%, transparent 70%);
+    animation: pulse-glow 7s infinite ease-in-out;
+  }
+
+  .dark .luminous-spot {
+     /* Cor base para modo escuro, pode ser ajustada */
+    background-image: radial-gradient(circle, hsl(var(--primary) / 0.4) 0%, transparent 70%);
+  }
+
+  /* 
+  .letter-reveal-container .letter-char {
+    @apply transition-transform duration-300 ease-out;
+  }
+  .letter-reveal-container:hover .letter-char {
+    @apply scale-110;
+  }
+  .letter-reveal-container .revealed-text {
+    @apply absolute left-1/2 -translate-x-1/2 top-full mt-1 px-2 py-1 text-xs rounded-md shadow-lg whitespace-nowrap
+           bg-secondary text-secondary-foreground border border-border
+           opacity-0 transition-all duration-300 ease-out pointer-events-none;
+  }
+  .letter-reveal-container:hover .revealed-text {
+    @apply opacity-100 translate-y-1;
+  }
+    */
+}
+ 

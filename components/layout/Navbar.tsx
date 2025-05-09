@@ -1,11 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image"; // Adicionado para usar o componente Image do Next.js
-import { useState } from "react";
+import NextImage from "next/image"; // Renomeado para evitar conflito com session.user.image
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Sun, Moon } from "lucide-react"; // Adicionado Sun e Moon
-import { useTheme } from "next-themes"; // Importado useTheme
+import { Menu, X, Sun, Moon, LogOut, Settings, LayoutDashboard, UserCircle } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useSession, signOut } from "next-auth/react"; // Importar useSession e signOut
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // Importar Avatar
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"; // Importar DropdownMenu
+import { Button } from "@/components/ui/button"; // Importar Button
 
 const navLinks = [
   { href: "#beneficios", label: "Benefícios" },
@@ -18,7 +29,11 @@ const corHoverBotaoDestaqueDark = "#2563EB"; // azul um pouco mais escuro para h
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const { theme, setTheme } = useTheme(); // Hook para gerenciar o tema
+  const { theme, setTheme } = useTheme();
+  const { data: session, status } = useSession(); // Obter dados da sessão
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -59,7 +74,7 @@ export default function Navbar() {
             transition={{ duration: 0.5 }}
           >
             <Link href="/" className="flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary rounded-sm">
-              <Image
+              <NextImage // Usar NextImage
                 src="/logo.svg"
                 alt="R.A.I.O Logo"
                 width={32}
@@ -89,14 +104,59 @@ export default function Navbar() {
                 </Link>
               </motion.div>
             ))}
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link
-                href="/dashboard"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-4 py-2 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105" // Usando cores primárias
-              >
-                Acessar Dashboard
-              </Link>
-            </motion.div>
+            {status === "authenticated" ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={session.user?.image ?? undefined} alt={session.user?.name ?? "Avatar"} />
+                      <AvatarFallback>
+                        {session.user?.name ? session.user.name.substring(0, 2).toUpperCase() : <UserCircle size={24}/>}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{session.user?.name}</p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {session.user?.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard">
+                      <LayoutDashboard className="mr-2 h-4 w-4" />
+                      Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/configuracoes">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Configurações
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => signOut({ callbackUrl: '/' })}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sair
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : status === "loading" ? (
+                <div className="h-10 w-24 bg-muted animate-pulse rounded-md"></div> // Placeholder para botão de login/avatar
+            ) : (
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link
+                  href="/api/auth/signin" // Ou sua página de login customizada
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-4 py-2 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105"
+                >
+                  Acessar Plataforma
+                </Link>
+              </motion.div>
+            )}
             {/* Botão de Alternar Tema */}
             <motion.button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
@@ -153,19 +213,30 @@ export default function Navbar() {
                   </Link>
                 </motion.div>
               ))}
-              <motion.div variants={menuItemVariants} className="pt-2">
-                <Link
-                  href="/dashboard"
-                  className="block w-full text-center bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-4 py-3 rounded-lg shadow-md transition-all duration-300 ease-in-out" // Usando cores primárias
-                  onClick={() => setIsOpen(false)}
-                >
-                  Acessar Dashboard
-                </Link>
-              </motion.div>
+              {status === "unauthenticated" && (
+                <motion.div variants={menuItemVariants} className="pt-2">
+                  <Link
+                    href="/api/auth/signin" // Ou sua página de login
+                    className="block w-full text-center bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-4 py-3 rounded-lg shadow-md transition-all duration-300 ease-in-out" // Usando cores primárias
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Acessar Plataforma
+                  </Link>
+                </motion.div>
+              )}
+              {/* Botão de Alternar Tema */}
+              <motion.button
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors" // Usando accent para hover
+                aria-label="Alternar tema"
+                whileTap={{ scale: 0.9 }}
+              >
+                {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+              </motion.button>
             </div>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence> {/* Ensure this closing tag is present and correctly placed */}
     </nav>
   );
 }

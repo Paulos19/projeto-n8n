@@ -13,6 +13,7 @@ import { MessageCircle, User, Calendar, ExternalLink, Eye } from "lucide-react";
 import { ChatInteraction } from "@prisma/client"; // Importe o tipo gerado
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/auth";
+import { Trash2 } from "lucide-react"; // Adicione este import
 
 export const dynamic = 'force-dynamic';
 
@@ -41,6 +42,17 @@ export default async function ConversasPage() {
   const userId = session.user.id;
   const conversas = await getConversas(userId);
   const gradientText = "bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400"; // Mantido para o efeito de gradiente específico
+
+  // Função para deletar conversa (Client Side)
+  async function handleDelete(conversaId: string) {
+    if (!window.confirm("Tem certeza que deseja excluir esta conversa?")) return;
+    const res = await fetch(`/api/conversas/${conversaId}`, { method: "DELETE" });
+    if (res.ok) {
+      window.location.reload(); // Ou use um método de atualização de estado se for Client Component
+    } else {
+      alert("Erro ao excluir conversa.");
+    }
+  }
 
   return (
     <div className="space-y-8">

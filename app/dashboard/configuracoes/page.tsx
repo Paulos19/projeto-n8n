@@ -19,7 +19,7 @@ export default async function ConfiguracoesPage() {
     );
   }
 
-  const { name, email, webhookApiKey } = session.user;
+  const { name, email, webhookApiKey, image } = session.user; // Adicionado 'image'
 
   return (
     <div className="space-y-8 max-w-3xl mx-auto">
@@ -58,7 +58,7 @@ export default async function ConfiguracoesPage() {
         </CardContent>
       </Card>
 
-      <SettingsForm currentUser={{ name: name || "", email: email || "" }} />
+      <SettingsForm currentUser={{ name: name || "", email: email || "", image: image || null }} />
       
     </div>
   );

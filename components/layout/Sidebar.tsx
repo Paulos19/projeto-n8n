@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, MessageSquare, Users, FileText, LogOut, MessageCircle, X, Sun, Moon, Settings } from "lucide-react"; // Added Sun, Moon
-import Image from "next/image";
-import React, { useState, useEffect } from "react"; // Added useState, useEffect
+import { Home, MessageSquare, Users, FileText, LogOut, MessageCircle, X, Sun, Moon, Settings, UserCircle as UserIcon } from "lucide-react"; // Added UserIcon
+import NextImage from "next/image"; // Renomeado para evitar conflito
+import React, { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
+import { useSession, signOut } from "next-auth/react"; // Importar useSession e signOut
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // Importar Avatar
 
 // Remova ou comente as variáveis de cor JavaScript que não serão mais usadas para o fundo.
 // const corBackgroundSidebar = "#DDE7F7"; // Exemplo de variável a ser removida para o fundo
@@ -32,9 +34,9 @@ interface SidebarProps {
 export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false); // State to track if component is mounted
+  const [mounted, setMounted] = useState(false);
+  const { data: session, status } = useSession(); // Obter dados da sessão
 
-  // useEffect runs only on the client, after mount
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -52,14 +54,14 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
     >
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <Image
+          <NextImage // Usar NextImage
             src="/logo.svg" 
             alt="R.A.I.O Logo"
             width={32}
             height={32}
             className="h-8 w-8"
           />
-          <span className="text-2xl font-bold text-sidebar-primary">R.A.I.O</span> {/* Usando text-sidebar-primary */}
+          <span className="text-2xl font-bold dark:text-white text-black">R.A.I.O</span>
         </div>
         <button
             onClick={() => setIsOpen(false)}
@@ -103,13 +105,16 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           {mounted ? (theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />) : <div className="h-5 w-5" /> /* Placeholder */}
           <span>Alternar Tema</span>
         </button>
-        <button
-          className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-colors w-full text-left
-                     text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground`} // Usando variáveis da sidebar
-        >
-          <LogOut className="h-5 w-5" />
-          <span>Sair</span>
-        </button>
+        {status === "authenticated" && (
+          <button
+            onClick={() => signOut({ callbackUrl: '/' })}
+            className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-colors w-full text-left
+                       text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground`}
+          >
+            <LogOut className="h-5 w-5" />
+            <span>Sair</span>
+          </button>
+        )}
       </div>
     </aside>
   );
