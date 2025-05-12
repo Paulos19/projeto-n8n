@@ -16,6 +16,7 @@ export interface AvaliacaoPayload {
   sugestoes_melhoria: string[];
   resumo_atendimento: string;
   remoteJid?: string | null;
+  storeOwnerApiKey?: string | null; // NOVO PARÂMETRO ADICIONADO
 }
 
 interface RouteContext {
@@ -47,13 +48,11 @@ export async function POST(request: NextRequest, context: RouteContext) {
     }
 
     const formularioString: string = requestBody.text;
-    // A interface AvaliacaoPayload não espera mais webhookApiKey, pois ela vem do path
     const parsedDataFromN8N: AvaliacaoPayload = JSON.parse(formularioString); 
     console.log('Dados do formulário (após parse do campo "text"):', parsedDataFromN8N);
 
-    // Valida o apiKeyPath (que é a webhookApiKey)
     const user = await prisma.user.findUnique({
-      where: { webhookApiKey: apiKeyPath }, // Usa o apiKeyPath para encontrar o usuário
+      where: { webhookApiKey: apiKeyPath }, 
     });
 
     if (!user) {
@@ -63,7 +62,6 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
 
-    // Preparar dados para o Prisma
     const dataToSave = {
       nota_cliente: Number(parsedDataFromN8N.nota_cliente) || 0,
       pontos_fortes: Array.isArray(parsedDataFromN8N.pontos_fortes) ? parsedDataFromN8N.pontos_fortes : [],
@@ -74,7 +72,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
       sugestoes_melhoria: Array.isArray(parsedDataFromN8N.sugestoes_melhoria) ? parsedDataFromN8N.sugestoes_melhoria : [],
       resumo_atendimento: String(parsedDataFromN8N.resumo_atendimento || "Não informado"),
       remoteJid: parsedDataFromN8N.remoteJid || null,
-      userId: user.id, // Associa ao usuário encontrado
+      userId: user.id, 
+      evolutionInstanceApiKey: parsedDataFromN8N.storeOwnerApiKey || null, // SALVANDO O NOVO PARÂMETRO
     };
 
     const novaAvaliacao = await prisma.avaliacao.create({

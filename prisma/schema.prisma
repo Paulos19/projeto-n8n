@@ -10,23 +10,22 @@ datasource db {
 }
 
 model Avaliacao {
-  id                  String   @id @default(cuid())
-  nota_cliente        Int
-  pontos_fortes       String[]
-  pontos_fracos       String[]
-  tempo_resposta      String
-  clareza_comunicacao String
-  resolucao_problema  String
-  sugestoes_melhoria  String[]
-  resumo_atendimento  String   @db.Text
-  remoteJid           String?
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  id String @id @default(cuid())
+  nota_cliente          Int?
+  pontos_fortes         String[]
+  pontos_fracos         String[]
+  tempo_resposta        String?
+  clareza_comunicacao   String?
+  resolucao_problema    String?
+  sugestoes_melhoria    String[]
+  resumo_atendimento    String?
+  remoteJid             String?
+  userId    String? // Chave estrangeira para User
+  user      User?   @relation(fields: [userId], references: [id])
+  evolutionInstanceApiKey String? // NOVO CAMPO: Chave API da instância Evolution que gerou esta avaliação
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  userId String? // Adicionado para relacionar com o User
-  user   User?   @relation(fields: [userId], references: [id]) // Adicionado
-
-  @@index([userId]) // Adicionado
   @@map("avaliacoes")
 }
 
