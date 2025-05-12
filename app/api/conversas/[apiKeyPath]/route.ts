@@ -25,7 +25,8 @@ interface N8nMessagePayload {
     number: string; // Same as remoteJid
   };
   timestamp: string; // ISO 8601 date string
-  instanceName?: string; // Optional field for the N8N instance/seller name
+  instanceName?: string; // Nome da instância Evolution do VENDEDOR (Seller.evolutionInstanceName)
+  // Considere adicionar sellerEvolutionApiKey?: string; se o N8N puder enviar para uma correspondência mais precisa
 }
 
 /**
@@ -45,7 +46,7 @@ interface RouteContext {
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
     const { params } = context;
-    const apiKeyPath = params.apiKeyPath;
+    const apiKeyPath = params.apiKeyPath; // User.webhookApiKey (dono da loja)
 
     // Validate if apiKeyPath is provided in the URL
     if (!apiKeyPath) {
@@ -68,14 +69,12 @@ export async function POST(request: NextRequest, context: RouteContext) {
       where: { webhookApiKey: apiKeyPath },
     });
 
-    // If user is not found, return an authorization error
     if (!user) {
       return NextResponse.json({ message: "Webhook API Key (path) inválida ou usuário não encontrado." }, { status: 403 });
     }
 
-    const results = []; // To store the outcome of each item processing
+    const results = [];
 
-    // Process each item in the payload array
     for (const item of payloadArray) {
       // Validate required fields for each item
       if (!item.remoteJid || !item.chat_history || !item.analysis || !item.customer || !item.timestamp) {
@@ -84,18 +83,35 @@ export async function POST(request: NextRequest, context: RouteContext) {
       }
     
       // Prepare data for saving to the database
+      let sellerIdToSave: string | null = null;
+      if (item.instanceName) { // Assumindo que instanceName é Seller.evolutionInstanceName
+        const seller = await prisma.seller.findFirst({
+          where: {
+            storeOwnerId: user.id,
+            evolutionInstanceName: item.instanceName,
+            // Se você adicionar sellerEvolutionApiKey ao payload, adicione aqui:
+            // evolutionApiKey: item.sellerEvolutionApiKey
+          },
+        });
+        if (seller) {
+          sellerIdToSave = seller.id;
+        } else {
+          console.warn(`Vendedor com instanceName ${item.instanceName} não encontrado para o usuário ${user.id}`);
+        }
+      }
+      
       const dataToSave = {
         remoteJid: item.remoteJid,
         customerName: item.customer.name,
-        chatHistory: item.chat_history as any, // Using 'as any' if the structure is complex and already working. Consider defining a more specific type.
+        chatHistory: item.chat_history as any,
         analysisSummary: item.analysis.summary,
         analysisKeywords: item.analysis.keywords,
         eventTimestamp: new Date(item.timestamp),
         userId: user.id,
-        sellerInstanceName: item.instanceName, // This correctly saves the instance name
+        sellerId: sellerIdToSave, // SALVANDO O ID DO VENDEDOR
+        sellerInstanceName: item.instanceName, 
       };
-    
-      // Create a new chat interaction record in the database
+      
       const newInteraction = await prisma.chatInteraction.create({
         data: dataToSave,
       });

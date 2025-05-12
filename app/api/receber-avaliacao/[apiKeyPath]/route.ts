@@ -16,7 +16,7 @@ export interface AvaliacaoPayload {
   sugestoes_melhoria: string[];
   resumo_atendimento: string;
   remoteJid?: string | null;
-  storeOwnerApiKey?: string | null; // NOVO PARÂMETRO ADICIONADO
+  sellerEvolutionApiKey?: string | null; // ALTERADO: Chave API do vendedor
 }
 
 interface RouteContext {
@@ -28,7 +28,7 @@ interface RouteContext {
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
     const { params } = context;
-    const apiKeyPath = params.apiKeyPath;
+    const apiKeyPath = params.apiKeyPath; // Este é o User.webhookApiKey (dono da loja)
 
     if (!apiKeyPath) {
       return NextResponse.json(
@@ -48,11 +48,11 @@ export async function POST(request: NextRequest, context: RouteContext) {
     }
 
     const formularioString: string = requestBody.text;
-    const parsedDataFromN8N: AvaliacaoPayload = JSON.parse(formularioString); 
+    const parsedDataFromN8N: AvaliacaoPayload = JSON.parse(formularioString);
     console.log('Dados do formulário (após parse do campo "text"):', parsedDataFromN8N);
 
     const user = await prisma.user.findUnique({
-      where: { webhookApiKey: apiKeyPath }, 
+      where: { webhookApiKey: apiKeyPath },
     });
 
     if (!user) {
@@ -60,6 +60,22 @@ export async function POST(request: NextRequest, context: RouteContext) {
         { message: 'Webhook API Key (path) inválida ou usuário não encontrado.' },
         { status: 403 }
       );
+    }
+
+    let sellerIdToSave: string | null = null;
+    if (parsedDataFromN8N.sellerEvolutionApiKey) {
+      const seller = await prisma.seller.findFirst({
+        where: {
+          storeOwnerId: user.id,
+          evolutionApiKey: parsedDataFromN8N.sellerEvolutionApiKey,
+        },
+      });
+      if (seller) {
+        sellerIdToSave = seller.id;
+      } else {
+        console.warn(`Vendedor com evolutionApiKey ${parsedDataFromN8N.sellerEvolutionApiKey} não encontrado para o usuário ${user.id}`);
+        // Decida se quer retornar um erro aqui ou apenas não associar o vendedor
+      }
     }
 
     const dataToSave = {
@@ -72,8 +88,9 @@ export async function POST(request: NextRequest, context: RouteContext) {
       sugestoes_melhoria: Array.isArray(parsedDataFromN8N.sugestoes_melhoria) ? parsedDataFromN8N.sugestoes_melhoria : [],
       resumo_atendimento: String(parsedDataFromN8N.resumo_atendimento || "Não informado"),
       remoteJid: parsedDataFromN8N.remoteJid || null,
-      userId: user.id, 
-      evolutionInstanceApiKey: parsedDataFromN8N.storeOwnerApiKey || null, // SALVANDO O NOVO PARÂMETRO
+      userId: user.id,
+      sellerId: sellerIdToSave, // SALVANDO O ID DO VENDEDOR
+      sellerEvolutionApiKey: parsedDataFromN8N.sellerEvolutionApiKey || null, // SALVANDO A API KEY DO VENDEDOR
     };
 
     const novaAvaliacao = await prisma.avaliacao.create({

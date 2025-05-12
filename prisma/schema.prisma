@@ -22,10 +22,14 @@ model Avaliacao {
   remoteJid             String?
   userId    String? // Chave estrangeira para User
   user      User?   @relation(fields: [userId], references: [id])
-  evolutionInstanceApiKey String? // NOVO CAMPO: Chave API da instância Evolution que gerou esta avaliação
+  sellerEvolutionApiKey String? // RENOMEADO: Chave API da instância Evolution do VENDEDOR que gerou esta avaliação
+  sellerId              String? // NOVO CAMPO: Chave estrangeira para Seller
+  seller                Seller? @relation(fields: [sellerId], references: [id]) // NOVA RELAÇÃO
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([userId]) // Adicionando índice se ainda não existir explicitamente para userId
+  @@index([sellerId]) // NOVO ÍNDICE
   @@map("avaliacoes")
 }
 
@@ -94,6 +98,7 @@ model Seller {
   storeOwnerId String // Chave estrangeira para o User (dono da loja)
   storeOwner   User   @relation("StoreOwnerToSellers", fields: [storeOwnerId], references: [id])
 
+  avaliacoes       Avaliacao[]       // Relação inversa para Avaliacoes
   chatInteractions ChatInteraction[] // Interações de chat atribuídas a este vendedor
 
   createdAt DateTime @default(now())

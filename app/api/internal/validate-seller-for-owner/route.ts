@@ -3,9 +3,9 @@ import prisma from '@/lib/prisma'; // Certifique-se que o caminho para o Prisma 
 
 // Interface atualizada para o payload de validação
 interface ValidateSellerPayload {
-  storeOwnerApiKey: string; // Antiga webhookApiKey, agora representa a API Key do dono da loja
-  evolutionInstanceName: string; // Nome da instância na Evolution API
-  evolutionApiKey: string; // Chave da Evolution API específica deste vendedor
+  storeOwnerWebhookApiKey: string; // Chave API principal do dono da loja (User.webhookApiKey)
+  sellerEvolutionInstanceName: string; // Nome da instância na Evolution API do vendedor
+  sellerEvolutionApiKey: string; // Chave da Evolution API específica deste vendedor
 }
 
 export async function POST(request: NextRequest) {
@@ -13,28 +13,28 @@ export async function POST(request: NextRequest) {
     const body = await request.json() as ValidateSellerPayload;
 
     const {
-      storeOwnerApiKey,
-      evolutionInstanceName,
-      evolutionApiKey,
+      storeOwnerWebhookApiKey,
+      sellerEvolutionInstanceName,
+      sellerEvolutionApiKey,
     } = body;
 
     // Validação dos campos obrigatórios
-    if (!storeOwnerApiKey || !evolutionInstanceName || !evolutionApiKey) {
+    if (!storeOwnerWebhookApiKey || !sellerEvolutionInstanceName || !sellerEvolutionApiKey) {
       return NextResponse.json(
-        { message: 'Campos obrigatórios faltando: storeOwnerApiKey, evolutionInstanceName e evolutionApiKey são necessários.' },
+        { message: 'Campos obrigatórios faltando: storeOwnerWebhookApiKey, sellerEvolutionInstanceName e sellerEvolutionApiKey são necessários.' },
         { status: 400 }
       );
     }
 
-    // 1. Encontrar o User (dono da loja) usando a storeOwnerApiKey
+    // 1. Encontrar o User (dono da loja) usando a storeOwnerWebhookApiKey
     const storeOwner = await prisma.user.findUnique({
-      where: { webhookApiKey: storeOwnerApiKey }, // Assumindo que no DB o campo ainda é webhookApiKey para o User
+      where: { webhookApiKey: storeOwnerWebhookApiKey },
     });
 
     if (!storeOwner) {
       return NextResponse.json(
-        { message: 'storeOwnerApiKey inválida ou proprietário da loja não encontrado.' },
-        { status: 403 } // Forbidden ou Not Found
+        { message: 'storeOwnerWebhookApiKey inválida ou proprietário da loja não encontrado.' },
+        { status: 403 }
       );
     }
 
@@ -44,17 +44,16 @@ export async function POST(request: NextRequest) {
     const seller = await prisma.seller.findFirst({
       where: {
         storeOwnerId,
-        evolutionApiKey,
-        evolutionInstanceName,
-        // Você pode adicionar isActive: true se quiser validar apenas vendedores ativos
-        // isActive: true, 
+        evolutionApiKey: sellerEvolutionApiKey,
+        evolutionInstanceName: sellerEvolutionInstanceName,
+        // isActive: true, // Descomente se quiser validar apenas vendedores ativos
       },
     });
 
     if (!seller) {
       return NextResponse.json(
         { message: 'Vendedor não encontrado ou não associado a este proprietário com os dados fornecidos (evolutionApiKey e evolutionInstanceName).' },
-        { status: 404 } // Not Found
+        { status: 404 }
       );
     }
 
