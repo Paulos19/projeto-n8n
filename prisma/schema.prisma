@@ -10,60 +10,40 @@ datasource db {
 }
 
 model Avaliacao {
-  id                  String    @id @default(cuid())
+  id                  String   @id @default(cuid())
   nota_cliente        Int
   pontos_fortes       String[]
-  pontos_fracos        String[]
+  pontos_fracos       String[]
   tempo_resposta      String
   clareza_comunicacao String
   resolucao_problema  String
   sugestoes_melhoria  String[]
-  resumo_atendimento  String    @db.Text
+  resumo_atendimento  String   @db.Text
   remoteJid           String?
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
-  userId              String? // Adicionado para relacionar com o User
-  user                User?     @relation(fields: [userId], references: [id]) // Adicionado
+  userId String? // Adicionado para relacionar com o User
+  user   User?   @relation(fields: [userId], references: [id]) // Adicionado
 
   @@index([userId]) // Adicionado
   @@map("avaliacoes")
 }
 
-model ChatInteraction {
-  id                String    @id @default(cuid())
-  remoteJid         String
-  customerName      String
-  chatHistory       Json
-  analysisSummary   String?
-  analysisKeywords  String[]
-  eventTimestamp    DateTime
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-
-  userId            String? // Adicionado para relacionar com o User
-  user              User?     @relation(fields: [userId], references: [id]) // Adicionado
-
-  @@index([remoteJid])
-  @@index([eventTimestamp])
-  @@index([userId]) // Adicionado
-  @@map("chat_interactions")
-}
-
 // Modelos para NextAuth.js / Auth.js
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?  @db.Text
-  session_state      String?
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -89,14 +69,72 @@ model User {
   image         String?
   identifier    String?   @unique
   passwordHash  String?
-  webhookApiKey String?   @unique // Chave para identificar o webhook do usuário
+  webhookApiKey String?   @unique // Chave principal da loja/usuário (dono da loja)
+  instanceName  String?   // Nome geral da instância da loja (opcional)
 
-  accounts      Account[]
-  sessions      Session[]
-  avaliacoes    Avaliacao[]       // Adicionado: Relação inversa
-  chatInteractions ChatInteraction[] // Adicionado: Relação inversa
+  accounts         Account[]
+  sessions         Session[]
+  avaliacoes       Avaliacao[]
+  chatInteractions ChatInteraction[] // Interações gerais da loja (se aplicável)
+  
+  // Relação: Dono da loja para com seus vendedores
+  sellers          Seller[]          @relation("StoreOwnerToSellers")
 
   @@map("users")
+}
+
+// Novo modelo para Vendedores
+model Seller {
+  id                    String  @id @default(cuid())
+  name                  String? // Nome de exibição para o vendedor (ex: "Paulo Henrique Vendas")
+  evolutionInstanceName String  // Nome da instância na Evolution API (do webhook: body.instance)
+  evolutionApiKey       String  // Chave da Evolution API específica deste vendedor (do webhook: body.apikey)
+  sellerWhatsAppNumber  String  // Número do WhatsApp da instância Evolution do vendedor (informado pelo dono da loja)
+  isActive              Boolean @default(true) // Para ativar/desativar vendedor
+
+  storeOwnerId String // Chave estrangeira para o User (dono da loja)
+  storeOwner   User   @relation("StoreOwnerToSellers", fields: [storeOwnerId], references: [id])
+
+  chatInteractions ChatInteraction[] // Interações de chat atribuídas a este vendedor
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([storeOwnerId, evolutionInstanceName]) // Nome da instância deve ser único por loja
+  @@unique([storeOwnerId, evolutionApiKey])       // API Key da Evolution deve ser única por loja
+  @@unique([storeOwnerId, sellerWhatsAppNumber])  // Número do WhatsApp do vendedor deve ser único por loja
+  @@map("sellers")
+}
+
+model ChatInteraction {
+  id               String   @id @default(cuid())
+  remoteJid        String   // JID do cliente
+  customerName     String   // Nome do cliente (pushName)
+  chatHistory      Json
+  analysisSummary  String?
+  analysisKeywords String[]
+  eventTimestamp   DateTime
+  
+  // Pode ser populado com Seller.name ou Seller.evolutionInstanceName para display rápido
+  // Este campo pode se tornar redundante se sempre usarmos os dados do Seller relacionado.
+  sellerInstanceName String?  
+
+  // ID do dono da loja (quem "possui" a webhookApiKey principal usada na URL da API)
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  // ID do vendedor específico que lidou com a interação
+  sellerId String?
+  seller   Seller? @relation(fields: [sellerId], references: [id])
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([remoteJid])
+  @@index([eventTimestamp])
+  @@index([userId])
+  @@index([sellerId]) // Novo índice
+  @@map("chat_interactions")
 }
 
 model VerificationToken {

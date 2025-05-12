@@ -10,10 +10,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        17580,
-        4260
+        16660,
+        2660
       ],
-      "id": "5ce75ef5-7b73-4dde-a62f-9afdbd578dbd",
+      "id": "c66c634d-5e33-4943-9a0b-29e6eaf5b284",
       "name": "Webhook Entrada",
       "webhookId": "d918ace9-297b-4fcf-809c-4e41c6db9c5d"
     },
@@ -106,10 +106,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        17900,
-        4260
+        17180,
+        2660
       ],
-      "id": "b891ee3b-bda7-4860-a367-18791b0ee065",
+      "id": "9e0c92c5-98e2-4af4-9d14-6dbf795690b9",
       "name": "Processar Mensagem"
     },
     {
@@ -136,13 +136,13 @@
         },
         "options": {}
       },
-      "id": "e31e3eaa-1c85-4a5c-b112-6c6458111929",
+      "id": "7cdffdca-d0d2-4b39-9719-a656538c48d1",
       "name": "IF: Mensagem do Dono?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        18320,
-        4260
+        17600,
+        2040
       ]
     },
     {
@@ -169,13 +169,13 @@
         },
         "options": {}
       },
-      "id": "f0ed6546-392d-4645-888a-464e581213f4",
+      "id": "2f63550c-85bf-40ce-9ac3-50ee7644079e",
       "name": "IF: É comando /setup?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        18640,
-        4240
+        17960,
+        2040
       ]
     },
     {
@@ -185,13 +185,13 @@
         "key": "=registration_apikey:{{ $json.data.remoteJid }}",
         "options": {}
       },
-      "id": "292b36a0-1e76-4504-954b-5e45ad2d5955",
+      "id": "2e8c547e-989e-4733-bfdb-4b71a0ba3d70",
       "name": "Redis GET: Verificar Chave API Existente",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        19080,
-        4100
+        18320,
+        2020
       ],
       "credentials": {
         "redis": {
@@ -223,13 +223,13 @@
         },
         "options": {}
       },
-      "id": "71a06306-c5ea-4203-86c8-5da1fb383d6f",
+      "id": "efd66216-1f93-4c84-a3a1-386efb59a93f",
       "name": "IF: Já Registrado?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        19340,
-        4100
+        18660,
+        2020
       ]
     },
     {
@@ -260,13 +260,13 @@
         },
         "options": {}
       },
-      "id": "7642ac1e-3c69-4f87-a9e1-bfb8217ddf8f",
+      "id": "1c6aefbb-f524-4d54-b513-e23aaba7f15a",
       "name": "HTTP Request: Enviar Msg (Já Registrado)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        19980,
-        4080
+        19120,
+        2000
       ]
     },
     {
@@ -297,13 +297,13 @@
         },
         "options": {}
       },
-      "id": "a78b60af-75bd-498d-8d30-9c508e99d24e",
+      "id": "c0b8a733-9b66-4c86-ba9e-7193698b6ded",
       "name": "HTTP Request: Pedir Dados Cadastro",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        19500,
-        4220
+        18820,
+        2200
       ]
     },
     {
@@ -330,13 +330,13 @@
         },
         "options": {}
       },
-      "id": "59df70b9-ee56-4517-93f3-0b457d311b74",
+      "id": "ebf4a74b-cc4f-40af-8af9-a3b9f1cb886d",
       "name": "IF: É resposta de cadastro?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        18920,
-        4560
+        17960,
+        2280
       ]
     },
     {
@@ -363,13 +363,13 @@
         },
         "options": {}
       },
-      "id": "89799e4d-a68c-403e-a80f-187e9fda74a8",
+      "id": "14b021b5-99dc-4ae9-aa24-dab90b49b0b9",
       "name": "IF: Erro no Parse?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        19580,
-        4520
+        18900,
+        2500
       ]
     },
     {
@@ -387,26 +387,26 @@
           }
         }
       },
-      "id": "33c85db1-3ab5-43fb-9034-111ffe573f49",
+      "id": "306b08dd-5b14-4fba-a722-cb38ff287483",
       "name": "HTTP Request: Chamar API Register",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        19860,
-        4560
+        19180,
+        2540
       ]
     },
     {
       "parameters": {
         "jsCode": "const response = $json; // $json é o objeto de resposta completo\nconst statusCode = $json.statusCode;\nlet body = {}; // Inicia como objeto vazio\n\n// Verifica se $json.body existe e se precisa ser parseado\nif ($json.body) {\n  if (typeof $json.body === 'string') {\n    try {\n      body = JSON.parse($json.body); // Tenta parsear se for string\n    } catch (e) {\n      console.error(\"Erro ao fazer parse do $json.body (string):\", e);\n      // Mantém body como {} se o parse falhar\n    }\n  } else if (typeof $json.body === 'object') {\n    body = $json.body; // Usa diretamente se já for objeto\n  }\n}\n\n// Garante que remoteJid seja buscado corretamente (verifique o nome do nó!)\nlet remoteJid = 'JID_DESCONHECIDO';\ntry {\n    // Use .first() pois o nó anterior pode ter múltiplas saídas em testes manuais\n    remoteJid = $('Code: Parse Dados Cadastro').first().json.remoteJid || remoteJid;\n} catch(e) {\n    console.error(\"Erro ao obter remoteJid do nó 'Code: Parse Dados Cadastro':\", e);\n}\n\n\nlet result = {\n  remoteJid: remoteJid,\n  registration_complete_flag: false,\n  final_message: 'Ocorreu um erro ao tentar registrar. Tente novamente mais tarde.',\n  webhookApiKey: null\n};\n\n// Usa as variáveis 'statusCode' e 'body' (que agora é garantido ser um objeto)\nif (statusCode === 201 && body.webhookApiKey) {\n  result.registration_complete_flag = true;\n  result.final_message = `Registro realizado com sucesso! Sua Webhook API Key é: ${body.webhookApiKey} | Guarde esta chave em segurança, ela será necessária para identificar suas requisições.`;\n  result.webhookApiKey = body.webhookApiKey;\n} else if (statusCode === 409) {\n  result.final_message = `Erro no registro: ${body.message || 'Email ou Identificador já cadastrado.'}`;\n} else if (statusCode === 400) {\n  result.final_message = `Erro no registro: ${body.message || 'Dados inválidos.'}`;\n} else {\n   result.final_message = `Erro no servidor de registro (Código: ${statusCode}). Tente novamente.`;\n}\n\nreturn [{ json: result }];"
       },
-      "id": "dea1ad45-453e-465e-a9f1-5f8aa0354d39",
+      "id": "e2a1ee19-9ba0-456f-8e3e-1effdcd1ec14",
       "name": "Code: Processar Resposta API",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        20120,
-        4560
+        19440,
+        2540
       ]
     },
     {
@@ -433,13 +433,13 @@
         },
         "options": {}
       },
-      "id": "8e4ae59e-e20f-4794-b2dd-a77c5a3fa266",
+      "id": "428223cb-7150-43f1-983f-07d1363a7f26",
       "name": "IF: Registro OK?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        20400,
-        4560
+        19720,
+        2540
       ]
     },
     {
@@ -448,13 +448,13 @@
         "key": "=registration_apikey:{{ $json.remoteJid }}",
         "value": "={{ $json.webhookApiKey }}"
       },
-      "id": "33706bbe-b038-49cf-abac-c5e0679ca1d3",
+      "id": "f2473da1-44bf-4cb5-bb6a-b4c2d6f2e6ec",
       "name": "Redis SET: Salvar API Key",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        20740,
-        4540
+        20060,
+        2520
       ],
       "credentials": {
         "redis": {
@@ -491,13 +491,13 @@
         },
         "options": {}
       },
-      "id": "9c56ef93-659e-4870-8670-d0c69991ac81",
+      "id": "5d68a5ea-9d8c-446d-94d7-44d0ee17554b",
       "name": "HTTP Request: Enviar Msg (Sucesso)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        21080,
-        4540
+        20400,
+        2520
       ]
     },
     {
@@ -528,13 +528,13 @@
         },
         "options": {}
       },
-      "id": "cf50dd8b-d7e8-4e0d-b0aa-1d0c5f898e92",
+      "id": "0f34112c-0d62-45a5-8008-281d2b45d142",
       "name": "HTTP Request: Enviar Msg (Erro API)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        20740,
-        4700
+        20060,
+        2680
       ]
     },
     {
@@ -564,10 +564,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        18460,
-        5020
+        17600,
+        3260
       ],
-      "id": "63c24b8c-f5a1-40d7-9378-88f0d2f27578",
+      "id": "48447630-a80f-4276-a60a-1e3e0fa20e3d",
       "name": "Verificar se é Áudio"
     },
     {
@@ -578,10 +578,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        18740,
-        4800
+        17820,
+        2920
       ],
-      "id": "243e0287-aad1-40db-a31e-b65cee873dd3",
+      "id": "aca7e553-d6cf-4868-9246-89bcd5021627",
       "name": "Baixar Arquivo de Áudio",
       "notes": "Baixa o áudio da mediaUrl para transcrição"
     },
@@ -594,10 +594,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        19000,
-        4800
+        18080,
+        2920
       ],
-      "id": "2fdb5558-bc51-4b86-b429-eab1ac65589a",
+      "id": "f766796e-3b0f-425c-b0c4-61c8dbf65c87",
       "name": "OpenAI",
       "credentials": {
         "openAiApi": {
@@ -629,10 +629,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        19280,
-        4800
+        18380,
+        2920
       ],
-      "id": "e65d2493-19de-467d-b6c2-4372bbbd728a",
+      "id": "6570a049-d2cf-4abd-83b0-e0e4bffbd792",
       "name": "Atualizar Mensagem com Transcrição"
     },
     {
@@ -662,23 +662,23 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
       "position": [
-        18920,
-        5180
+        18240,
+        3300
       ],
-      "id": "583114ed-fbd9-47a6-8539-260696a0907b",
+      "id": "a9597dac-c386-4744-bee4-9a221d8fd2c1",
       "name": "Filtrar Chats Individuais"
     },
     {
       "parameters": {
-        "amount": 15
+        "amount": 10
       },
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        19220,
-        5080
+        18600,
+        3300
       ],
-      "id": "3661eea9-b98d-4673-a827-3e7f74c94d0e",
+      "id": "b548cbe7-8087-472a-bd35-d1da499413d0",
       "name": "Aguardar Mensagens",
       "webhookId": "24da4e40-c742-414e-91c5-ddb6ee1dfc83",
       "notes": "Aguarda 15 segundos coletando todas as mensagens recebidas neste período"
@@ -690,10 +690,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        19520,
-        4860
+        18940,
+        3300
       ],
-      "id": "9ddfb26d-b53f-478c-a842-f6266181f422",
+      "id": "058c3319-f099-4b0f-ab5f-170682fac70f",
       "name": "Agrupar e Format Mensagens"
     },
     {
@@ -706,10 +706,10 @@
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        19520,
-        5080
+        19280,
+        3300
       ],
-      "id": "4c9756d6-8295-4ee4-9a08-e29f18351c43",
+      "id": "604b02a6-7c8b-4a11-bb0a-25c976789858",
       "name": "Obter Histórico de Chat Existente",
       "credentials": {
         "redis": {
@@ -725,10 +725,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        19520,
-        5300
+        19700,
+        3300
       ],
-      "id": "341b58c4-23c1-47e5-a965-0d08ce969c77",
+      "id": "a5e3f67b-2eaa-4d3a-8a01-5eb3bf2d9b4b",
       "name": "Anexar Novas Mensagens ao Histórico de Chat"
     },
     {
@@ -741,10 +741,10 @@
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        19780,
-        5120
+        20040,
+        3300
       ],
-      "id": "ca1da306-6d0f-4552-bdfc-bc55f31802dd",
+      "id": "1173c86f-fc07-4685-aeb2-9e83e5251bc5",
       "name": "Armazenar Mensagens (Atualizado)",
       "credentials": {
         "redis": {
@@ -765,10 +765,10 @@
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        20040,
-        5120
+        20320,
+        3320
       ],
-      "id": "e062b496-1e82-4e8f-828d-3b1106071384",
+      "id": "5765b559-e257-4c7b-a5c1-2a67a47d8565",
       "name": "Obter Conversa Completa p/ Dashboard",
       "credentials": {
         "redis": {
@@ -784,10 +784,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        20280,
-        5120
+        20620,
+        3320
       ],
-      "id": "36fea440-7ca5-4eb3-a466-a227ce78ed13",
+      "id": "356a2c6a-519c-425c-9af9-a166ff924327",
       "name": "Formatar Histórico p/ Dashboard e IA"
     },
     {
@@ -799,10 +799,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.8,
       "position": [
-        20540,
-        5120
+        20980,
+        3320
       ],
-      "id": "8a3fddb2-96ac-4af4-b31b-6fe71c7106ba",
+      "id": "1c6bf14a-ec57-43e5-889b-53bf1660b330",
       "name": "Analisar Chat p/ Dashboard (IA)"
     },
     {
@@ -817,10 +817,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        20500,
-        5300
+        21100,
+        3500
       ],
-      "id": "39df2cb2-47ea-48ce-86aa-c92a84601275",
+      "id": "94607a38-5e77-4f38-982b-c538f0b45454",
       "name": "OpenAI Chat Model (Dashboard)",
       "credentials": {
         "openAiApi": {
@@ -836,10 +836,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        21000,
-        5120
+        21600,
+        3320
       ],
-      "id": "966831e4-68ce-41a2-a40f-b7fe3f66d7ee",
+      "id": "dcfea73f-c0cb-4af1-93d0-bdcb61d78402",
       "name": "Formatar Saída Agente Dashboard"
     },
     {
@@ -852,10 +852,10 @@
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        21220,
-        5120
+        21920,
+        3320
       ],
-      "id": "bec97cb1-1612-41e3-956d-7953e403ecdf",
+      "id": "bd190c17-7139-42d6-8952-e6074afedf04",
       "name": "Armazenar Saída Formatada Dashboard",
       "credentials": {
         "redis": {
@@ -892,26 +892,26 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        20040,
-        4940
+        20300,
+        2980
       ],
-      "id": "ace8464e-b478-4ddb-b99e-3205bdde8ddc",
+      "id": "9a1074e2-f786-490b-a44c-3853eebfe3a4",
       "name": "Verificar Mensagem Cliente"
     },
     {
       "parameters": {
         "operation": "get",
         "propertyName": "avaliacao_pendente",
-        "key": "avaliacao:pendente:{{ $('Processar Mensagem').item.json.data.remoteJid }}",
+        "key": "=avaliacao:pendente:{{ $('Processar Mensagem').item.json.data.remoteJid }}",
         "options": {}
       },
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        20280,
-        4920
+        20620,
+        2960
       ],
-      "id": "c702e818-598a-40d3-8d55-5fa5d2769f35",
+      "id": "6db2d894-fa8b-4b2c-925a-b30adbe6d417",
       "name": "Verificar Avaliação Pendente",
       "credentials": {
         "redis": {
@@ -947,10 +947,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        20540,
-        4920
+        20900,
+        2960
       ],
-      "id": "fbcb76e3-b351-42b1-a5a7-c906510ec603",
+      "id": "2b5d8bda-ffe3-437d-ba4e-524bf76fd30d",
       "name": "É Resposta Avaliação"
     },
     {
@@ -960,10 +960,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        20800,
-        4900
+        21220,
+        2960
       ],
-      "id": "37f8d960-1830-4612-81a4-cceed5aacaa3",
+      "id": "0c58df9d-54bf-4353-b692-e6b216429caf",
       "name": "Validar Nota Avaliação"
     },
     {
@@ -994,10 +994,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        21020,
-        4900
+        21480,
+        2960
       ],
-      "id": "73681e88-b17e-4c3a-9da1-1211e6def064",
+      "id": "17298994-e1ee-4b33-aa75-4ed1bc210471",
       "name": "Verificar Nota Válida"
     },
     {
@@ -1010,10 +1010,10 @@
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        21260,
-        4880
+        21760,
+        2920
       ],
-      "id": "15c04288-6697-4fb6-98f7-8b40bad177d7",
+      "id": "36bc5200-bfa9-47de-851a-61cc056f8be1",
       "name": "Armazenar Nota Avaliação",
       "credentials": {
         "redis": {
@@ -1030,10 +1030,10 @@
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        21540,
-        4880
+        22060,
+        2920
       ],
-      "id": "8721148c-a75e-4067-9234-d47adb623597",
+      "id": "409b1c73-600e-4701-931f-0696c9b6daf3",
       "name": "Remover Pendência",
       "credentials": {
         "redis": {
@@ -1052,10 +1052,10 @@
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        21920,
-        4880
+        22580,
+        2920
       ],
-      "id": "ed3193ae-dabc-4ccb-b3bc-b3f77e510a36",
+      "id": "4556e207-f288-4449-a7fd-678bc797026a",
       "name": "Obter Histórico Chat (Avaliação)",
       "credentials": {
         "redis": {
@@ -1071,25 +1071,25 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        22120,
-        4880
+        22880,
+        2920
       ],
-      "id": "47407d41-baff-4aac-bd50-e12bd9e9cad0",
+      "id": "453da58b-d0b0-464b-a6f8-6ae0ecbd269b",
       "name": "Formatar Histórico (Avaliação)"
     },
     {
       "parameters": {
         "promptType": "define",
-        "text": "=Você é um assistente especializado em análise de atendimento ao cliente. Analise a conversa abaixo entre um vendedor e um cliente. O cliente deu uma nota {{$json.nota_avaliacao}} (de 0 a 10) para o atendimento.\n\nCONVERSA:\n{{$json.historico_formatado}}\n\nCom base na conversa e na nota dada pelo cliente {{ $json.remoteJid }}, crie um formulário de avaliação de desempenho do vendedor no formato JSON com os seguintes campos:\n\n1. nota_cliente: a nota numérica dada pelo cliente ({{$json.nota_avaliacao}})\n2. pontos_fortes: array com 3 pontos fortes identificados no atendimento\n3. pontos_fracos: array com 3 pontos que podem ser melhorados\n4. tempo_resposta: avaliação do tempo de resposta (\"Excelente\", \"Bom\", \"Regular\" ou \"Ruim\")\n5. clareza_comunicacao: avaliação da clareza na comunicação (\"Excelente\", \"Bom\", \"Regular\" ou \"Ruim\")\n6. resolucao_problema: avaliação da capacidade de resolver o problema (\"Excelente\", \"Bom\", \"Regular\" ou \"Ruim\")\n7. sugestoes_melhoria: array com 2 sugestões concretas para melhorar o atendimento\n8. resumo_atendimento: um parágrafo resumindo o atendimento\n9. contexto_conversa: um resumo do contexto geral da conversa\n\nRetorne APENAS o objeto JSON, sem explicações adicionais.",
+        "text": "=Você é um assistente especializado em análise de atendimento ao cliente, com foco em avaliações justas e orgânicas.\nAnalise a conversa abaixo entre um vendedor e um cliente. O cliente deu uma nota {{$json.nota_avaliacao}} (de 0 a 10) para o atendimento.\n\nCONVERSA:\n{{$json.historico_formatado}}\n\nINSTRUÇÕES IMPORTANTES:\n1.  Avalie criticamente a nota {{$json.nota_avaliacao}} fornecida pelo cliente em relação ao conteúdo real da conversa.\n2.  Considere se a nota reflete de forma justa a qualidade do atendimento demonstrada pelo vendedor. Por exemplo, o atendimento pode ter sido excelente, mas a nota baixa, ou vice-versa. Sua análise deve levar isso em conta para ser justa com o vendedor.\n3.  O cliente é: {{$json.remoteJid}}.\n\nCom base na conversa e na nota, e seguindo as instruções acima, crie um formulário de avaliação de desempenho do vendedor no formato JSON com os seguintes campos:\n\n1.  `nota_cliente`: a nota numérica dada pelo cliente ({{$json.nota_avaliacao}})\n2.  `pontos_fortes`: array com até 3 pontos fortes identificados no atendimento, embasados pela conversa.\n3.  `pontos_fracos`: array com até 3 pontos que podem ser melhorados, embasados pela conversa.\n4.  `tempo_resposta`: avaliação do tempo de resposta do vendedor (\"Excelente\", \"Bom\", \"Regular\", \"Ruim\" ou \"Não aplicável se o chat não permitir essa inferência\").\n5.  `clareza_comunicacao`: avaliação da clareza na comunicação do vendedor (\"Excelente\", \"Bom\", \"Regular\" ou \"Ruim\").\n6.  `resolucao_problema`: avaliação da capacidade do vendedor de resolver o problema ou encaminhar a solicitação do cliente (\"Excelente\", \"Bom\", \"Regular\", \"Ruim\", \"Não resolvido\" ou \"Não aplicável\").\n7.  `sugestoes_melhoria`: array com até 2 sugestões concretas para melhorar o atendimento, baseadas na análise.\n8.  `resumo_atendimento`: um parágrafo resumindo o atendimento, incluindo uma menção à performance geral do vendedor.\n9.  `contexto_conversa`: um resumo do contexto geral e do(s) principal(is) objetivo(s) da conversa.\n10. `observacao_sobre_nota`: (string) Uma breve análise sobre a consistência da nota do cliente com a qualidade do atendimento observada na conversa. Indique se a nota parece justa, se o atendimento parece ter sido melhor do que a nota sugere, ou pior, e justifique brevemente.\n\nRetorne APENAS o objeto JSON, sem explicações adicionais.",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.8,
       "position": [
-        22400,
-        4880
+        23240,
+        2920
       ],
-      "id": "c1ca82ae-2153-4300-9dc6-d8d180b191d0",
+      "id": "c4a779fa-a516-4882-b8bc-b66d35d6292d",
       "name": "Analisar Atendimento"
     },
     {
@@ -1104,10 +1104,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        22400,
-        5140
+        23180,
+        3120
       ],
-      "id": "dcff1c5d-42b1-4cc6-8a9c-b21c84e8f957",
+      "id": "27affaaa-f393-4cbb-8e8a-a6bcbf19a17f",
       "name": "OpenAI Chat Model (Avaliação)",
       "credentials": {
         "openAiApi": {
@@ -1123,10 +1123,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        22900,
-        4880
+        23720,
+        2920
       ],
-      "id": "e97f97c5-a0b7-43bc-a682-9e5f744626ef",
+      "id": "14480711-3eb5-4728-b310-56e1cc1d48fe",
       "name": "Formatar Formulário (Avaliação)"
     },
     {
@@ -1139,10 +1139,10 @@
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        23220,
-        4880
+        24060,
+        2920
       ],
-      "id": "057c5894-63c2-40df-b1ba-53532cee8a57",
+      "id": "1a9d5015-cca4-4240-804d-19003e9b6e0e",
       "name": "Armazenar Formulário (Avaliação)",
       "credentials": {
         "redis": {
@@ -1154,7 +1154,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "=[https://projeto-n8n.vercel.app/api/receber-avaliacao/](https://projeto-n8n.vercel.app/api/receber-avaliacao/){{ $('Processar Mensagem').item.json.data.userWebhookApiKey }}",
+        "url": "=https://projeto-n8n.vercel.app/api/receber-avaliacao/871bd0d0634d30304de31ad979faee87",
         "sendBody": true,
         "bodyParameters": {
           "parameters": [
@@ -1173,29 +1173,217 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        23520,
-        4880
+        24420,
+        2920
       ],
-      "id": "a2440565-a4e0-4deb-afa1-dabc07a66cab",
+      "id": "816f635c-4758-48c5-b2e7-d0ad42fba1cf",
       "name": "Notificar Conclusão Avaliação"
     },
     {
       "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        18400,
+        2240
+      ],
+      "id": "a12ab5e5-de01-4790-9722-cea0ed269cae",
+      "name": "Wait",
+      "webhookId": "088b94eb-d737-44ce-bcde-69829a47a678"
+    },
+    {
+      "parameters": {
         "method": "POST",
-        "url": "=https://projeto-n8n.vercel.app/api/conversas/b512c2f00becd4c97e4a7b01eac6ce8e",
+        "url": "={{ $('Processar Mensagem').item.json.evo.server_url }}/message/sendText/{{ $('Processar Mensagem').item.json.evo.instance }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $('Processar Mensagem').item.json.evo.apikey }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "number",
+              "value": "={{ $('IF: Erro no Parse?').item.json.remoteJid }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $('IF: Erro no Parse?').item.json.error_message }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2b137303-b6de-4dee-9dac-b6697af0fe14",
+      "name": "HTTP Request: Enviar Msg (Erro Formato)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        19140,
+        2300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $json.data.text;\nconst parts = text.split(';');\nlet response = {};\n\nif (parts.length === 4) {\n  const [name, email, password, identifier] = parts.map(part => part.trim());\n  \n  \n  if (name && email && password && identifier && email.includes('@')) {\n    response = {\n      parse_error: false,\n      registration_data: {\n        name: name,\n        email: email,\n        password: password,\n        identifier: identifier\n      }\n    };\n  } else {\n    response = {\n      parse_error: true,\n      error_message: 'Dados inválidos ou incompletos. Verifique o formato: Nome;Email;Senha;CPF/CNPJ'\n    };\n  }\n} else {\n  response = {\n    parse_error: true,\n    error_message: 'Formato inválido. Use: Nome;Email;Senha;CPF/CNPJ'\n  };\n}\n\n\nresponse.remoteJid = $json.data.remoteJid;\n\nreturn [{ json: response }];"
+      },
+      "id": "af4a5970-8db0-49db-a7cc-535c82da5662",
+      "name": "Code: Parse Dados Cadastro",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        18640,
+        2500
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://projeto-n8n.vercel.app/api/conversas/871bd0d0634d30304de31ad979faee87",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ $json.chat_history }}",
-        "options": {}
+        "jsonBody": "={{ [ $('Formatar Saída Agente Dashboard').item.json ] }}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
       },
       "name": "Enviar Conversas Formatadas para API",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        21220,
-        5320
+        22240,
+        3320
       ],
-      "id": "f484b25f-b0d9-4e17-8729-5c3a1b8c3ba5"
+      "id": "9eb92861-94bc-4cd3-b249-77090f3f33cf"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "818bbde3-3bb0-4e5e-8bc1-a2c9937e7268",
+              "leftValue": "={{ $('Processar Mensagem').item.json.data.fromMe }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "c97185e9-72cc-494c-b5e0-41d9e8d1b87d",
+              "leftValue": "={{ $('Processar Mensagem').item.json.data.text }}",
+              "rightValue": "Me avalie",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        20320,
+        3780
+      ],
+      "id": "ce9d4117-82ca-4d2c-a7a2-7f6fd4419fb1",
+      "name": "Verificar Mensagem Avaliação"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Processar Mensagem').item.json.evo.server_url }}/message/sendText/{{ $('Processar Mensagem').item.json.evo.instance }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apiKey",
+              "value": "={{ $('Processar Mensagem').item.json.evo.apikey }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "number",
+              "value": "={{ $('Processar Mensagem').item.json.data.remoteJid }}"
+            },
+            {
+              "name": "text",
+              "value": "Por favor, avalie meu atendimento de 0 a 10."
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        20660,
+        3780
+      ],
+      "id": "2051001c-63e3-4b32-a591-c377c60b0baa",
+      "name": "Enviar Pedido Avaliação"
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "=avaliacao:pendente:{{ $('Processar Mensagem').item.json.data.remoteJid }}",
+        "value": "true"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        20880,
+        3780
+      ],
+      "id": "d95d01a4-4ed8-4d78-b624-3d4d45525ab4",
+      "name": "Marcar Avaliação Pendente",
+      "credentials": {
+        "redis": {
+          "id": "N86fzX8xrhosKiMf",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 15
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        21120,
+        3780
+      ],
+      "id": "a6c773ba-974b-457c-840b-025f557397fb",
+      "name": "Aguardar Resposta",
+      "webhookId": "cbf4c00b-52df-4a71-82f0-916a6abbf06f"
     },
     {
       "parameters": {
@@ -1232,75 +1420,11 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        21740,
-        4880
+        22300,
+        2920
       ],
-      "id": "2180c225-0d56-47da-8f2e-378dc5a43b62",
+      "id": "03b3cf6d-4199-42c6-bfe2-dbfc2a71d02b",
       "name": "Confirmar Avaliação Cliente"
-    },
-    {
-      "parameters": {
-        "amount": 10
-      },
-      "type": "n8n-nodes-base.wait",
-      "typeVersion": 1.1,
-      "position": [
-        19040,
-        4300
-      ],
-      "id": "0fd7a677-4cfa-4e5b-9413-33872e70e34d",
-      "name": "Wait",
-      "webhookId": "088b94eb-d737-44ce-bcde-69829a47a678"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "={{ $('Processar Mensagem').item.json.evo.server_url }}/message/sendText/{{ $('Processar Mensagem').item.json.evo.instance }}",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "apikey",
-              "value": "={{ $('Processar Mensagem').item.json.evo.apikey }}"
-            }
-          ]
-        },
-        "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "number",
-              "value": "={{ $('IF: Erro no Parse?').item.json.remoteJid }}"
-            },
-            {
-              "name": "text",
-              "value": "={{ $('IF: Erro no Parse?').item.json.error_message }}"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "244e4d56-9da9-4a21-890d-449addace85e",
-      "name": "HTTP Request: Enviar Msg (Erro Formato)",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        19820,
-        4400
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "const text = $json.data.text;\nconst parts = text.split(';');\nlet response = {};\n\nif (parts.length === 4) {\n  const [name, email, password, identifier] = parts.map(part => part.trim());\n  \n  \n  if (name && email && password && identifier && email.includes('@')) {\n    response = {\n      parse_error: false,\n      registration_data: {\n        name: name,\n        email: email,\n        password: password,\n        identifier: identifier\n      }\n    };\n  } else {\n    response = {\n      parse_error: true,\n      error_message: 'Dados inválidos ou incompletos. Verifique o formato: Nome;Email;Senha;CPF/CNPJ'\n    };\n  }\n} else {\n  response = {\n    parse_error: true,\n    error_message: 'Formato inválido. Use: Nome;Email;Senha;CPF/CNPJ'\n  };\n}\n\n\nresponse.remoteJid = $json.data.remoteJid;\n\nreturn [{ json: response }];"
-      },
-      "id": "79fa7a7c-31c8-42fe-b9a8-eb32cc106e39",
-      "name": "Code: Parse Dados Cadastro",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        19320,
-        4520
-      ]
     }
   ],
   "pinData": {
@@ -1310,7 +1434,7 @@
           "headers": {
             "host": "n8n-n8n.lwr5mp.easypanel.host",
             "user-agent": "axios/1.7.9",
-            "content-length": "957",
+            "content-length": "946",
             "accept-encoding": "gzip, compress, deflate, br",
             "content-type": "application/json",
             "x-forwarded-for": "172.18.0.1",
@@ -1327,30 +1451,32 @@
             "instance": "Paulo Henrique",
             "data": {
               "key": {
-                "remoteJid": "556186446934@s.whatsapp.net",
-                "fromMe": true,
-                "id": "D5AD74E28D66EDA039B3D7DDA8CEE880"
+                "remoteJid": "556182115281@s.whatsapp.net",
+                "fromMe": false,
+                "id": "83BB9558CC4C84F02BA199B4F0C76032"
               },
-              "pushName": "Henrique",
-              "status": "SERVER_ACK",
+              "pushName": "Maria Lopes",
+              "status": "DELIVERY_ACK",
               "message": {
+                "conversation": "Me avalie",
                 "messageContextInfo": {
-                  "messageSecret": "6ZXf6kJEtryyXptBFy8dxurVQTO8xHY0gEib+/XdxQg="
-                },
-                "conversation": "Paulo Henrique; paulohenrique.012araujo@gmail.com;password;05814436166"
-              },
-              "contextInfo": {
-                "entryPointConversionSource": "global_search_new_chat",
-                "entryPointConversionApp": "whatsapp",
-                "entryPointConversionDelaySeconds": 5567
+                  "deviceListMetadata": {
+                    "senderKeyHash": "vLXC+Rq8J6g4SQ==",
+                    "senderTimestamp": "1746998210",
+                    "recipientKeyHash": "oOVlY4BF6byG8w==",
+                    "recipientTimestamp": "1746972607"
+                  },
+                  "deviceListMetadataVersion": 2,
+                  "messageSecret": "YI65rtY/TtgTTlV02ClZCTD8viSSHSIHP7A/6JOD5tw="
+                }
               },
               "messageType": "conversation",
-              "messageTimestamp": 1746728043,
+              "messageTimestamp": 1746998283,
               "instanceId": "d54b371c-67ed-4c0d-82d9-6b66dea0c990",
               "source": "android"
             },
             "destination": "https://n8n-n8n.lwr5mp.easypanel.host/webhook/avaliacao-atendimento-webhook",
-            "date_time": "2025-05-08T15:14:03.890Z",
+            "date_time": "2025-05-11T18:18:03.261Z",
             "sender": "556186446934@s.whatsapp.net",
             "server_url": "https://evolution-evolution.lwr5mp.easypanel.host",
             "apikey": "948D0A6EDFA1-4BC3-AFFD-70CE70DD89D7"
@@ -1362,6 +1488,28 @@
     ]
   },
   "connections": {
+    "Code: Parse Dados Cadastro": {
+      "main": [
+        [
+          {
+            "node": "IF: Erro no Parse?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "IF: É resposta de cadastro?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Webhook Entrada": {
       "main": [
         [
@@ -1483,6 +1631,11 @@
           },
           {
             "node": "Obter Conversa Completa p/ Dashboard",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Verificar Mensagem Avaliação",
             "type": "main",
             "index": 0
           }
@@ -1698,17 +1851,6 @@
         ]
       ]
     },
-    "Confirmar Avaliação Cliente": {
-      "main": [
-        [
-          {
-            "node": "Obter Histórico Chat (Avaliação)",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "IF: Mensagem do Dono?": {
       "main": [
         [
@@ -1880,22 +2022,44 @@
         ]
       ]
     },
-    "Wait": {
+    "Verificar Mensagem Avaliação": {
       "main": [
         [
           {
-            "node": "IF: É resposta de cadastro?",
+            "node": "Enviar Pedido Avaliação",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Parse Dados Cadastro": {
+    "Enviar Pedido Avaliação": {
       "main": [
         [
           {
-            "node": "IF: Erro no Parse?",
+            "node": "Marcar Avaliação Pendente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marcar Avaliação Pendente": {
+      "main": [
+        [
+          {
+            "node": "Aguardar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirmar Avaliação Cliente": {
+      "main": [
+        [
+          {
+            "node": "Obter Histórico Chat (Avaliação)",
             "type": "main",
             "index": 0
           }
@@ -1907,7 +2071,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "f25cc1f5-b641-4324-b0fb-1cdf8c05f2eb",
+  "versionId": "5684a1dc-c00b-4eac-b18b-cc58cddab5bc",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "13bc83b253b227bcad46beb8869279f45f1be61c89bdea526a2d396efe853401"
