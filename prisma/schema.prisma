@@ -128,7 +128,7 @@ model ChatInteraction {
   user   User?   @relation(fields: [userId], references: [id])
 
   // ID do vendedor específico que lidou com a interação
-  sellerId String?
+  sellerId String? // ID do vendedor específico que lidou com a interação
   seller   Seller? @relation(fields: [sellerId], references: [id])
 
   createdAt        DateTime @default(now())

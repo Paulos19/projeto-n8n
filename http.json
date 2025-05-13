@@ -1,0 +1,5 @@
+{
+  "storeOwnerWebhookApiKey": "{{ $('Redis GET: Buscar Chave API Dono Salva').item.json.retrieved_store_owner_apikey }}",
+  "sellerEvolutionInstanceName": "{{ $('Processar Mensagem').item.json.evo.instance }}",
+  "sellerEvolutionApiKey": "{{ $('Processar Mensagem').item.json.evo.apikey }}"
+}

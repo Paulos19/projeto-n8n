@@ -49,6 +49,7 @@ export async function ConversationList({ selectedSellerId, loggedInUserId }: Con
           // instanceName: true // instanceName no User é o da loja, não do vendedor
         }
       },
+      seller: true, // Adicionado para incluir os dados completos do vendedor
     },
     orderBy: {
       eventTimestamp: 'desc', // Ordenar por data do evento da interação
@@ -73,7 +74,7 @@ export async function ConversationList({ selectedSellerId, loggedInUserId }: Con
              <CardTitle className="text-lg">Cliente: {interaction.customerName || 'Não informado'}</CardTitle>
              <CardDescription className="flex items-center text-sm pt-1">
                <User className="mr-2 h-4 w-4 text-muted-foreground" />
-               Vendedor: {interaction.sellerInstanceName || 'Não atribuído'}
+               Vendedor: {interaction.seller?.name || interaction.sellerInstanceName || 'Não atribuído'}
              </CardDescription>
              <CardDescription className="flex items-center text-xs pt-1">
                 <CalendarDays className="mr-2 h-3 w-3 text-muted-foreground" />

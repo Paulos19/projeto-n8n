@@ -25,8 +25,9 @@ interface N8nMessagePayload {
     number: string; // Same as remoteJid
   };
   timestamp: string; // ISO 8601 date string
-  instanceName?: string; // Nome da instância Evolution do VENDEDOR (Seller.evolutionInstanceName)
-  // Considere adicionar sellerEvolutionApiKey?: string; se o N8N puder enviar para uma correspondência mais precisa
+  sellerId?: string; // <--- ADICIONE ESTA LINHA
+  instanceName?: string; 
+  sellerEvolutionApiKey?: string; 
 }
 
 /**
@@ -84,20 +85,58 @@ export async function POST(request: NextRequest, context: RouteContext) {
     
       // Prepare data for saving to the database
       let sellerIdToSave: string | null = null;
-      if (item.instanceName) { // Assumindo que instanceName é Seller.evolutionInstanceName
+      let dbSellerInstanceName: string | null = null;
+  
+      // 1. Tentar encontrar pelo sellerId do payload, se fornecido
+      if (item.sellerId) {
         const seller = await prisma.seller.findFirst({
           where: {
-            storeOwnerId: user.id,
-            evolutionInstanceName: item.instanceName,
-            // Se você adicionar sellerEvolutionApiKey ao payload, adicione aqui:
-            // evolutionApiKey: item.sellerEvolutionApiKey
+            id: item.sellerId,
+            storeOwnerId: user.id, // Garante que o vendedor pertence ao dono da loja correto
           },
         });
         if (seller) {
           sellerIdToSave = seller.id;
+          dbSellerInstanceName = seller.evolutionInstanceName;
         } else {
-          console.warn(`Vendedor com instanceName ${item.instanceName} não encontrado para o usuário ${user.id}`);
+          console.warn(`Vendedor com sellerId (do payload) '${item.sellerId}' não encontrado ou não pertence ao usuário '${user.id}'. Verificando outros campos.`);
         }
+      }
+  
+      // 2. Se não encontrado pelo sellerId do payload, tentar pelo sellerEvolutionApiKey
+      if (!sellerIdToSave && item.sellerEvolutionApiKey) {
+        const seller = await prisma.seller.findFirst({
+          where: {
+            storeOwnerId: user.id,
+            evolutionApiKey: item.sellerEvolutionApiKey,
+          },
+        });
+        if (seller) {
+          sellerIdToSave = seller.id;
+          dbSellerInstanceName = seller.evolutionInstanceName;
+        } else {
+          console.warn(`Vendedor com sellerEvolutionApiKey '${item.sellerEvolutionApiKey}' não encontrado para o usuário '${user.id}'. Payload instanceName: ${item.instanceName || 'N/A'}`);
+        }
+      } 
+      
+      // 3. Se ainda não encontrado, tentar pelo instanceName
+      else if (!sellerIdToSave && item.instanceName) {
+        const seller = await prisma.seller.findFirst({
+          where: {
+            storeOwnerId: user.id,
+            evolutionInstanceName: item.instanceName,
+          },
+        });
+        if (seller) {
+          sellerIdToSave = seller.id;
+          dbSellerInstanceName = seller.evolutionInstanceName; 
+        } else {
+          console.warn(`Vendedor com instanceName '${item.instanceName}' não encontrado (e sellerEvolutionApiKey/sellerId não fornecido ou inválido) para o usuário '${user.id}'`);
+        }
+      }
+  
+      if (!sellerIdToSave) {
+         console.warn(`Nenhum vendedor pôde ser associado para o item do payload com remoteJid '${item.remoteJid}' para o usuário '${user.id}'. Item:`, JSON.stringify(item));
       }
       
       const dataToSave = {
@@ -108,8 +147,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
         analysisKeywords: item.analysis.keywords,
         eventTimestamp: new Date(item.timestamp),
         userId: user.id,
-        sellerId: sellerIdToSave, // SALVANDO O ID DO VENDEDOR
-        sellerInstanceName: item.instanceName, 
+        sellerId: sellerIdToSave, 
+        sellerInstanceName: dbSellerInstanceName || item.instanceName || null,
       };
       
       const newInteraction = await prisma.chatInteraction.create({
@@ -140,31 +179,5 @@ export async function POST(request: NextRequest, context: RouteContext) {
     }
     console.error("Error in POST /api/conversas:", error); // Log the error for debugging
     return NextResponse.json({ message: 'Erro ao salvar interações', error: errorMessage }, { status: 500 });
-  }
-}
-
-/**
- * GET handler to retrieve chat interactions for the authenticated user.
- */
-export async function GET(request: NextRequest) {
-  const session = await getServerSession(authOptions);
-
-  // Check if the user is authenticated
-  if (!session?.user?.id) {
-    return NextResponse.json({ message: 'Não autorizado' }, { status: 401 });
-  }
-
-  try {
-    // Fetch chat interactions for the logged-in user, ordered by timestamp
-    const interactions = await prisma.chatInteraction.findMany({
-      where: { userId: session.user.id },
-      orderBy: {
-        eventTimestamp: 'desc',
-      },
-    });
-    return NextResponse.json(interactions, { status: 200 });
-  } catch (error) {
-    console.error("Error in GET /api/conversas:", error); // Log the error for debugging
-    return NextResponse.json({ message: 'Erro ao buscar interações', error: (error as Error).message }, { status: 500 });
   }
 }
