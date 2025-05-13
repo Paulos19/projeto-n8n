@@ -15,8 +15,8 @@ const navItems = [
   { href: "/dashboard/conversas", label: "Conversas n8n", icon: MessageCircle },
   { href: "/dashboard/relatorios", label: "Relatórios", icon: FileText },
   { href: "/dashboard/clientes", label: "Clientes", icon: Users },
-  { href: "/dashboard/configuracoes", label: "Configurações", icon: Settings },
   { href: "/dashboard/sellers", label: "Vendedores", icon: UserIcon },
+  { href: "/dashboard/configuracoes", label: "Configurações", icon: Settings },
 ];
 
 interface SidebarProps {
