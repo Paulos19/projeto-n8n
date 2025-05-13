@@ -75,3 +75,29 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'Erro interno do servidor ao adicionar vendedor.' }, { status: 500 });
   }
 }
+
+export async function GET(request: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ message: 'Não autorizado.' }, { status: 401 });
+    }
+
+    const storeOwnerId = session.user.id;
+
+    const sellers = await prisma.seller.findMany({
+      where: {
+        storeOwnerId: storeOwnerId,
+      },
+      orderBy: {
+        createdAt: 'desc', // Ou 'name', 'asc'
+      },
+    });
+
+    return NextResponse.json({ sellers }, { status: 200 });
+  } catch (error) {
+    console.error('Erro ao buscar vendedores:', error);
+    return NextResponse.json({ message: 'Erro interno do servidor ao buscar vendedores.' }, { status: 500 });
+  }
+}

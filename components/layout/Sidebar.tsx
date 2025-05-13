@@ -9,14 +9,6 @@ import { useTheme } from "next-themes";
 import { useSession, signOut } from "next-auth/react"; // Importar useSession e signOut
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // Importar Avatar
 
-// Remova ou comente as variáveis de cor JavaScript que não serão mais usadas para o fundo.
-// const corBackgroundSidebar = "#DDE7F7"; // Exemplo de variável a ser removida para o fundo
-
-// As outras variáveis de cor (corDestaque, corTexto, etc.) para os itens de navegação
-// também deveriam ser migradas para usar variáveis CSS do tema para consistência total.
-// Por exemplo, em vez de text-[${corTexto}], usar text-[var(--sidebar-foreground)].
-// No entanto, focaremos no fundo e no blur conforme solicitado.
-
 const navItems = [
   { href: "/dashboard", label: "Início", icon: Home },
   { href: "/dashboard/avaliacoes", label: "Avaliações", icon: MessageSquare },
@@ -24,6 +16,7 @@ const navItems = [
   { href: "/dashboard/relatorios", label: "Relatórios", icon: FileText },
   { href: "/dashboard/clientes", label: "Clientes", icon: Users },
   { href: "/dashboard/configuracoes", label: "Configurações", icon: Settings },
+  { href: "/dashboard/sellers", label: "Vendedores", icon: UserIcon },
 ];
 
 interface SidebarProps {
