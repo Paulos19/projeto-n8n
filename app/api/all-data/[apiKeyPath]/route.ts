@@ -20,6 +20,35 @@ export async function GET(request: NextRequest, context: RouteContext) {
       );
     }
 
+    const { searchParams } = request.nextUrl;
+    const startDateParam = searchParams.get('startDate');
+    const endDateParam = searchParams.get('endDate');
+
+    let dateFilterAvaliacoes = {};
+    let dateFilterChatInteractions = {};
+
+    if (startDateParam) {
+      const startDate = new Date(startDateParam);
+      if (!isNaN(startDate.getTime())) {
+        dateFilterAvaliacoes = { ...dateFilterAvaliacoes, createdAt: { ...((dateFilterAvaliacoes as any).createdAt), gte: startDate } };
+        dateFilterChatInteractions = { ...dateFilterChatInteractions, eventTimestamp: { ...((dateFilterChatInteractions as any).eventTimestamp), gte: startDate } };
+      } else {
+        return NextResponse.json({ message: 'Formato de startDate inválido. Use YYYY-MM-DD ou um formato de data ISO válido.' }, { status: 400 });
+      }
+    }
+
+    if (endDateParam) {
+      const endDate = new Date(endDateParam);
+      if (!isNaN(endDate.getTime())) {
+        // Para incluir o dia final, ajustamos para o final do dia
+        endDate.setHours(23, 59, 59, 999);
+        dateFilterAvaliacoes = { ...dateFilterAvaliacoes, createdAt: { ...((dateFilterAvaliacoes as any).createdAt), lte: endDate } };
+        dateFilterChatInteractions = { ...dateFilterChatInteractions, eventTimestamp: { ...((dateFilterChatInteractions as any).eventTimestamp), lte: endDate } };
+      } else {
+        return NextResponse.json({ message: 'Formato de endDate inválido. Use YYYY-MM-DD ou um formato de data ISO válido.' }, { status: 400 });
+      }
+    }
+
     const userWithData = await prisma.user.findUnique({
       where: { webhookApiKey: apiKeyPath },
       select: {
@@ -30,9 +59,11 @@ export async function GET(request: NextRequest, context: RouteContext) {
         instanceName: true,
         // Avaliações e interações de chat diretamente ligadas ao dono da loja
         avaliacoes: {
+          where: dateFilterAvaliacoes, // Aplicar filtro de data
           orderBy: { createdAt: 'desc' }
         },
         chatInteractions: {
+          where: dateFilterChatInteractions, // Aplicar filtro de data
           orderBy: { eventTimestamp: 'desc' }
         },
         // Dados dos vendedores associados a este dono de loja
@@ -45,9 +76,11 @@ export async function GET(request: NextRequest, context: RouteContext) {
             isActive: true,
             // Avaliações e interações de chat específicas de cada vendedor
             avaliacoes: {
+              where: dateFilterAvaliacoes, // Aplicar filtro de data
               orderBy: { createdAt: 'desc' }
             },
             chatInteractions: {
+              where: dateFilterChatInteractions, // Aplicar filtro de data
               orderBy: { eventTimestamp: 'desc' }
             }
           },
