@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, MessageSquare, Users, FileText, LogOut, MessageCircle, X, Sun, Moon, Settings, UserCircle as UserIcon } from "lucide-react"; // Added UserIcon
+import { Home, MessageSquare, Users, FileText, LogOut, MessageCircle, X, Sun, Moon, Settings, UserCircle as UserIcon, Bot } from "lucide-react"; // Added Bot
 import NextImage from "next/image"; // Renomeado para evitar conflito
 import React, { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
@@ -16,6 +16,7 @@ const navItems = [
   { href: "/dashboard/relatorios", label: "Relatórios", icon: FileText },
   { href: "/dashboard/clientes", label: "Clientes", icon: Users },
   { href: "/dashboard/sellers", label: "Vendedores", icon: UserIcon },
+  { href: "/dashboard/chatbot", label: "Assistente IA", icon: Bot },
   { href: "/dashboard/configuracoes", label: "Configurações", icon: Settings },
 ];
 
@@ -79,7 +80,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                   className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-colors group
                     ${isActive ? activeClasses : inactiveClasses}`}
                 >
-                  <item.icon className={`h-5 w-5 ${isActive ? 'text-sidebar-primary-foreground' : 'text-sidebar-foreground group-hover:text-sidebar-accent-foreground'}`} /> {/* Ajuste de cor do ícone */}
+                  <item.icon className={`h-5 w-5 ${isActive ? 'text-sidebar-primary-foreground' : 'text-sidebar-foreground group-hover:text-sidebar-accent-foreground'}`} /> {}
                   <span>{item.label}</span>
                 </Link>
               </li>
@@ -87,7 +88,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           })}
         </ul>
       </nav>
-      <div className="mt-auto space-y-2"> {/* Added mt-auto and space-y-2 for spacing */}
+      <div className="mt-auto space-y-2"> {}
         <button
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-colors w-full text-left
@@ -95,7 +96,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           aria-label="Alternar tema"
           disabled={!mounted} // Disable button until mounted to prevent interaction before hydration
         >
-          {mounted ? (theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />) : <div className="h-5 w-5" /> /* Placeholder */}
+          {mounted ? (theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />) : <div className="h-5 w-5" /> }
           <span>Alternar Tema</span>
         </button>
         {status === "authenticated" && (

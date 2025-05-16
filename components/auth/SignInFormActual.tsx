@@ -92,6 +92,17 @@ export function SignInFormActual() {
             </Button>
           </form>
         </CardContent>
+        <CardFooter className="flex justify-center">
+          <p className="text-sm text-muted-foreground">
+            Não tem uma conta?{" "}
+            <Link
+              href="/auth/signup" // Ajuste este caminho se sua página de signup for diferente
+              className="font-medium text-primary hover:underline"
+            >
+              Cadastre-se
+            </Link>
+          </p>
+        </CardFooter>
       </Card>
     </div>
   );

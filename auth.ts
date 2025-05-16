@@ -1,6 +1,6 @@
 import { NextAuthOptions, User as NextAuthUser } from "next-auth"; // Import User for explicit typing
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import prisma from "@/lib/prisma";
+import prisma from "@/lib/prisma"; // Certifique-se de que o prisma client está importado
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 
@@ -59,35 +59,60 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session: newSessionData }) {
       if (user) {
-        // user object here is from authorize
-        const u = user as AuthorizeUserType; // Cast to ensure access to identifier
-        token.id = u.id;
-        token.identifier = u.identifier;
-        token.webhookApiKey = u.webhookApiKey; // Adicionado
-        // Optionally map to standard JWT claims if needed elsewhere
-        token.name = u.name;
-        token.email = u.email;
-        token.picture = u.image; // 'image' often mapped to 'picture' in JWT
+        token.id = user.id;
+        // @ts-ignore
+        token.webhookApiKey = user.webhookApiKey; // Adicionado ao buscar usuário inicial
+        // @ts-ignore
+        token.image = user.image; // Adicionado ao buscar imagem inicial
+      }
+
+      // Se a sessão for atualizada (ex: após salvar configurações do usuário)
+      if (trigger === "update" && newSessionData) {
+        if (newSessionData.user?.name) {
+          token.name = newSessionData.user.name;
+        }
+        if (newSessionData.user?.email) {
+          token.email = newSessionData.user.email;
+        }
+        if (newSessionData.user?.image) {
+          // @ts-ignore
+          token.image = newSessionData.user.image;
+        }
+        // Se a webhookApiKey puder ser atualizada via sessão, adicione aqui também
+        // if (newSessionData.user?.webhookApiKey) {
+        //   token.webhookApiKey = newSessionData.user.webhookApiKey;
+        // }
       }
       return token;
     },
     async session({ session, token }) {
-      // token object here is from jwt callback
-      if (token && session.user) {
+      if (session.user) {
         session.user.id = token.id as string;
-        session.user.name = token.name;
-        session.user.email = token.email;
-        session.user.image = token.picture; // Map 'picture' back to 'image'
-
-        // Assign custom 'identifier' property to session.user
-        // This relies on Session.user in next-auth.d.ts being augmented
-        session.user.identifier = token.identifier as (string | null | undefined);
-        session.user.webhookApiKey = token.webhookApiKey as (string | null | undefined); // Adicionado
+        // @ts-ignore
+        session.user.webhookApiKey = token.webhookApiKey as string | null;
+        // @ts-ignore
+        session.user.image = token.image as string | null;
       }
       return session;
     },
+    // Adicione o evento de createUser se ainda não existir, para gerar a webhookApiKey
+    // async events: {
+    //   async createUser({ user }) {
+    //     if (user.id) {
+    //       const apiKey = `RAIO-${crypto.randomUUID()}`;
+    //       await prisma.user.update({
+    //         where: { id: user.id },
+    //         data: { webhookApiKey: apiKey },
+    //       });
+    //     }
+    //   },
+    // },
+  },
+  adapter: PrismaAdapter(prisma), // Se você estiver usando o PrismaAdapter
+  session: {
+    strategy: "jwt",
   },
   pages: {
     signIn: '/auth/signin',
