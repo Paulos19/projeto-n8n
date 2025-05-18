@@ -115,6 +115,13 @@ model ChatInteraction {
   remoteJid String // JID do contato externo (ex: cliente no WhatsApp)
   messageId String? @unique // ID único da mensagem da plataforma de origem (opcional, mas útil)
 
+  // Campos adicionados para corresponder ao payload do N8N
+  customerName       String?
+  chatHistory        Json?    // Para armazenar o histórico de chat como JSON
+  analysisSummary    String?  @db.Text // Para o resumo da análise
+  analysisKeywords   String[] // Para as palavras-chave da análise
+  sellerInstanceName String?  // Nome da instância do vendedor, se aplicável
+
   interactionType String? // Ex: "message_received", "message_sent", "call_log", "status_update"
   content         String?  @db.Text // Conteúdo da mensagem, detalhes da chamada, etc.
   eventTimestamp  DateTime // Quando a interação ocorreu (pode ser diferente de createdAt)
