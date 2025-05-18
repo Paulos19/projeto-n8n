@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/auth";
+import { Prisma } from '@prisma/client'; // Adicionado
 
 // A interface pode ser movida para um arquivo de tipos compartilhado
 // O campo webhookApiKey não é mais necessário aqui, pois virá do path
@@ -78,7 +79,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       }
     }
 
-    const dataToSave = {
+    const dataToSave: Prisma.AvaliacaoCreateInput = {
       nota_cliente: Number(parsedDataFromN8N.nota_cliente) || 0,
       pontos_fortes: Array.isArray(parsedDataFromN8N.pontos_fortes) ? parsedDataFromN8N.pontos_fortes : [],
       pontos_fracos: Array.isArray(parsedDataFromN8N.pontos_fracos) ? parsedDataFromN8N.pontos_fracos : [],
@@ -88,10 +89,17 @@ export async function POST(request: NextRequest, context: RouteContext) {
       sugestoes_melhoria: Array.isArray(parsedDataFromN8N.sugestoes_melhoria) ? parsedDataFromN8N.sugestoes_melhoria : [],
       resumo_atendimento: String(parsedDataFromN8N.resumo_atendimento || "Não informado"),
       remoteJid: parsedDataFromN8N.remoteJid || null,
-      userId: user.id,
-      sellerId: sellerIdToSave, // SALVANDO O ID DO VENDEDOR
-      sellerEvolutionApiKey: parsedDataFromN8N.sellerEvolutionApiKey || null, // SALVANDO A API KEY DO VENDEDOR
+      user: { // CORRIGIDO: Usar connect para a relação com User
+        connect: { id: user.id },
+      },
+      // O campo sellerEvolutionApiKey foi removido daqui pois não existe no modelo Avaliacao
     };
+
+    if (sellerIdToSave) { // CORRIGIDO: Usar connect para a relação com Seller, se sellerIdToSave existir
+      dataToSave.seller = {
+        connect: { id: sellerIdToSave },
+      };
+    }
 
     const novaAvaliacao = await prisma.avaliacao.create({
       data: dataToSave,
