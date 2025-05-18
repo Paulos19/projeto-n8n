@@ -2,8 +2,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { NavLinks } from "./NavLinks";
 import { LoginButton } from "./LoginButton";
-// Se precisar de UserMenu ou ThemeToggle aqui, importe-os.
-// Para este design, o ThemeToggle está no header mobile, e UserMenu não está no mobile dropdown.
 
 interface NavLink {
   href: string;
@@ -31,22 +29,22 @@ export function MobileMenu({ isOpen, navLinks, status, setIsOpen }: MobileMenuPr
           className="md:hidden absolute top-full left-0 right-0 bg-background/95 dark:bg-background/95 backdrop-blur-md shadow-xl pb-4 border-t border-border/60 overflow-hidden"
           initial="hidden"
           animate="visible"
-          exit="hidden" // Use 'hidden' for exit to reverse the animation correctly
+          exit="hidden" 
           variants={menuVariants}
         >
-          <div className="px-4 pt-4 pb-2 space-y-3"> {/* Increased padding and spacing */}
+          <div className="px-4 pt-4 pb-2 space-y-3"> {}
             <NavLinks
               links={navLinks}
               onLinkClick={() => setIsOpen(false)}
               isMobile
-              className="space-y-2" // Add more spacing between mobile links if needed
+              className="space-y-2" 
             />
             {status === "unauthenticated" && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="pt-3 border-t border-border/60 mt-3" // Separator
+                className="pt-3 border-t border-border/60 mt-3" 
               >
                 <LoginButton isMobile onClick={() => setIsOpen(false)} />
               </motion.div>

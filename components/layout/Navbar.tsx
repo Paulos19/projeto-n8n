@@ -33,8 +33,6 @@ export default function Navbar() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <Logo />
-
-          {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-6">
             <NavLinks links={navLinks} />
             <div className="flex items-center space-x-3">
@@ -48,16 +46,12 @@ export default function Navbar() {
               <ThemeToggleButton />
             </div>
           </div>
-
-          {/* Mobile Menu Trigger Area */}
           <div className="md:hidden flex items-center space-x-2">
             <ThemeToggleButton iconSize={20} />
             <MobileMenuButton isOpen={isOpen} toggleMenu={toggleMenu} />
           </div>
         </div>
       </div>
-
-      {/* Mobile Menu Dropdown */}
       <MobileMenu
         isOpen={isOpen}
         navLinks={navLinks}

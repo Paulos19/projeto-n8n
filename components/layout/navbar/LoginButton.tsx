@@ -18,12 +18,12 @@ export function LoginButton({ isMobile, onClick }: LoginButtonProps) {
     >
       <Button
         asChild
-        variant="default" // Use your default button style, or "primary" if defined
+        variant="default" 
         size={isMobile ? "lg" : "default"}
         className="w-full group shadow-lg hover:shadow-primary/40 transition-shadow duration-300"
       >
         <Link
-          href="/api/auth/signin" // Ou sua página de login customizada
+          href="/api/auth/signin" 
           onClick={onClick}
         >
           Acessar Plataforma

@@ -21,7 +21,7 @@ export interface Feature {
   icon: LucideIcon;
   title: string;
   description: string;
-  details?: string[]; // Opcional para mais detalhes
+  details?: string[]; 
 }
 
 export interface HowItWorksStep {

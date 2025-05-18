@@ -9,7 +9,7 @@ interface RouteParams {
   };
 }
 
-// DELETE: Deletar um chat arquivado específico
+
 export async function DELETE(request: Request, { params }: RouteParams) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {

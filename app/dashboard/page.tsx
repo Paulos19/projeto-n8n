@@ -1,21 +1,21 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Activity, ArrowUpRight, Users, MessageSquareText, BarChart2, Settings, Copy } from "lucide-react"; // Adicionado Copy
+import { Activity, ArrowUpRight, Users, MessageSquareText, BarChart2, Settings, Copy } from "lucide-react"; 
 import Link from "next/link";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/auth";
-import { CopyToClipboardButton } from "@/components/ui/copy-to-clipboard-button"; // Adicionado
-// Removido import não utilizado de Avaliacao se não for usado diretamente como tipo aqui
-// import { Avaliacao } from "@prisma/client";
+import { CopyToClipboardButton } from "@/components/ui/copy-to-clipboard-button"; 
+
+
 
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
-    // Idealmente, redirecionar para login ou mostrar mensagem de não autorizado
-    // Por enquanto, para evitar erros, podemos retornar um estado vazio ou mensagem.
+
+
     return (
       <div>
         <h1 className="text-2xl font-bold">Acesso Negado</h1>
@@ -24,7 +24,7 @@ export default async function DashboardPage() {
     );
   }
   const userId = session.user.id;
-  const webhookApiKey = session.user.webhookApiKey; // Obter a chave da sessão
+  const webhookApiKey = session.user.webhookApiKey; 
 
   const gradientText = "bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-teal-300 to-green-300";
 
@@ -32,13 +32,13 @@ export default async function DashboardPage() {
   oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
   const totalAvaliacoes = await prisma.avaliacao.count({
-    where: { userId: userId }, // Adicionado filtro
+    where: { userId: userId }, 
   });
 
   const avaliacoesUltimoMes = await prisma.avaliacao.findMany({
     where: { 
       createdAt: { gte: oneMonthAgo },
-      userId: userId, // Adicionado filtro
+      userId: userId, 
     },
     select: { remoteJid: true },
   });
@@ -53,7 +53,7 @@ export default async function DashboardPage() {
 
   const satisfacaoMediaData = await prisma.avaliacao.aggregate({
     _avg: { nota_cliente: true },
-    where: { userId: userId }, // Adicionado filtro
+    where: { userId: userId }, 
   });
   const satisfacaoMedia = satisfacaoMediaData._avg.nota_cliente !== null
     ? satisfacaoMediaData._avg.nota_cliente.toFixed(1) + "/10"
@@ -62,11 +62,11 @@ export default async function DashboardPage() {
   const numAvaliacoesEsteMes = await prisma.avaliacao.count({
     where: { 
       createdAt: { gte: oneMonthAgo },
-      userId: userId, // Adicionado filtro
+      userId: userId, 
     },
   });
 
-  // Dados para os cards de estatísticas
+
   const stats = [
     { title: "Total de Avaliações", value: totalAvaliacoes.toString(), icon: MessageSquareText },
     { title: "Novos Clientes (Mês)", value: novosClientesMes.toString(), icon: Users },
@@ -74,9 +74,9 @@ export default async function DashboardPage() {
     { title: "Avaliações este Mês", value: numAvaliacoesEsteMes.toString(), icon: ArrowUpRight },
   ];
 
-  // Dados para atividades recentes
+
   const recentAvaliacoesData = await prisma.avaliacao.findMany({
-    where: { userId: userId }, // Adicionado filtro
+    where: { userId: userId }, 
     orderBy: { createdAt: 'desc' },
     take: 5,
     select: { id: true, remoteJid: true, createdAt: true },
@@ -90,7 +90,7 @@ export default async function DashboardPage() {
         : (avaliacao.id && typeof avaliacao.id === 'string' ? `(ID: ${avaliacao.id.substring(0, 8)})` : '(ID: Indisponível)')
     }`,
     time: new Date(avaliacao.createdAt).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-    type: "avaliacao", // Usado para estilizar o ponto colorido
+    type: "avaliacao", 
   }));
 
   return (
@@ -101,14 +101,14 @@ export default async function DashboardPage() {
           <p className="text-muted-foreground">Bem-vindo de volta! Aqui está um resumo da sua atividade.</p>
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-4 mt-4 md:mt-0">
-          {/* O webhookApiKey foi movido para baixo */}
+          {}
           <Button asChild className="bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white font-semibold shadow-md transition-all duration-300 ease-in-out transform hover:scale-105">
             <Link href="/dashboard/avaliacoes/nova">Nova Avaliação</Link>
           </Button>
         </div>
       </div>
 
-      {/* Stats Cards */}
+      {}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
           <Card key={stat.title}>
@@ -123,7 +123,7 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      {/* Recent Activity & Quick Actions */}
+      {}
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>

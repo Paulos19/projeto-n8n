@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/auth'; // Ajuste o caminho se necessário
-import prisma from '@/lib/prisma'; // Ajuste o caminho se necessário
+import { authOptions } from '@/auth'; 
+import prisma from '@/lib/prisma'; 
 
 interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
 }
 
-// GET: Carregar chat ativo
+
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -24,7 +24,7 @@ export async function GET(request: Request) {
     if (activeSession) {
       return NextResponse.json({ messages: activeSession.messages });
     } else {
-      return NextResponse.json({ messages: [] }); // Retorna array vazio se não houver sessão
+      return NextResponse.json({ messages: [] }); 
     }
   } catch (error) {
     console.error('Erro ao carregar chat ativo:', error);
@@ -32,7 +32,7 @@ export async function GET(request: Request) {
   }
 }
 
-// POST: Salvar chat ativo
+
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -47,12 +47,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Formato de mensagens inválido' }, { status: 400 });
     }
 
-    // Remova o cast explícito para Prisma.JsonValue
-    // const messagesJson = messages as unknown as Prisma.JsonValue; // LINHA REMOVIDA
+
+
 
     await prisma.chatbotActiveSession.upsert({
       where: { userId },
-      // Use o array 'messages' diretamente
+
       update: { messages: messages as any }, 
       create: { userId, messages: messages as any },
     });

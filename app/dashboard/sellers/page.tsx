@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import prisma from "@/lib/prisma"; // Usaremos Prisma diretamente para Server Component
+import prisma from "@/lib/prisma"; 
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/auth";
 import {
@@ -15,15 +15,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserPlus, Users, Eye, Edit, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-// import { SellerActions } from './components/seller-actions'; // Componente cliente para ações futuras
 
-export const dynamic = 'force-dynamic'; // Garante que os dados sejam sempre frescos
+
+export const dynamic = 'force-dynamic'; 
 
 interface Seller {
   id: string;
   name: string | null;
   evolutionInstanceName: string;
-  evolutionApiKey: string; // Considerar não exibir diretamente na lista por segurança
+  evolutionApiKey: string; 
   sellerWhatsAppNumber: string;
   isActive: boolean;
   createdAt: Date;
@@ -43,13 +43,13 @@ async function getSellers(): Promise<Seller[]> {
       id: true,
       name: true,
       evolutionInstanceName: true,
-      evolutionApiKey: true, // Apenas para ter o dado, mas não exibir na tabela principal
+      evolutionApiKey: true, 
       sellerWhatsAppNumber: true,
       isActive: true,
       createdAt: true,
     }
   });
-  return sellers as Seller[]; // Cast para Seller, assumindo que os campos correspondem
+  return sellers as Seller[]; 
 }
 
 export default async function SellersPage() {
@@ -107,7 +107,7 @@ export default async function SellersPage() {
                     {new Date(seller.createdAt).toLocaleDateString('pt-BR')}
                   </TableCell>
                   <TableCell className="text-right space-x-1">
-                    {/* Ações atualizadas */}
+                    {}
                     <Button asChild variant="ghost" size="icon" className="text-blue-400 hover:text-blue-300 hover:bg-blue-800/50" title="Ver Detalhes">
                         <Link href={`/dashboard/sellers/${seller.id}`}>
                             <Eye className="h-4 w-4" />
@@ -118,7 +118,7 @@ export default async function SellersPage() {
                             <Edit className="h-4 w-4" />
                         </Link>
                     </Button>
-                     {/* O botão de excluir precisará de um componente cliente para confirmação e chamada da API */}
+                     {}
                      <Button variant="ghost" size="icon" className="text-red-400 hover:text-red-300 hover:bg-red-800/50" title="Excluir (implementar ação)" disabled>
                         <Trash2 className="h-4 w-4" />
                     </Button>

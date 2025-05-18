@@ -1,12 +1,11 @@
-// app/api/receber-avaliacao/[apiKeyPath]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/auth";
-import { Prisma } from '@prisma/client'; // Adicionado
+import { Prisma } from '@prisma/client'; 
 
-// A interface pode ser movida para um arquivo de tipos compartilhado
-// O campo webhookApiKey não é mais necessário aqui, pois virá do path
+
+
 export interface AvaliacaoPayload {
   nota_cliente: number;
   pontos_fortes: string[];
@@ -17,19 +16,19 @@ export interface AvaliacaoPayload {
   sugestoes_melhoria: string[];
   resumo_atendimento: string;
   remoteJid?: string | null;
-  sellerEvolutionApiKey?: string | null; // ALTERADO: Chave API do vendedor
+  sellerEvolutionApiKey?: string | null; 
 }
 
 interface RouteContext {
   params: {
-    apiKeyPath?: string; // O path dinâmico da URL
+    apiKeyPath?: string; 
   };
 }
 
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
     const { params } = context;
-    const apiKeyPath = params.apiKeyPath; // Este é o User.webhookApiKey (dono da loja)
+    const apiKeyPath = params.apiKeyPath; 
 
     if (!apiKeyPath) {
       return NextResponse.json(
@@ -75,7 +74,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
         sellerIdToSave = seller.id;
       } else {
         console.warn(`Vendedor com evolutionApiKey ${parsedDataFromN8N.sellerEvolutionApiKey} não encontrado para o usuário ${user.id}`);
-        // Decida se quer retornar um erro aqui ou apenas não associar o vendedor
+
       }
     }
 
@@ -89,13 +88,13 @@ export async function POST(request: NextRequest, context: RouteContext) {
       sugestoes_melhoria: Array.isArray(parsedDataFromN8N.sugestoes_melhoria) ? parsedDataFromN8N.sugestoes_melhoria : [],
       resumo_atendimento: String(parsedDataFromN8N.resumo_atendimento || "Não informado"),
       remoteJid: parsedDataFromN8N.remoteJid || null,
-      user: { // CORRIGIDO: Usar connect para a relação com User
+      user: { 
         connect: { id: user.id },
       },
-      // O campo sellerEvolutionApiKey foi removido daqui pois não existe no modelo Avaliacao
+
     };
 
-    if (sellerIdToSave) { // CORRIGIDO: Usar connect para a relação com Seller, se sellerIdToSave existir
+    if (sellerIdToSave) { 
       dataToSave.seller = {
         connect: { id: sellerIdToSave },
       };
@@ -115,8 +114,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
      if (error instanceof SyntaxError) {
       errorMessage = 'Erro de parsing do JSON no campo "text". Verifique se a string JSON é válida.';
       try {
-        // Tenta logar o corpo bruto se o parsing inicial falhar
-        const rawBodyForErrorLog = await request.text(); // request.text() só pode ser chamado uma vez
+
+        const rawBodyForErrorLog = await request.text(); 
         console.error("Corpo da requisição (string) que causou o erro de parsing:", rawBodyForErrorLog);
       } catch (e) {
         console.error("Não foi possível ler o corpo da requisição como texto para log de erro.");
@@ -128,9 +127,9 @@ export async function POST(request: NextRequest, context: RouteContext) {
   }
 }
 
-// GET para buscar todas as avaliações (para o painel de admin do usuário logado)
-// Esta função GET permanece como estava, pois ela é para o usuário logado no dashboard
-// e não depende do apiKeyPath.
+
+
+
 export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions);
 

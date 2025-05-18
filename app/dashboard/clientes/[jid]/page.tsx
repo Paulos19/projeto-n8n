@@ -7,8 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from "@/components/ui/table";
 import { ArrowLeft, UserCircle, MessageSquare, Star, CalendarDays, Eye, Hash } from "lucide-react";
 import { Avaliacao } from "@prisma/client";
-import { getServerSession } from "next-auth/next"; // Adicionado
-import { authOptions } from "@/auth"; // Adicionado
+import { getServerSession } from "next-auth/next"; 
+import { authOptions } from "@/auth"; 
 
 export const dynamic = 'force-dynamic';
 
@@ -23,9 +23,9 @@ interface ClienteDetalhes {
 }
 
 async function getClienteDetalhes(jidSlug: string): Promise<ClienteDetalhes | null> {
-  const session = await getServerSession(authOptions); // Adicionado
+  const session = await getServerSession(authOptions); 
   if (!session?.user?.id) {
-    return null; // Retorna nulo se não houver sessão
+    return null; 
   }
   const userId = session.user.id;
 
@@ -34,13 +34,13 @@ async function getClienteDetalhes(jidSlug: string): Promise<ClienteDetalhes | nu
   const avaliacoesCliente = await prisma.avaliacao.findMany({
     where: { 
       remoteJid: originalJid,
-      userId: userId, // Adicionado filtro por userId
+      userId: userId, 
     },
     orderBy: { createdAt: 'desc' },
   });
 
   if (avaliacoesCliente.length === 0) {
-    return null; // Cliente não encontrado ou sem avaliações
+    return null; 
   }
 
   let somaNotas = 0;

@@ -8,7 +8,7 @@ import { ArrowLeft, MessageSquare, Star, ThumbsUp, ThumbsDown, User, CalendarDay
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/auth";
 
-// Interface para os dados da avaliação
+
 interface AvaliacaoData {
   id: string;
   remoteJid: string | null;
@@ -22,8 +22,8 @@ interface AvaliacaoData {
   resumo_atendimento: string | null;
   createdAt: Date;
   updatedAt: Date;
-  // Adicione quaisquer outros campos que possam existir no seu modelo Prisma
-  // Ex: userId: string; (se você precisar dele na interface)
+
+
 }
 
 async function fetchAvaliacaoById(id: string, userId: string): Promise<AvaliacaoData | null> {
@@ -36,9 +36,9 @@ async function fetchAvaliacaoById(id: string, userId: string): Promise<Avaliacao
       return null;
     }
 
-    // Verifica se a avaliação pertence ao usuário logado (assumindo que seu modelo Avaliacao tem um campo userId)
-    // Se o seu modelo `avaliacao` não tiver `userId`, ajuste esta lógica ou remova-a se não for necessária aqui.
-    // @ts-ignore // Remova este ignore se o campo userId existir e estiver tipado corretamente
+
+
+
     if (avaliacao.userId !== userId) {
       console.warn(`Tentativa de acesso negado à avaliação ${id} pelo usuário ${userId}. Avaliação pertence a ${avaliacao.userId}`);
       return null;
@@ -53,8 +53,8 @@ async function fetchAvaliacaoById(id: string, userId: string): Promise<Avaliacao
 export default async function AvaliacaoDetalhePage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
-    // Usuário não logado, redireciona ou mostra erro
-    // O middleware geralmente cuida disso, mas uma verificação aqui é uma boa prática.
+
+
     notFound();
   }
 
@@ -62,21 +62,21 @@ export default async function AvaliacaoDetalhePage({ params }: { params: { id: s
   const gradientText = "bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-teal-300 to-green-300";
 
   if (!avaliacao) {
-    notFound(); // Avaliação não encontrada ou não pertence ao usuário
+    notFound(); 
   }
 
   const getNotaBadgeVariant = (nota: number | null): "default" | "secondary" | "destructive" | "outline" | null => {
     if (nota === null) return "secondary";
     if (nota <= 2) return "destructive";
-    if (nota <= 3) return "secondary"; // Ex: notas 3 e 4 como neutras/secundárias
-    return "default"; // Ex: notas 5+ como positivas/padrão
+    if (nota <= 3) return "secondary"; 
+    return "default"; 
   };
 
   const renderField = (
     label: string,
     value: string | number | string[] | null | Date,
     Icon?: React.ElementType,
-    isBadgeList?: boolean, // Renomeado para clareza, indica que o valor é uma lista para badges
+    isBadgeList?: boolean, 
     badgeVariant?: "default" | "secondary" | "destructive" | "outline" | null
   ) => {
     if (value === null || value === undefined || (typeof value === 'string' && value.trim() === "") || (Array.isArray(value) && value.length === 0)) {
@@ -94,7 +94,7 @@ export default async function AvaliacaoDetalhePage({ params }: { params: { id: s
             <Badge 
               key={index} 
               variant={badgeVariant || "secondary"} 
-              className="text-sm break-words whitespace-normal max-w-full" // Chave para responsividade de badges
+              className="text-sm break-words whitespace-normal max-w-full" 
             >
               {String(item)}
             </Badge>
@@ -102,23 +102,23 @@ export default async function AvaliacaoDetalhePage({ params }: { params: { id: s
         </div>
       );
     } else if (typeof value === 'number' || (typeof value === 'string' && !isBadgeList)) {
-        // Se for um número ou uma string simples que não é para ser uma lista de badges
-        // (ex: nota_cliente, tempo_resposta, etc., que podem ser renderizados como texto ou uma única badge)
-        if (badgeVariant && typeof value !== 'object') { // Renderiza como uma única badge se badgeVariant for fornecido
+
+
+        if (badgeVariant && typeof value !== 'object') { 
              displayValue = <Badge variant={badgeVariant} className="text-sm break-words whitespace-normal">{String(value)}</Badge>;
         } else {
             displayValue = String(value);
         }
     } else {
-      displayValue = String(value); // Fallback para outros tipos
+      displayValue = String(value); 
     }
 
     return (
       <div className="flex items-start space-x-3 py-3 border-b border-gray-700 last:border-b-0">
         {Icon && <Icon className="h-5 w-5 mt-1 text-blue-400 flex-shrink-0" />}
-        <div className="flex-grow min-w-0"> {/* min-w-0 é crucial para permitir que este contêiner encolha */}
+        <div className="flex-grow min-w-0"> {}
           <p className="text-sm font-medium text-gray-400">{label}</p>
-          {/* A classe break-words no parágrafo abaixo ajuda se displayValue for uma string longa */}
+          {}
           <div className="text-gray-200 break-words whitespace-normal mt-1">{displayValue}</div>
         </div>
       </div>
@@ -126,7 +126,7 @@ export default async function AvaliacaoDetalhePage({ params }: { params: { id: s
   };
 
   return (
-    <div className="space-y-6 w-full max-w-full px-2 sm:px-0"> {/* Adicionado padding horizontal para telas pequenas */}
+    <div className="space-y-6 w-full max-w-full px-2 sm:px-0"> {}
       <Button asChild variant="outline" className="border-blue-500 text-blue-400 hover:bg-blue-700 hover:text-white">
         <Link href="/dashboard/avaliacoes">
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Avaliações
@@ -136,7 +136,7 @@ export default async function AvaliacaoDetalhePage({ params }: { params: { id: s
       <Card className="bg-gray-800 border-gray-700 text-white shadow-xl w-full">
         <CardHeader>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 min-w-0">
-            <div className="min-w-0 flex-1"> {/* Permite que esta seção encolha e quebre texto */}
+            <div className="min-w-0 flex-1"> {}
               <CardTitle className={`text-2xl font-bold ${gradientText} break-words whitespace-normal`}>
                 Detalhes da Avaliação
               </CardTitle>
@@ -147,7 +147,7 @@ export default async function AvaliacaoDetalhePage({ params }: { params: { id: s
             {avaliacao.nota_cliente !== null && (
               <Badge 
                 variant={getNotaBadgeVariant(avaliacao.nota_cliente)} 
-                className="text-lg px-3 py-1 mt-2 sm:mt-0 flex-shrink-0" // flex-shrink-0 para não encolher a nota
+                className="text-lg px-3 py-1 mt-2 sm:mt-0 flex-shrink-0" 
               >
                 Nota: {avaliacao.nota_cliente}/10
               </Badge>

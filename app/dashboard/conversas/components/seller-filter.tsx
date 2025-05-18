@@ -7,7 +7,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'; // Supondo que você use Shadcn/UI Select
+} from '@/components/ui/select'; 
 
 interface Seller {
   id: string;

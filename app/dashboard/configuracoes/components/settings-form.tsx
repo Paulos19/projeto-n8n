@@ -1,22 +1,21 @@
 'use client';
 
 import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
-import Image from 'next/image'; // Importar Image do Next.js
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { UserCircle, Mail, Camera } from 'lucide-react'; // Adicionado Camera
-import { storage } from '@/lib/firebase'; // Importar storage do Firebase
+import { UserCircle, Mail, Camera } from 'lucide-react'; 
+import { storage } from '@/lib/firebase'; 
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // Para exibir a imagem
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; 
 
 interface SettingsFormProps {
   currentUser: {
     name: string;
     email: string;
-    image: string | null; // Adicionado image
+    image: string | null; 
   };
 }
 
@@ -50,15 +49,15 @@ export function SettingsForm({ currentUser }: SettingsFormProps) {
     setIsLoading(true);
     toast.loading("Salvando alterações...");
 
-    let imageUrl = currentImageUrl; // Usar a imagem atual por padrão
+    let imageUrl = currentImageUrl; 
 
     try {
       if (imageFile) {
-        // Fazer upload da nova imagem para o Firebase Storage
-        const imageRef = ref(storage, `user-avatars/${currentUser.email}/${imageFile.name}-${Date.now()}`); // Usar email ou ID do usuário para path
+
+        const imageRef = ref(storage, `user-avatars/${currentUser.email}/${imageFile.name}-${Date.now()}`); 
         await uploadBytes(imageRef, imageFile);
         imageUrl = await getDownloadURL(imageRef);
-        setCurrentImageUrl(imageUrl); // Atualiza a URL da imagem atual no estado
+        setCurrentImageUrl(imageUrl); 
       }
 
       const response = await fetch('/api/user/settings', {
@@ -66,7 +65,7 @@ export function SettingsForm({ currentUser }: SettingsFormProps) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, email, image: imageUrl }), // Enviar a URL da imagem
+        body: JSON.stringify({ name, email, image: imageUrl }), 
       });
 
       const result = await response.json();
@@ -75,12 +74,12 @@ export function SettingsForm({ currentUser }: SettingsFormProps) {
       if (response.ok) {
         toast.success(result.message || "Configurações atualizadas com sucesso!");
         setIsChanged(false);
-        setImageFile(null); // Limpar o arquivo selecionado após o sucesso
-        if (imageUrl) setImagePreview(imageUrl); // Atualizar preview com a imagem do Firebase
-        // Para atualizar a imagem na navbar/sidebar imediatamente, pode ser necessário
-        // forçar um refresh da sessão ou usar um estado global/contexto.
-        // A forma mais simples é um reload da página ou confiar que o próximo fetch da sessão trará a imagem atualizada.
-        // window.location.reload(); // Descomente se quiser forçar o reload
+        setImageFile(null); 
+        if (imageUrl) setImagePreview(imageUrl); 
+
+
+
+
       } else {
         toast.error(result.message || "Falha ao atualizar configurações.");
       }

@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma'; // Assuming prisma client is correctly set up
+import prisma from '@/lib/prisma'; 
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/auth"; // Assuming authOptions are correctly set up
+import { authOptions } from "@/auth"; 
 
-/**
- * Interface for the expected payload from N8N for each message.
- */
+
 interface N8nMessagePayload {
   remoteJid: string;
   chat_history: Array<{
@@ -22,42 +20,36 @@ interface N8nMessagePayload {
   };
   customer: {
     name: string;
-    number: string; // Same as remoteJid
+    number: string; 
   };
-  timestamp: string; // ISO 8601 date string
-  sellerId?: string; // <--- ADICIONE ESTA LINHA
+  timestamp: string; 
+  sellerId?: string; 
   instanceName?: string; 
   sellerEvolutionApiKey?: string; 
 }
 
-/**
- * Interface for the route context, expecting apiKeyPath from dynamic route.
- */
+
 interface RouteContext {
   params: {
     apiKeyPath?: string;
   };
 }
 
-/**
- * POST handler to receive chat interaction data from N8N.
- * It expects an array of N8nMessagePayload objects.
- * The apiKeyPath is extracted from the URL.
- */
+
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
     const { params } = context;
-    const apiKeyPath = params.apiKeyPath; // User.webhookApiKey (dono da loja)
+    const apiKeyPath = params.apiKeyPath; 
 
-    // Validate if apiKeyPath is provided in the URL
+
     if (!apiKeyPath) {
       return NextResponse.json({ message: "API Key path é obrigatório na URL." }, { status: 400 });
     }
 
-    // Parse the JSON payload from the request
+
     const payloadArray: N8nMessagePayload[] = await request.json();
 
-    // Validate if the payload is an array and not empty
+
     if (!Array.isArray(payloadArray) || payloadArray.length === 0) {
       return NextResponse.json(
         { message: 'Corpo da requisição inválido: um array de mensagens é esperado.' },
@@ -65,7 +57,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
 
-    // Find the user associated with the provided API key
+
     const user = await prisma.user.findUnique({
       where: { webhookApiKey: apiKeyPath },
     });
@@ -77,22 +69,22 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const results = [];
 
     for (const item of payloadArray) {
-      // Validate required fields for each item
+
       if (!item.remoteJid || !item.chat_history || !item.analysis || !item.customer || !item.timestamp) {
         results.push({ success: false, message: 'Item inválido, dados faltando (remoteJid, chat_history, analysis, customer, ou timestamp).', item });
-        continue; // Skip to the next item
+        continue; 
       }
     
-      // Prepare data for saving to the database
+
       let sellerIdToSave: string | null = null;
       let dbSellerInstanceName: string | null = null;
   
-      // 1. Tentar encontrar pelo sellerId do payload, se fornecido
+
       if (item.sellerId) {
         const seller = await prisma.seller.findFirst({
           where: {
             id: item.sellerId,
-            storeOwnerId: user.id, // Garante que o vendedor pertence ao dono da loja correto
+            storeOwnerId: user.id, 
           },
         });
         if (seller) {
@@ -103,7 +95,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
         }
       }
   
-      // 2. Se não encontrado pelo sellerId do payload, tentar pelo sellerEvolutionApiKey
+
       if (!sellerIdToSave && item.sellerEvolutionApiKey) {
         const seller = await prisma.seller.findFirst({
           where: {
@@ -119,7 +111,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
         }
       } 
       
-      // 3. Se ainda não encontrado, tentar pelo instanceName
+
       else if (!sellerIdToSave && item.instanceName) {
         const seller = await prisma.seller.findFirst({
           where: {
@@ -157,11 +149,11 @@ export async function POST(request: NextRequest, context: RouteContext) {
       results.push({ success: true, data: newInteraction });
     }
 
-    // Determine the overall success and appropriate status code
-    const allSuccessful = results.every(r => r.success);
-    const status = allSuccessful ? 201 : (results.some(r => r.success) ? 207 : 400); // 207 for partial success
 
-    // Return a summary response
+    const allSuccessful = results.every(r => r.success);
+    const status = allSuccessful ? 201 : (results.some(r => r.success) ? 207 : 400); 
+
+
     return NextResponse.json(
       {
         message: allSuccessful ? 'Todas as interações foram salvas com sucesso!' : 'Processamento concluído com alguns erros/avisos.',
@@ -177,7 +169,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     } else if (error instanceof Error) {
       errorMessage = error.message;
     }
-    console.error("Error in POST /api/conversas:", error); // Log the error for debugging
+    console.error("Error in POST /api/conversas:", error); 
     return NextResponse.json({ message: 'Erro ao salvar interações', error: errorMessage }, { status: 500 });
   }
 }

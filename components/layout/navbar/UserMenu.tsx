@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { LogOut, Settings, LayoutDashboard, UserCircle } from "lucide-react";
 import { signOut } from "next-auth/react";
-import type { Session } from "next-auth"; // Import type
+import type { Session } from "next-auth"; 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,

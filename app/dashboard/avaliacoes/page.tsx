@@ -16,7 +16,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/auth";
 
-export const dynamic = 'force-dynamic'; // Garante que os dados sejam sempre frescos
+export const dynamic = 'force-dynamic'; 
 
 async function getAvaliacoes(userId: string) {
   const avaliacoes = await prisma.avaliacao.findMany({
@@ -26,7 +26,7 @@ async function getAvaliacoes(userId: string) {
     orderBy: {
       createdAt: 'desc',
     },
-    // Poderia adicionar paginação aqui no futuro
+
   });
   return avaliacoes;
 }
@@ -50,8 +50,8 @@ export default async function AvaliacoesPage() {
   const getNotaBadgeVariant = (nota: number | null) => {
     if (nota === null) return "secondary";
     if (nota <= 2) return "destructive";
-    if (nota <= 3) return "secondary"; // Amarelo/Laranja seria ideal, mas ShadCN default não tem. Usando secondary.
-    return "default"; // Verde para notas boas (default é azulado/verdeado no tema)
+    if (nota <= 3) return "secondary"; 
+    return "default"; 
   };
 
   return (

@@ -1,10 +1,9 @@
-// app/api/all-data/[apiKeyPath]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
 interface RouteContext {
   params: {
-    apiKeyPath?: string; // User.webhookApiKey (dono da loja)
+    apiKeyPath?: string; 
   };
 }
 
@@ -40,7 +39,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
     if (endDateParam) {
       const endDate = new Date(endDateParam);
       if (!isNaN(endDate.getTime())) {
-        // Para incluir o dia final, ajustamos para o final do dia
+
         endDate.setHours(23, 59, 59, 999);
         dateFilterAvaliacoes = { ...dateFilterAvaliacoes, createdAt: { ...((dateFilterAvaliacoes as any).createdAt), lte: endDate } };
         dateFilterChatInteractions = { ...dateFilterChatInteractions, eventTimestamp: { ...((dateFilterChatInteractions as any).eventTimestamp), lte: endDate } };
@@ -57,16 +56,16 @@ export async function GET(request: NextRequest, context: RouteContext) {
         email: true,
         webhookApiKey: true,
         instanceName: true,
-        // Avaliações e interações de chat diretamente ligadas ao dono da loja
+
         avaliacoes: {
-          where: dateFilterAvaliacoes, // Aplicar filtro de data
+          where: dateFilterAvaliacoes, 
           orderBy: { createdAt: 'desc' }
         },
         chatInteractions: {
-          where: dateFilterChatInteractions, // Aplicar filtro de data
+          where: dateFilterChatInteractions, 
           orderBy: { eventTimestamp: 'desc' }
         },
-        // Dados dos vendedores associados a este dono de loja
+
         sellers: {
           select: {
             id: true,
@@ -74,13 +73,13 @@ export async function GET(request: NextRequest, context: RouteContext) {
             evolutionInstanceName: true,
             sellerWhatsAppNumber: true,
             isActive: true,
-            // Avaliações e interações de chat específicas de cada vendedor
+
             avaliacoes: {
-              where: dateFilterAvaliacoes, // Aplicar filtro de data
+              where: dateFilterAvaliacoes, 
               orderBy: { createdAt: 'desc' }
             },
             chatInteractions: {
-              where: dateFilterChatInteractions, // Aplicar filtro de data
+              where: dateFilterChatInteractions, 
               orderBy: { eventTimestamp: 'desc' }
             }
           },

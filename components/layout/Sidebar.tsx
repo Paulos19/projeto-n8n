@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, MessageSquare, Users, FileText, LogOut, MessageCircle, X, Sun, Moon, Settings, UserCircle as UserIcon, Bot } from "lucide-react"; // Added Bot
-import NextImage from "next/image"; // Renomeado para evitar conflito
+import { Home, MessageSquare, Users, FileText, LogOut, MessageCircle, X, Sun, Moon, Settings, UserCircle as UserIcon, Bot } from "lucide-react"; 
+import NextImage from "next/image"; 
 import React, { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
-import { useSession, signOut } from "next-auth/react"; // Importar useSession e signOut
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // Importar Avatar
-import { motion } from "framer-motion"; // Adicionar esta linha
+import { useSession, signOut } from "next-auth/react"; 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; 
+import { motion } from "framer-motion"; 
 
-// Defina as classes do gradiente para reutilização (se não estiver globalmente acessível)
+
 const gradientTextClassesSideBar = "bg-clip-text text-transparent bg-gradient-to-r from-sky-500 via-cyan-400 to-emerald-500";
 
 
@@ -34,7 +34,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const { data: session, status } = useSession(); // Obter dados da sessão
+  const { data: session, status } = useSession(); 
 
   useEffect(() => {
     setMounted(true);
@@ -44,8 +44,8 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const mobileClasses = `fixed inset-y-0 left-0 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'}`;
   const desktopClasses = `md:relative md:translate-x-0 md:flex`;
   
-  // Usando variáveis CSS para o fundo da sidebar (já estava correto)
-  // bg-[var(--sidebar-transparent-bg)] backdrop-blur-md
+
+
 
   return (
     <aside 
@@ -59,13 +59,13 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           className="flex items-center space-x-2"
         >
           <NextImage
-            src="/logo.svg" // Conforme o seu código atual. Se quiser o azul, use "/logo-raio-sky.svg"
+            src="/logo.svg" 
             alt="R.A.I.O Logo"
             width={26} 
             height={39} 
             className="h-8 w-auto" 
           />
-          <span className={`text-2xl font-bold ${gradientTextClassesSideBar}`}>R.A.I.O</span> {/* Aplicando o gradiente */}
+          <span className={`text-2xl font-bold ${gradientTextClassesSideBar}`}>R.A.I.O</span> {}
         </motion.div>
         <button
             onClick={() => setIsOpen(false)}
@@ -79,8 +79,8 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
         <ul>
           {navItems.map((item) => {
             const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
-            const activeClasses = `bg-sidebar-primary text-sidebar-primary-foreground font-medium shadow-sm`; // Usando variáveis da sidebar
-            const inactiveClasses = `text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground`; // Usando variáveis da sidebar
+            const activeClasses = `bg-sidebar-primary text-sidebar-primary-foreground font-medium shadow-sm`; 
+            const inactiveClasses = `text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground`; 
 
             return (
               <li key={item.label} className="mb-2">
@@ -104,7 +104,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-colors w-full text-left
                      text-sidebar-foreground cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground`}
           aria-label="Alternar tema"
-          disabled={!mounted} // Disable button until mounted to prevent interaction before hydration
+          disabled={!mounted} 
         >
           {mounted ? (theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />) : <div className="h-5 w-5" /> }
           <span>Alternar Tema</span>

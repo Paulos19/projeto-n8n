@@ -4,13 +4,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, useAnimation, useInView, AnimatePresence } from 'framer-motion';
 import { Zap, Target, BarChartBig, Lightbulb, ArrowRight, ChevronUp, Menu, X, BotMessageSquare, SearchCheck, TrendingUp, UploadCloud, CheckCircle } from 'lucide-react';
 
-// Importando Navbar e Footer existentes
+
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 
-// --- Configurações Globais de Animação e Estilo ---
+
 const gradientText = "bg-clip-text text-transparent bg-gradient-to-r from-sky-500 via-cyan-400 to-emerald-500";
-// Estilo padrão para botões
+
 const standardButtonClasses = "px-8 py-3 bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-700 hover:to-cyan-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105 inline-flex items-center justify-center";
 
 const fadeIn = (direction = 'up', delay = 0, duration = 0.5) => ({
@@ -41,14 +41,14 @@ const staggerContainer = (staggerChildren = 0.1, delayChildren = 0) => ({
   },
 });
 
-// --- Componentes de UI ---
 
-// Botão Personalizado (Estilo Padrão)
+
+
 const Button = ({ children, onClick, className, icon: Icon, iconPosition = 'right' }: { children: React.ReactNode, onClick?: () => void, className?: string, icon?: React.ElementType, iconPosition?: 'left' | 'right' }) => {
   return (
     <motion.button
       onClick={onClick}
-      className={`${standardButtonClasses} ${className || ''}`} // Adicionado className opcional
+      className={`${standardButtonClasses} ${className || ''}`} 
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
     >
@@ -59,7 +59,7 @@ const Button = ({ children, onClick, className, icon: Icon, iconPosition = 'righ
   );
 };
 
-// Card de Funcionalidade
+
 const FeatureCard = ({ icon: Icon, title, description, index }: { icon: React.ElementType, title: string, description: string, index: number }) => {
   const controls = useAnimation();
   const ref = useRef(null);
@@ -88,10 +88,10 @@ const FeatureCard = ({ icon: Icon, title, description, index }: { icon: React.El
   );
 };
 
-// --- Componentes de Layout (AGORA IMPORTADOS) ---
-// Navbar e Footer são importados do início do arquivo.
 
-// Scroll to Top Button
+
+
+
 const ScrollToTopButton = () => {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -139,9 +139,9 @@ const ScrollToTopButton = () => {
 };
 
 
-// --- Seções da Página ---
 
-// Seção Hero
+
+
 const HeroSection = () => {
   const title = "R.A.I.O";
   const subtitle = "Desvende o Potencial dos Seus Dados com Inteligência Artificial";
@@ -173,7 +173,7 @@ const HeroSection = () => {
 
   return (
     <section id="hero" className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 dark:from-slate-900 via-sky-50 dark:via-slate-800 to-emerald-50 dark:to-slate-900 py-20 pt-32 md:pt-20 relative overflow-hidden">
-      {/* Elementos de fundo decorativos */}
+      {}
       <div className="absolute -top-20 -left-20 w-72 h-72 bg-sky-300/30 dark:bg-sky-700/30 rounded-full filter blur-3xl opacity-70 animate-pulse"></div>
       <div className="absolute -bottom-20 -right-20 w-96 h-96 bg-emerald-300/30 dark:bg-emerald-700/30 rounded-full filter blur-3xl opacity-70 animate-pulse animation-delay-2000"></div>
       
@@ -220,7 +220,7 @@ const HeroSection = () => {
   );
 };
 
-// Seção Problema/Solução
+
 const ProblemSolutionSection = () => {
   const controls = useAnimation();
   const ref = useRef(null);
@@ -305,7 +305,7 @@ const ProblemSolutionSection = () => {
   );
 };
 
-// Seção Funcionalidades
+
 const FeaturesSection = () => {
   const features = [
     {
@@ -361,7 +361,7 @@ const FeaturesSection = () => {
   );
 };
 
-// Seção Como Funciona
+
 const HowItWorksSection = () => {
   const steps = [
     {
@@ -420,7 +420,7 @@ const HowItWorksSection = () => {
 };
 
 
-// Seção CTA Final
+
 const CtaSection = () => {
   const redirectToDashboard = () => {
     if (typeof window !== 'undefined') {
@@ -449,7 +449,7 @@ const CtaSection = () => {
         >
           <Button 
             onClick={redirectToDashboard}
-            className="bg-white text-sky-600 hover:bg-slate-100 px-10 py-4 text-lg" // Estilo diferenciado para o CTA principal
+            className="bg-white text-sky-600 hover:bg-slate-100 px-10 py-4 text-lg" 
             icon={Lightbulb}
           >
             Acessar Dashboard
@@ -461,12 +461,12 @@ const CtaSection = () => {
 };
 
 
-// Componente Principal da Aplicação
+
 const App = () => {
 
   return (
     <div className="font-sans antialiased text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 selection:bg-sky-300/70 selection:text-sky-900">
-      <Navbar /> {/* Navbar importada */}
+      <Navbar /> {}
       <main>
         <HeroSection />
         <ProblemSolutionSection />
@@ -474,7 +474,7 @@ const App = () => {
         <HowItWorksSection />
         <CtaSection />
       </main>
-      <Footer /> {/* Footer importado */}
+      <Footer /> {}
       <ScrollToTopButton />
     </div>
   );

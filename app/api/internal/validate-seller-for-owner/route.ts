@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma'; // Certifique-se que o caminho para o Prisma Client está correto
+import prisma from '@/lib/prisma'; 
 
-// Interface atualizada para o payload de validação
+
 interface ValidateSellerPayload {
-  storeOwnerWebhookApiKey: string; // Chave API principal do dono da loja (User.webhookApiKey)
-  sellerEvolutionInstanceName: string; // Nome da instância na Evolution API do vendedor
-  sellerEvolutionApiKey: string; // Chave da Evolution API específica deste vendedor
+  storeOwnerWebhookApiKey: string; 
+  sellerEvolutionInstanceName: string; 
+  sellerEvolutionApiKey: string; 
 }
 
 export async function POST(request: NextRequest) {
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       sellerEvolutionApiKey,
     } = body;
 
-    // Validação dos campos obrigatórios
+
     if (!storeOwnerWebhookApiKey || !sellerEvolutionInstanceName || !sellerEvolutionApiKey) {
       return NextResponse.json(
         { message: 'Campos obrigatórios faltando: storeOwnerWebhookApiKey, sellerEvolutionInstanceName e sellerEvolutionApiKey são necessários.' },
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 1. Encontrar o User (dono da loja) usando a storeOwnerWebhookApiKey
+
     const storeOwner = await prisma.user.findUnique({
       where: { webhookApiKey: storeOwnerWebhookApiKey },
     });
@@ -40,13 +40,13 @@ export async function POST(request: NextRequest) {
 
     const storeOwnerId = storeOwner.id;
 
-    // 2. Validar se o vendedor existe com os dados fornecidos e pertence ao dono da loja
+
     const seller = await prisma.seller.findFirst({
       where: {
         storeOwnerId,
         evolutionApiKey: sellerEvolutionApiKey,
         evolutionInstanceName: sellerEvolutionInstanceName,
-        // isActive: true, // Descomente se quiser validar apenas vendedores ativos
+
       },
     });
 
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Se o vendedor for encontrado e validado
+
     return NextResponse.json({
       message: 'Vendedor validado com sucesso para este proprietário.',
       seller: {
@@ -74,19 +74,19 @@ export async function POST(request: NextRequest) {
     if (error instanceof SyntaxError) {
       return NextResponse.json({ message: 'Erro de sintaxe no JSON recebido.' }, { status: 400 });
     }
-    // A tratativa de erro P2002 (unique constraint) é menos provável de ocorrer aqui,
-    // pois não estamos criando registros, mas pode ser mantida para outros erros do Prisma.
+
+
     // @ts-ignore
     if (error.code === 'P2002') {
-        // @ts-ignore
+      // @ts-ignore
       const target = error.meta?.target as string[] | undefined;
       let fieldMessage = "um campo único";
       if (target?.includes('evolutionInstanceName')) fieldMessage = "Nome da Instância Evolution";
       else if (target?.includes('evolutionApiKey')) fieldMessage = "API Key da Evolution";
       else if (target?.includes('sellerWhatsAppNumber')) fieldMessage = "Número do WhatsApp do Vendedor";
       
-      // Esta mensagem pode precisar de ajuste, pois não estamos criando um vendedor.
-      // Poderia ser um erro inesperado se P2002 ocorrer neste contexto.
+
+
       return NextResponse.json(
         { message: `Conflito de dados: ${fieldMessage} já existe de forma inesperada.` },
         { status: 409 }

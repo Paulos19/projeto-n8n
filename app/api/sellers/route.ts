@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next'; // Supondo que suas opções do NextAuth estão aqui
-import prisma from '@/lib/prisma'; // Seu cliente Prisma
+import { getServerSession } from 'next-auth/next'; 
+import prisma from '@/lib/prisma'; 
 import { authOptions } from '@/auth';
 
 export async function POST(request: Request) {
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       sellerWhatsAppNumber,
     } = body;
 
-    // Validação básica dos campos obrigatórios
+
     if (!evolutionInstanceName || !evolutionApiKey || !sellerWhatsAppNumber) {
       return NextResponse.json(
         { message: 'Campos obrigatórios faltando: Nome da Instância Evolution, API Key da Evolution e Número do WhatsApp do Vendedor são necessários.' },
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Verificar se já existe um vendedor com os mesmos identificadores únicos para esta loja
+
     const existingSeller = await prisma.seller.findFirst({
       where: {
         storeOwnerId,
@@ -49,18 +49,18 @@ export async function POST(request: Request) {
       
       return NextResponse.json(
         { message: `Um vendedor com este ${conflictField} já existe para sua loja.` },
-        { status: 409 } // Conflict
+        { status: 409 } 
       );
     }
 
     const newSeller = await prisma.seller.create({
       data: {
-        name: name || null, // Nome é opcional
+        name: name || null, 
         evolutionInstanceName,
         evolutionApiKey,
         sellerWhatsAppNumber,
         storeOwnerId,
-        isActive: true, // Por padrão, o vendedor é ativo
+        isActive: true, 
       },
     });
 
@@ -70,8 +70,8 @@ export async function POST(request: Request) {
     if (error instanceof SyntaxError) {
       return NextResponse.json({ message: 'Erro de sintaxe no JSON recebido.' }, { status: 400 });
     }
-    // Adicionar verificação para erros do Prisma (ex: violação de constraint única se não coberta acima)
-    // if (error.code === 'P2002') { ... } 
+
+
     return NextResponse.json({ message: 'Erro interno do servidor ao adicionar vendedor.' }, { status: 500 });
   }
 }
@@ -91,7 +91,7 @@ export async function GET(request: Request) {
         storeOwnerId: storeOwnerId,
       },
       orderBy: {
-        createdAt: 'desc', // Ou 'name', 'asc'
+        createdAt: 'desc', 
       },
     });
 

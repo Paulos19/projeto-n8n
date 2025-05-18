@@ -12,10 +12,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserPlus, Users, Eye } from "lucide-react";
-import { getServerSession } from "next-auth/next"; // Adicionado
-import { authOptions } from "@/auth"; // Adicionado
+import { getServerSession } from "next-auth/next"; 
+import { authOptions } from "@/auth"; 
 
-export const dynamic = 'force-dynamic'; // Garante que os dados sejam sempre frescos
+export const dynamic = 'force-dynamic'; 
 
 interface ClienteInfo {
   jid: string;
@@ -25,14 +25,14 @@ interface ClienteInfo {
 }
 
 async function getClientes(): Promise<ClienteInfo[]> {
-  const session = await getServerSession(authOptions); // Adicionado
+  const session = await getServerSession(authOptions); 
   if (!session?.user?.id) {
-    return []; // Retorna vazio se não houver sessão
+    return []; 
   }
   const userId = session.user.id;
 
   const avaliacoes = await prisma.avaliacao.findMany({
-    where: { userId: userId }, // Adicionado filtro por userId
+    where: { userId: userId }, 
     select: { remoteJid: true, createdAt: true },
     orderBy: { createdAt: 'desc' },
   });
@@ -58,13 +58,13 @@ async function getClientes(): Promise<ClienteInfo[]> {
   for (const [jid, data] of clientesMap.entries()) {
     clientesInfo.push({
       jid,
-      nomeCliente: jid.split('@')[0], // Extrai o nome/número antes do @
+      nomeCliente: jid.split('@')[0], 
       totalAvaliacoes: data.totalAvaliacoes,
       ultimaAvaliacao: data.ultimaAvaliacao,
     });
   }
 
-  // Ordenar por quem teve a última avaliação mais recente
+
   clientesInfo.sort((a, b) => {
     if (a.ultimaAvaliacao && b.ultimaAvaliacao) {
       return b.ultimaAvaliacao.getTime() - a.ultimaAvaliacao.getTime();
@@ -125,7 +125,7 @@ export default async function ClientesPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <Button asChild variant="ghost" size="sm" className="text-blue-400 hover:text-blue-300 hover:bg-blue-800">
-                      {/* Link para uma futura página de detalhes do cliente */}
+                      {}
                       <Link href={`/dashboard/clientes/${cliente.jid.replace('@', '_')}`}> 
                         <Eye className="mr-2 h-4 w-4" /> Ver Detalhes
                       </Link>

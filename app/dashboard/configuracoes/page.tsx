@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { CopyToClipboardButton } from "@/components/ui/copy-to-clipboard-button"; // Componente criado anteriormente // Criaremos este componente cliente
+import { CopyToClipboardButton } from "@/components/ui/copy-to-clipboard-button"; 
 import { KeyRound } from "lucide-react";
 import { SettingsForm } from "./components/settings-form";
 
@@ -19,7 +19,7 @@ export default async function ConfiguracoesPage() {
     );
   }
 
-  const { name, email, webhookApiKey, image } = session.user; // Adicionado 'image'
+  const { name, email, webhookApiKey, image } = session.user; 
 
   return (
     <div className="space-y-8 max-w-3xl mx-auto">

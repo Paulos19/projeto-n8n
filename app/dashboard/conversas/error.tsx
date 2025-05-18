@@ -1,7 +1,7 @@
-'use client'; // Componentes de erro precisam ser Client Components
+'use client'; 
 
 import { useEffect } from 'react';
-import { Button } from '@/components/ui/button'; // Supondo que você tenha um componente Button
+import { Button } from '@/components/ui/button'; 
 
 export default function ErrorConversasPage({
   error,
@@ -11,7 +11,7 @@ export default function ErrorConversasPage({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Você pode logar o erro para um serviço de monitoramento aqui
+
     console.error(error);
   }, [error]);
 
@@ -28,7 +28,7 @@ export default function ErrorConversasPage({
       )}
       <Button
         onClick={
-          // Tenta renderizar novamente o segmento da rota
+
           () => reset()
         }
       >

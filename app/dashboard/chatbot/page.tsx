@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { useSession } from 'next-auth/react'; // Adicionado para obter a sessão do usuário
+import { useSession } from 'next-auth/react'; 
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -49,30 +49,30 @@ const ActionButton = ({ icon, text, onClick, isIconOnly }: ActionButtonProps) =>
   </Button>
 );
 
-// Novo componente para o efeito de digitação // REMOVIDO
-// const TypingEffect = ({ textToType, typingSpeed = 30 }: { textToType: string; typingSpeed?: number }) => {
-//   const [typedText, setTypedText] = useState('');
-//   const [currentIndex, setCurrentIndex] = useState(0);
 
-//   useEffect(() => {
-//     setTypedText('');
-//     setCurrentIndex(0);
-//   }, [textToType]);
 
-//   useEffect(() => {
-//     if (currentIndex < textToType.length) {
-//       const timeoutId = setTimeout(() => {
-//         setTypedText((prevText) => prevText + textToType[currentIndex]);
-//         setCurrentIndex((prevIndex) => prevIndex + 1);
-//       }, typingSpeed);
-//       return () => clearTimeout(timeoutId);
-//     }
-//   }, [currentIndex, textToType, typingSpeed]);
 
-//   return <div className="whitespace-pre-wrap">{typedText}</div>;
-// };
 
-// Função auxiliar para limpar os marcadores **
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const cleanMessageContent = (content: string): string => {
   if (typeof content !== 'string') return '';
   return content.replace(/\*\*/g, '');
@@ -83,18 +83,18 @@ export default function ChatbotPage() {
   const [archivedChats, setArchivedChats] = useState<ArchivedChat[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { data: session, status: sessionStatus } = useSession(); // Adicionado useSession
+  const { data: session, status: sessionStatus } = useSession(); 
   const scrollableMessagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Carregar mensagens e chats arquivados da API ao montar, se o usuário estiver autenticado
+
   useEffect(() => {
     if (sessionStatus === 'authenticated' && session?.user?.id) {
       const userId = session.user.id;
 
-      // Função para carregar o chat ativo
+
       const loadActiveChat = async () => {
         try {
           const response = await fetch(`/api/chatbot/active-chat?userId=${userId}`);
@@ -103,19 +103,19 @@ export default function ChatbotPage() {
             if (data && data.messages) {
               setMessages(data.messages);
             } else {
-              setMessages([]); // Inicia com array vazio se não houver chat ativo salvo
+              setMessages([]); 
             }
           } else {
             console.error("Erro ao carregar chat ativo:", response.statusText);
-            // setMessages([]); // Opcional: resetar em caso de erro
+
           }
         } catch (error) {
           console.error("Erro ao carregar chat ativo do servidor:", error);
-          // setMessages([]); // Opcional: resetar em caso de erro
+
         }
       };
 
-      // Função para carregar chats arquivados
+
       const loadArchivedChats = async () => {
         try {
           const response = await fetch(`/api/chatbot/archived-chats?userId=${userId}`);
@@ -124,30 +124,30 @@ export default function ChatbotPage() {
             setArchivedChats(data || []);
           } else {
             console.error("Erro ao carregar chats arquivados:", response.statusText);
-            // setArchivedChats([]); // Opcional: resetar em caso de erro
+
           }
         } catch (error) {
           console.error("Erro ao carregar chats arquivados do servidor:", error);
-          // setArchivedChats([]); // Opcional: resetar em caso de erro
+
         }
       };
 
       loadActiveChat();
       loadArchivedChats();
     } else if (sessionStatus === 'unauthenticated') {
-      // Limpar estados se o usuário não estiver autenticado (ex: após logout)
+
       setMessages([]);
       setArchivedChats([]);
-      // Opcional: redirecionar para login ou mostrar mensagem
+
       toast.info("Faça login para acessar o chatbot.");
     }
     inputRef.current?.focus();
   }, [sessionStatus, session?.user?.id]);
 
 
-  // Salvar mensagens ativas na API sempre que mudarem
+
   useEffect(() => {
-    if (sessionStatus === 'authenticated' && session?.user?.id && messages.length > 0) { // Só salva se houver mensagens
+    if (sessionStatus === 'authenticated' && session?.user?.id && messages.length > 0) { 
       const saveActiveChat = async () => {
         try {
           await fetch('/api/chatbot/active-chat', {
@@ -160,12 +160,12 @@ export default function ChatbotPage() {
           toast.error("Não foi possível salvar seu chat ativo. Verifique sua conexão.");
         }
       };
-      // Adicionar um debounce aqui pode ser útil para evitar muitas chamadas à API
-      const debounceSave = setTimeout(saveActiveChat, 1000); // Salva 1 segundo após a última mudança
+
+      const debounceSave = setTimeout(saveActiveChat, 1000); 
       return () => clearTimeout(debounceSave);
     }
 
-    // Lógica de scroll existente
+
     const container = scrollableMessagesContainerRef.current;
     if (container) {
       const { scrollTop, scrollHeight, clientHeight } = container;
@@ -177,8 +177,8 @@ export default function ChatbotPage() {
     }
   }, [messages, sessionStatus, session?.user?.id]);
 
-  // Não é mais necessário um useEffect para salvar archivedChats diretamente,
-  // pois as operações de arquivamento (criar, deletar) serão tratadas em suas respectivas funções.
+
+
 
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
     messagesEndRef.current?.scrollIntoView({ behavior });
@@ -188,7 +188,7 @@ export default function ChatbotPage() {
     const container = scrollableMessagesContainerRef.current;
     if (container) {
       const { scrollTop, scrollHeight, clientHeight } = container;
-      // Mostrar botão se não estiver perto do final (ex: mais de 200px do final para dar um buffer)
+
       if (scrollHeight - scrollTop - clientHeight > 200) {
         setShowScrollButton(true);
       } else {
@@ -201,16 +201,16 @@ export default function ChatbotPage() {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
-    const cleanedInput = cleanMessageContent(input); // Limpa o input do usuário
+    const cleanedInput = cleanMessageContent(input); 
     const userMessage: ChatMessage = { role: 'user', content: cleanedInput };
     setMessages(prev => [...prev, userMessage]);
-    const currentInput = cleanedInput; // Usa o input limpo para a API
+    const currentInput = cleanedInput; 
     setInput('');
     setIsLoading(true);
 
-    // Removido setTimeout para scrollToBottom, pois o useEffect [messages] já cuida disso.
 
-    // Verificar se é um comando para cadastrar vendedor
+
+
     if (currentInput.toLowerCase().startsWith('cadastrar vendedor:')) {
       const dataString = currentInput.substring('cadastrar vendedor:'.length).trim();
       const parts = dataString.split(',').map(part => part.trim());
@@ -222,13 +222,13 @@ export default function ChatbotPage() {
         sellerWhatsAppNumber: string;
       } | null = null;
 
-      if (parts.length === 3) { // Formato: Instância, API Key, WhatsApp
+      if (parts.length === 3) { 
         sellerData = {
           evolutionInstanceName: parts[0],
           evolutionApiKey: parts[1],
           sellerWhatsAppNumber: parts[2],
         };
-      } else if (parts.length === 4) { // Formato: Nome, Instância, API Key, WhatsApp
+      } else if (parts.length === 4) { 
         sellerData = {
           name: parts[0],
           evolutionInstanceName: parts[1],
@@ -267,7 +267,7 @@ export default function ChatbotPage() {
           setIsLoading(false);
           inputRef.current?.focus();
         }
-        return; // Impede a chamada para /api/chatbot
+        return; 
       } else {
         const formatErrorMessage: ChatMessage = {
           role: 'assistant',
@@ -276,18 +276,18 @@ export default function ChatbotPage() {
         setMessages(prev => [...prev, formatErrorMessage]);
         setIsLoading(false);
         inputRef.current?.focus();
-        return; // Impede a chamada para /api/chatbot
+        return; 
       }
     }
 
-    // Lógica existente para chamar /api/chatbot
+
     try {
       const response = await fetch('/api/chatbot', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: currentInput, // currentInput já está limpo aqui se for o input original do usuário
-          history: messages.map(m => ({ role: m.role, content: m.content })) // O histórico já está limpo
+          message: currentInput, 
+          history: messages.map(m => ({ role: m.role, content: m.content })) 
         }),
       });
 
@@ -296,7 +296,7 @@ export default function ChatbotPage() {
         throw new Error(errorData.message || 'Falha ao comunicar com o assistente.');
       }
 
-      // Processar a resposta como stream
+
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let assistantResponseContent = '';
@@ -304,9 +304,9 @@ export default function ChatbotPage() {
       let tempAssistantMessageId = `temp_${Date.now()}`;
 
 
-      // Adiciona uma mensagem de "pensando" temporária que será atualizada
+
       if (reader) {
-        const thinkingMessage: ChatMessage = { role: 'assistant', content: '...' }; // Conteúdo inicial para TypingEffect
+        const thinkingMessage: ChatMessage = { role: 'assistant', content: '...' }; 
         setMessages(prev => [...prev, thinkingMessage]);
 
 
@@ -315,7 +315,7 @@ export default function ChatbotPage() {
           if (done) break;
           assistantResponseContent += decoder.decode(value, { stream: true });
           
-          // Atualiza a última mensagem (que é a do assistente sendo construída)
+
           setMessages(prevMsgs => {
             const newMsgs = [...prevMsgs];
             if (newMsgs.length > 0 && newMsgs[newMsgs.length - 1].role === 'assistant') {
@@ -325,8 +325,8 @@ export default function ChatbotPage() {
           });
         }
       } else {
-         // Fallback se não houver reader (improvável para fetch stream, mas para segurança)
-        const data = await response.json(); // Isso não deveria acontecer se a API sempre retorna stream
+
+        const data = await response.json(); 
         const assistantMessage: ChatMessage = { role: 'assistant', content: cleanMessageContent(data.response) };
         setMessages(prev => [...prev, assistantMessage]);
       }
@@ -340,7 +340,7 @@ export default function ChatbotPage() {
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
-      inputRef.current?.focus(); // Focar no input após a resposta
+      inputRef.current?.focus(); 
     }
   };
   
@@ -358,13 +358,13 @@ export default function ChatbotPage() {
 
     if (messages.length > 0) {
       try {
-        // Verifica se a conversa atual já existe exatamente igual nos arquivos (localmente, para evitar duplicados antes da API)
-        const currentChatContent = JSON.stringify(messages.map(m => ({ role: m.role, content: m.content }))); // Normaliza para comparação
+
+        const currentChatContent = JSON.stringify(messages.map(m => ({ role: m.role, content: m.content }))); 
         const isAlreadyArchivedLocally = archivedChats.some(chat => JSON.stringify(chat.messages.map(m => ({ role: m.role, content: m.content }))) === currentChatContent);
 
         if (!isAlreadyArchivedLocally) {
           const chatName = messages[0]?.content.substring(0, 30) + "..." || `Conversa ${new Date().toLocaleTimeString()}`;
-          const response = await fetch('/api/chatbot/archived-chats', { // MODIFIED HERE
+          const response = await fetch('/api/chatbot/archived-chats', { 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId, name: chatName, messages }),
@@ -376,27 +376,27 @@ export default function ChatbotPage() {
           } else {
             toast.error("Falha ao arquivar a conversa atual.");
             console.error("Erro ao arquivar conversa:", await response.text());
-            return; // Não continua se o arquivamento falhar
+            return; 
           }
         }
       } catch (error) {
         toast.error("Erro de rede ao arquivar conversa.");
         console.error("Erro de rede ao arquivar:", error);
-        return; // Não continua se o arquivamento falhar
+        return; 
       }
     }
-    setMessages([]); // Limpa as mensagens ativas para iniciar um novo chat
+    setMessages([]); 
     
-    // Limpa o chat ativo no backend também
+
     try {
       await fetch('/api/chatbot/active-chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, messages: [] }), // Envia um array vazio
+        body: JSON.stringify({ userId, messages: [] }), 
       });
     } catch (error) {
       console.error("Erro ao limpar chat ativo no servidor:", error);
-      // Não é crítico para a experiência do usuário imediata, mas logar é importante
+
     }
 
     inputRef.current?.focus();
@@ -412,7 +412,7 @@ export default function ChatbotPage() {
 
     const chatToLoad = archivedChats.find(chat => chat.id === chatId);
     if (chatToLoad) {
-      // 1. Arquivar a conversa ativa atual, se ela tiver mensagens e for diferente da que será carregada
+
       if (messages.length > 0 && JSON.stringify(messages.map(m => ({ role: m.role, content: m.content }))) !== JSON.stringify(chatToLoad.messages.map(m => ({ role: m.role, content: m.content })))) {
         const currentChatContent = JSON.stringify(messages.map(m => ({ role: m.role, content: m.content })));
         const isCurrentChatAlreadyArchivedLocally = archivedChats.some(
@@ -422,14 +422,14 @@ export default function ChatbotPage() {
         if (!isCurrentChatAlreadyArchivedLocally) {
           try {
             const archiveName = messages[0]?.content.substring(0, 30) + "..." || `Conversa (auto-arquivada ${new Date().toLocaleTimeString()})`;
-            const response = await fetch('/api/chatbot/archived-chats', { // MODIFIED HERE
+            const response = await fetch('/api/chatbot/archived-chats', { 
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ userId, name: archiveName, messages }),
             });
             if (response.ok) {
               const newArchivedChat = await response.json();
-              setArchivedChats(prev => [newArchivedChat, ...prev.filter(c => c.id !== newArchivedChat.id)]); // Adiciona e remove duplicata se houver
+              setArchivedChats(prev => [newArchivedChat, ...prev.filter(c => c.id !== newArchivedChat.id)]); 
             } else {
               toast.error("Falha ao auto-arquivar a conversa atual.");
             }
@@ -438,9 +438,9 @@ export default function ChatbotPage() {
           }
         }
       }
-      // 2. Carregar a conversa arquivada selecionada para o estado de mensagens ativas
+
       setMessages([...chatToLoad.messages]);
-      // 3. Atualizar o chat ativo no backend
+
       try {
         await fetch('/api/chatbot/active-chat', {
           method: 'POST',
@@ -462,10 +462,10 @@ export default function ChatbotPage() {
       toast.error("Você precisa estar logado para gerenciar conversas.");
       return;
     }
-    // const userId = session.user.id; // userId from session is used in the backend
+
 
     try {
-      const response = await fetch(`/api/chatbot/archived-chats/${chatId}`, { // MODIFIED HERE (removed userId query param)
+      const response = await fetch(`/api/chatbot/archived-chats/${chatId}`, { 
         method: 'DELETE',
       });
       if (response.ok) {
@@ -482,25 +482,25 @@ export default function ChatbotPage() {
   };
 
 
-  // Estimativa da altura da área de input inferior para padding e posicionamento do botão de scroll
-  // Ajuste estes valores se a altura real da área de input mudar significativamente
-  const inputAreaHeightDesktop = "240px"; // Ex: "220px"
-  const inputAreaHeightMobile = "230px"; // Ex: "210px"
+
+
+  const inputAreaHeightDesktop = "240px"; 
+  const inputAreaHeightMobile = "230px"; 
 
 
   return (
-    // Container principal da página do chatbot. 
-    // Removido bg-gray-900 para ser transparente. 
-    // h-full assume que o pai no layout do dashboard tem altura definida.
+
+
+
     <div className="flex flex-col h-full text-white overflow-hidden">
-      {/* Message Display Area */}
-      {/* Padding inferior ajustado para não sobrepor a área de input fixa */}
+      {}
+      {}
       <div 
         ref={scrollableMessagesContainerRef} 
         className={`flex-grow overflow-y-auto p-4 sm:p-6 space-y-5 relative`}
-        style={{ paddingBottom: `calc(${inputAreaHeightMobile} + 20px)` }} // Adiciona um pouco de espaço extra
+        style={{ paddingBottom: `calc(${inputAreaHeightMobile} + 20px)` }} 
       >
-        {/* Fallback para telas maiores usando media query inline se necessário, ou ajuste o paddingBottom diretamente */}
+        {}
 {messages.length === 0 && !isLoading && (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <Bot size={48} className="text-purple-400 mb-4" />
@@ -510,7 +510,7 @@ export default function ChatbotPage() {
         )}
         {messages.map((msg, index) => (
           <div
-            key={index} // Usar um ID estável seria melhor se as mensagens pudessem ser reordenadas/excluídas do meio
+            key={index} 
             className={`flex items-end gap-2.5 animate-fadeIn ${
               msg.role === 'user' ? 'justify-end' : 'justify-start'
             }`}
@@ -528,7 +528,7 @@ export default function ChatbotPage() {
                     : 'bg-gray-700 text-gray-200 rounded-bl-none'
                 }`}
             >
-              {/* Mensagem renderizada diretamente */}
+              {}
               <p className="whitespace-pre-wrap">{msg.content}</p>
             </div>
             {msg.role === 'user' && (
@@ -538,7 +538,7 @@ export default function ChatbotPage() {
             )}
           </div>
         ))}
-        {isLoading && ( // Este é o loader temporário enquanto a API responde
+        {isLoading && ( 
           <div className="flex items-end gap-2.5 justify-start animate-fadeIn">
             <Avatar className="h-8 w-8 border border-purple-600 shadow-md flex-shrink-0">
               <AvatarFallback className="bg-purple-500/30"><Bot size={18} /></AvatarFallback>
@@ -565,12 +565,12 @@ export default function ChatbotPage() {
         )}
       </div>
 
-      {/* Input Area (Fixed at bottom, centered, transparent panel) */}
-      {/* Modificado para md:left-64 para respeitar a sidebar em telas médias e maiores */}
-      <div className="fixed bottom-0 right-0 md:left-64 left-0 flex justify-center z-30 pointer-events-none"> {/* Container para centralização */}
+      {}
+      {}
+      <div className="fixed bottom-0 right-0 md:left-64 left-0 flex justify-center z-30 pointer-events-none"> {}
         <div 
           className="w-full max-w-3xl p-3 sm:p-4 bg-gray-500/30 backdrop-blur-md border-t border-gray-700/50 rounded-lg shadow-xl pointer-events-auto mb-5"
-          // Ajuste a altura mínima ou padding aqui se necessário para garantir que inputAreaHeight* seja preciso
+
         >
           <div className="flex justify-between items-center mb-2 sm:mb-3">
             <h2 className="text-lg sm:text-xl font-semibold text-gray-300">
@@ -592,7 +592,7 @@ export default function ChatbotPage() {
                   <>
                     <DropdownMenuSeparator className="bg-gray-700" />
                     <DropdownMenuLabel className="text-gray-400 px-2 py-1.5 text-xs">Conversas Arquivadas</DropdownMenuLabel>
-                    <div className="max-h-60 overflow-y-auto"> {/* Scroll para lista de arquivados */}
+                    <div className="max-h-60 overflow-y-auto"> {}
                       {archivedChats.map(chat => (
                         <DropdownMenuItem 
                           key={chat.id} 
@@ -627,7 +627,7 @@ export default function ChatbotPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="flex items-center bg-transparent rounded-full p-1 sm:p-1.5">
-            {/* Os botões Plus e Mic foram removidos conforme sua indicação */}
+            {}
             <Input
               ref={inputRef}
               type="text"
@@ -655,8 +655,8 @@ export default function ChatbotPage() {
             <ActionButton icon={<MessageSquare className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />} text="Últimas Avaliações" onClick={() => handleActionClick("Quais foram as últimas avaliações recebidas?")} />
             <ActionButton icon={<BarChart2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />} text="Tipos de Relatório" onClick={() => handleActionClick("Que tipos de relatórios estão disponíveis?")} />
             <ActionButton icon={<HelpCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />} text="Ajuda Geral" onClick={() => handleActionClick("O que você pode fazer?")} />
-            {/* O botão MoreHorizontal pode ser mantido se houver mais ações planejadas */}
-            {/* <ActionButton icon={<MoreHorizontal className="h-3.5 w-3.5 sm:h-4 sm:w-4" />} text="" isIconOnly={true} /> */}
+            {}
+            {}
           </div>
         </div>
       </div>

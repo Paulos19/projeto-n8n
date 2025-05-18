@@ -13,7 +13,7 @@ interface ArchivedChatPayload {
   messages: ChatMessage[];
 }
 
-// GET: Listar chats arquivados
+
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -33,7 +33,7 @@ export async function GET(request: Request) {
   }
 }
 
-// POST: Arquivar um chat
+
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
       data: {
         userId,
         name,
-        messages: messages as any, // Cast messages to any
+        messages: messages as any, 
         timestamp: new Date(),
       },
     });

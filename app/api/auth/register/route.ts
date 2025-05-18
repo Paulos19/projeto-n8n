@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import { randomBytes } from 'crypto'; // Para gerar a API key
+import { randomBytes } from 'crypto'; 
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     if (existingUserByIdentifier) {
       return NextResponse.json(
         { message: 'Identificador (CPF/CNPJ) já cadastrado.' },
-        { status: 409 } // Conflict
+        { status: 409 } 
       );
     }
     
@@ -32,14 +32,14 @@ export async function POST(request: NextRequest) {
     if (existingUserByEmail) {
       return NextResponse.json(
         { message: 'Email já cadastrado.' },
-        { status: 409 } // Conflict
+        { status: 409 } 
       );
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // Gerar uma Webhook API Key única
-    const webhookApiKey = randomBytes(16).toString('hex'); // Gera uma string hexadecimal de 32 caracteres
+
+    const webhookApiKey = randomBytes(16).toString('hex'); 
 
     const newUser = await prisma.user.create({
       data: {
@@ -47,22 +47,22 @@ export async function POST(request: NextRequest) {
         email,
         passwordHash,
         identifier,
-        webhookApiKey, // Salva a chave gerada
-        // Adicione o role aqui se já estiver implementando papéis
-        // role: 'OWNER', // Exemplo, se o primeiro cadastro for sempre OWNER
+        webhookApiKey, 
+
+
       },
     });
 
-    // Não retorne a senha ou o hash da senha
+
     const { passwordHash: _, ...userWithoutPassword } = newUser;
 
-    // Você pode optar por retornar a webhookApiKey aqui para que o frontend a exiba ao usuário
-    // ou instruí-lo a encontrá-la em seu perfil após o login.
+
+
     return NextResponse.json(
       { 
         message: 'Usuário cadastrado com sucesso!', 
         user: userWithoutPassword,
-        webhookApiKey: webhookApiKey // Opcional: retornar para exibição imediata
+        webhookApiKey: webhookApiKey 
       }, 
       { status: 201 }
     );

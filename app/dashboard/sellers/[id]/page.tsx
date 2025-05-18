@@ -19,7 +19,7 @@ async function getSellerDetails(sellerId: string, userId: string) {
     const seller = await prisma.seller.findUnique({
       where: {
         id: sellerId,
-        storeOwnerId: userId, // Garante que o vendedor pertence ao usuário logado
+        storeOwnerId: userId, 
       },
     });
     return seller;
@@ -33,7 +33,7 @@ export default async function SellerDetailsPage({ params }: SellerDetailsPagePro
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
-    redirect("/auth/signin"); // Ou uma página de não autorizado
+    redirect("/auth/signin"); 
   }
 
   const seller = await getSellerDetails(params.id, session.user.id);

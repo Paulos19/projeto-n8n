@@ -18,7 +18,7 @@ export function NavLinkItem({ href, label, onClick, isMobile }: NavLinkItemProps
     initial: { opacity: 0, y: -10 },
     animate: { opacity: 1, y: 0 },
     exit: { opacity: 0, y: -10 },
-    hoverDesktop: { scale: 1.05, y: -2, color: "var(--foreground)" }, // Use CSS var for color
+    hoverDesktop: { scale: 1.05, y: -2, color: "var(--foreground)" }, 
     tap: { scale: 0.95 }
   };
 

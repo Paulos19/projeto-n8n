@@ -1,6 +1,6 @@
 import prisma from '@/lib/prisma';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button'; // Assumindo que você tem este componente
+import { Button } from '@/components/ui/button'; 
 import {
   Card,
   CardContent,
@@ -8,17 +8,17 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'; // Assumindo que você tem estes componentes
-import { User, MessageSquare, CalendarDays } from 'lucide-react'; // Ícones para detalhes
+} from '@/components/ui/card'; 
+import { User, MessageSquare, CalendarDays } from 'lucide-react'; 
 
 interface ConversationListProps {
   selectedSellerId?: string;
-  loggedInUserId?: string; // Adicionado para receber o ID do usuário logado
+  loggedInUserId?: string; 
 }
 
 export async function ConversationList({ selectedSellerId, loggedInUserId }: ConversationListProps) {
-  // Opcional: Simular um atraso para testar o Suspense
-  // await new Promise(resolve => setTimeout(resolve, 2000));
+
+
 
   if (!loggedInUserId) {
     return (
@@ -29,30 +29,30 @@ export async function ConversationList({ selectedSellerId, loggedInUserId }: Con
   }
 
   const whereCondition: any = {
-    userId: loggedInUserId, // Filtra sempre pelo ID do dono da loja logado
+    userId: loggedInUserId, 
   };
 
   if (selectedSellerId && selectedSellerId !== 'all') {
-    whereCondition.sellerId = selectedSellerId; // Adiciona filtro por sellerId se um vendedor específico for selecionado
+    whereCondition.sellerId = selectedSellerId; 
   }
 
   const chatInteractions = await prisma.chatInteraction.findMany({
     where: whereCondition,
-    // O include para 'user' (dono da loja) pode ser mantido se você usar o nome do dono da loja em outro lugar.
-    // Para o nome do vendedor, 'sellerInstanceName' já está no modelo ChatInteraction.
-    // Se precisar de mais dados do vendedor, pode adicionar: include: { seller: true }
-    // Por ora, o include existente para user é:
+
+
+
+
     include: {
       user: { 
         select: { 
           name: true,
-          // instanceName: true // instanceName no User é o da loja, não do vendedor
+
         }
       },
-      seller: true, // Adicionado para incluir os dados completos do vendedor
+      seller: true, 
     },
     orderBy: {
-      eventTimestamp: 'desc', // Ordenar por data do evento da interação
+      eventTimestamp: 'desc', 
     },
   });
 
@@ -82,20 +82,14 @@ export async function ConversationList({ selectedSellerId, loggedInUserId }: Con
              </CardDescription>
            </CardHeader>
            <CardContent className="flex-grow">
-            {/* Você pode adicionar um breve resumo da conversa aqui se desejar */}
-            {/* Exemplo:
-            <p className="text-sm text-muted-foreground line-clamp-3">
-              {typeof interaction.chatHistory === 'string' 
-                ? interaction.chatHistory.substring(0, 100) + "..." 
-                : "Prévia do histórico não disponível."}
-            </p>
-            */}
+            {}
+            {}
              <p className="text-sm text-muted-foreground">
                Clique nos botões abaixo para mais detalhes.
              </p>
            </CardContent>
            <CardFooter className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
-            {interaction.remoteJid && ( // Renderiza o botão se remoteJid existir e não for uma string vazia
+            {interaction.remoteJid && ( 
               <Button asChild variant="outline" size="sm">
                 <Link href={`/dashboard/clientes/${interaction.remoteJid.replace('@', '_')}`}>
                   Detalhes Cliente

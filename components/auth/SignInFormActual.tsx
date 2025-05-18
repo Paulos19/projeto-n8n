@@ -1,4 +1,3 @@
-// app/auth/signin/SignInFormProfessional.tsx
 "use client";
 
 import { signIn } from "next-auth/react";
@@ -11,7 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import Link from "next/link";
 import { AlertTriangle, LogIn, Mail, Lock, Loader2, Building, User } from "lucide-react";
 
-// Componente wrapper para Suspense, necessário para useSearchParams no Next.js App Router
+
 const SignInFormWrapper = () => {
   return (
     <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Carregando...</div>}>
@@ -29,7 +28,7 @@ function SignInFormProfessional() {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar senha
+  const [showPassword, setShowPassword] = useState(false); 
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -46,9 +45,9 @@ function SignInFormProfessional() {
 
     if (result?.error) {
       console.error("Erro de login:", result.error);
-      // Para exibir uma mensagem mais amigável, podemos mapear os erros
-      // ou simplesmente usar o router.push como antes, mas com uma mensagem mais clara
-      // Neste exemplo, manteremos o redirecionamento com o erro, mas o componente de erro será mais destacado.
+
+
+
       router.push(`/auth/signin?error=${result.error}&callbackUrl=${encodeURIComponent(callbackUrl)}`);
     } else if (result?.url) {
       router.push(result.url);
@@ -61,7 +60,7 @@ function SignInFormProfessional() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-slate-100 dark:bg-slate-900 p-4 selection:bg-sky-300/70 selection:text-sky-900">
-      {/* Logo ou Nome do Produto */}
+      {}
       <div className="mb-8 text-center">
         <Link href="/" className="inline-block">
           <h1 className={`text-5xl font-bold ${gradientText}`}>
@@ -115,7 +114,7 @@ function SignInFormProfessional() {
               <div className="flex items-center justify-between">
                 <Label htmlFor="password" className="font-medium text-slate-700 dark:text-slate-300">Senha</Label>
                 <Link
-                  href="/auth/forgot-password" // Crie esta página se necessário
+                  href="/auth/forgot-password" 
                   className="text-sm font-medium text-sky-600 hover:text-sky-500 dark:text-sky-400 dark:hover:text-sky-300 hover:underline"
                 >
                   Esqueceu a senha?
@@ -140,18 +139,13 @@ function SignInFormProfessional() {
                   aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                   disabled={isLoading}
                 >
-                  {showPassword ? <Mail size={20} /> : <Lock size={20} /> /* Usando ícones diferentes para clareza, idealmente seria eye/eye-off */}
+                  {showPassword ? <Mail size={20} /> : <Lock size={20} /> }
                 </button>
               </div>
             </div>
             
-            {/* Opção de "Lembrar-me" - funcionalidade a ser implementada */}
-            {/* <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Checkbox id="remember-me" disabled={isLoading} />
-                <Label htmlFor="remember-me" className="text-sm font-normal text-slate-600 dark:text-slate-400">Lembrar-me</Label>
-              </div>
-            </div> */}
+            {}
+            {}
 
             <Button type="submit" className="w-full py-6 text-base font-semibold bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-700 hover:to-cyan-600 dark:from-sky-500 dark:to-cyan-400 dark:hover:from-sky-600 dark:hover:to-cyan-500" disabled={isLoading}>
               {isLoading ? (
@@ -168,36 +162,20 @@ function SignInFormProfessional() {
             </Button>
           </form>
 
-          {/* Separador para "Ou continue com" */}
-          {/* <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-slate-300 dark:border-slate-700" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="px-2 bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400">
-                Ou continue com
-              </span>
-            </div>
-          </div> */}
+          {}
+          {}
 
-          {/* Botões de Login Social (Exemplo) */}
-          {/* <div className="space-y-3">
-            <Button variant="outline" className="w-full py-6 text-base border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800" disabled={isLoading}>
-              <Mail className="w-5 h-5 mr-2" /> {/* Substituir pelo ícone do Google */}
-          {/* Entrar com Google
-            </Button>
-            <Button variant="outline" className="w-full py-6 text-base border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800" disabled={isLoading}>
-              <Building className="w-5 h-5 mr-2" /> {/* Substituir pelo ícone do GitHub/Microsoft etc. */}
-          {/* Entrar com Microsoft
-            </Button>
-          </div> */}
+          {}
+          {}
+          {}
+          {}
 
         </CardContent>
         <CardFooter className="flex flex-col items-center justify-center pt-6 border-t dark:border-slate-700">
           <p className="text-sm text-slate-600 dark:text-slate-400">
             Não tem uma conta?{" "}
             <Link
-              href="/auth/signup" // Ajuste este caminho se sua página de signup for diferente
+              href="/auth/signup" 
               className="font-semibold text-sky-600 hover:text-sky-500 dark:text-sky-400 dark:hover:text-sky-300 hover:underline"
             >
               Cadastre-se agora
@@ -214,5 +192,5 @@ function SignInFormProfessional() {
   );
 }
 
-// Exporta o wrapper que inclui o Suspense
+
 export default SignInFormWrapper;

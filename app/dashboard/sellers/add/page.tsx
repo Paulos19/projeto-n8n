@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, UserPlus, Loader2 } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // Para mensagens de erro/sucesso
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; 
 
 export default function AddSellerPage() {
   const [name, setName] = useState('');

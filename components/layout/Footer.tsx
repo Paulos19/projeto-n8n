@@ -41,15 +41,14 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-card text-card-foreground pt-16 pb-8"> {/* Usando bg-card e text-card-foreground */}
+    <footer className="bg-card text-card-foreground pt-16 pb-8"> {}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-          {/* Logo e Descrição */}
           <div className="mb-6 md:mb-0 lg:col-span-1">
-            <Link href="/" className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-teal-300 to-green-300 mb-2 inline-block"> {/* Mantendo gradiente específico do logo */}
+            <Link href="/" className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-teal-300 to-green-300 mb-2 inline-block"> {}
               R.A.I.O
             </Link>
-            <p className="text-sm text-muted-foreground"> {/* Usando text-muted-foreground */}
+            <p className="text-sm text-muted-foreground"> {}
               Potencialize seu negócio com insights e gerenciamento inteligente.
             </p>
             <div className="flex space-x-4 mt-6">
@@ -59,7 +58,7 @@ export default function Footer() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-primary transition-colors" /* Usando text-muted-foreground e hover:text-primary */
+                  className="text-muted-foreground hover:text-primary transition-colors" 
                   aria-label={social.label}
                   whileHover={{ y: -2, scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
@@ -70,17 +69,17 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Links do Footer */}
+          {}
           {footerSections.map((section) => (
             <div key={section.title}>
-              <h5 className="text-lg font-semibold text-foreground mb-4">{section.title}</h5> {/* Usando text-foreground */}
+              <h5 className="text-lg font-semibold text-foreground mb-4">{section.title}</h5> {}
               <ul className="space-y-2">
                 {section.links.map((link) => (
                   <li key={link.label}>
                     <motion.div whileHover={{ x: 2 }} whileTap={{ scale: 0.98 }}>
                       <Link
                         href={link.href}
-                        className="hover:text-primary transition-colors text-sm text-muted-foreground" /* Usando text-muted-foreground e hover:text-primary */
+                        className="hover:text-primary transition-colors text-sm text-muted-foreground" 
                       >
                         {link.label}
                       </Link>
@@ -92,8 +91,8 @@ export default function Footer() {
           ))}
         </div>
 
-        <div className="border-t border-border pt-8 text-center"> {/* Usando border-border */}
-          <p className="text-sm text-muted-foreground"> {/* Usando text-muted-foreground */}
+        <div className="border-t border-border pt-8 text-center"> {}
+          <p className="text-sm text-muted-foreground"> {}
             &copy; {currentYear} R.A.I.O. Todos os direitos reservados.
           </p>
         </div>

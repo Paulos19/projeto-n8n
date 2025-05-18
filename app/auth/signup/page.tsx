@@ -1,4 +1,3 @@
-// app/auth/signup/SignUpFormProfessional.tsx
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -14,7 +13,7 @@ export default function SignUpFormProfessional() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [identifier, setIdentifier] = useState("");
-  const [email, setEmail] = useState(""); // Opcional
+  const [email, setEmail] = useState(""); 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -35,15 +34,15 @@ export default function SignUpFormProfessional() {
       return;
     }
 
-    // Validação simples de CPF/CNPJ (apenas comprimento)
+
     if (identifier.length !== 11 && identifier.length !== 14) {
         setError("O CPF deve ter 11 dígitos e o CNPJ 14 dígitos.");
         setIsLoading(false);
         return;
     }
     
-    // Validação de força da senha (exemplo: mínimo 8 caracteres, letra maiúscula, minúscula, número)
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d\S]{8,}$/; // Permite caracteres especiais também
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d\S]{8,}$/; 
     if (!passwordRegex.test(password)) {
         setError("A senha deve ter no mínimo 8 caracteres, incluindo uma letra maiúscula, uma minúscula e um número.");
         setIsLoading(false);
@@ -52,7 +51,7 @@ export default function SignUpFormProfessional() {
 
 
     try {
-      const response = await fetch("/api/auth/register", { // Endpoint da sua API de registro
+      const response = await fetch("/api/auth/register", { 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, identifier, email: email || undefined, password }),
@@ -70,7 +69,7 @@ export default function SignUpFormProfessional() {
         setPassword("");
         setConfirmPassword("");
         setTimeout(() => {
-          router.push("/auth/signin"); // Redireciona para a tela de login
+          router.push("/auth/signin"); 
         }, 3000);
       }
     } catch (err) {
@@ -85,7 +84,7 @@ export default function SignUpFormProfessional() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-slate-100 dark:bg-slate-900 p-4 selection:bg-sky-300/70 selection:text-sky-900">
-      {/* Logo ou Nome do Produto */}
+      {}
       <div className="mb-8 text-center">
         <Link href="/" className="inline-block">
           <h1 className={`text-5xl font-bold ${gradientText}`}>
@@ -124,7 +123,7 @@ export default function SignUpFormProfessional() {
             </div>
           )}
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Nome Completo */}
+            {}
             <div className="space-y-2">
               <Label htmlFor="name" className="font-medium text-slate-700 dark:text-slate-300">Nome Completo</Label>
               <div className="relative flex items-center">
@@ -142,7 +141,7 @@ export default function SignUpFormProfessional() {
               </div>
             </div>
 
-            {/* Identificador (CPF/CNPJ) */}
+            {}
             <div className="space-y-2">
               <Label htmlFor="identifier" className="font-medium text-slate-700 dark:text-slate-300">Identificador (CPF/CNPJ)</Label>
               <div className="relative flex items-center">
@@ -162,7 +161,7 @@ export default function SignUpFormProfessional() {
               </div>
             </div>
 
-            {/* Email (Opcional) */}
+            {}
             <div className="space-y-2">
               <Label htmlFor="email" className="font-medium text-slate-700 dark:text-slate-300">Email <span className="text-xs text-slate-500 dark:text-slate-400">(Opcional)</span></Label>
               <div className="relative flex items-center">
@@ -179,7 +178,7 @@ export default function SignUpFormProfessional() {
               </div>
             </div>
             
-            {/* Senha */}
+            {}
             <div className="space-y-2">
               <Label htmlFor="password" className="font-medium text-slate-700 dark:text-slate-300">Senha</Label>
               <div className="relative flex items-center">
@@ -192,7 +191,7 @@ export default function SignUpFormProfessional() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={isLoading || !!success}
-                  minLength={8} // Mínimo 8 caracteres para a senha
+                  minLength={8} 
                   className="pl-10 pr-10 py-6 text-base border-slate-300 dark:border-slate-700 focus:border-sky-500 dark:focus:border-sky-500 focus:ring-sky-500 dark:focus:ring-sky-500"
                 />
                 <button
@@ -208,7 +207,7 @@ export default function SignUpFormProfessional() {
                <p className="text-xs text-slate-500 dark:text-slate-400 px-1">Mínimo 8 caracteres, com maiúscula, minúscula e número.</p>
             </div>
 
-            {/* Confirmar Senha */}
+            {}
             <div className="space-y-2">
               <Label htmlFor="confirmPassword" className="font-medium text-slate-700 dark:text-slate-300">Confirmar Senha</Label>
               <div className="relative flex items-center">

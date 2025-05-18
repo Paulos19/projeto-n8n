@@ -2,17 +2,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, Content } from '@google/generative-ai';
 import prisma  from '@/lib/prisma';
-import { getServerSession } from "next-auth/next"; // Adicionado
-import { authOptions } from "@/auth"; // Adicionado (verifique se o caminho para authOptions está correto)
+import { getServerSession } from "next-auth/next"; 
+import { authOptions } from "@/auth"; 
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY || "");
 
 const generationConfig = {
-  temperature: 0.7, // Ajuste conforme necessário
+  temperature: 0.7, 
   topK: 1,
   topP: 1,
-  maxOutputTokens: 2048, // Ajuste conforme necessário
+  maxOutputTokens: 2048, 
 };
 
 const safetySettings = [
@@ -34,23 +34,23 @@ export async function POST(req: NextRequest) {
   const userId = session.user.id;
 
   try {
-    const { message: userCurrentMessage } = await req.json(); // Renomeado de 'message', e 'history' não é mais lido do cliente diretamente
+    const { message: userCurrentMessage } = await req.json(); 
 
     if (!userCurrentMessage) {
       return NextResponse.json({ error: 'Mensagem é obrigatória' }, { status: 400 });
     }
 
-    // Buscar dados do usuário e vendedores para contexto
+
     const currentUser = await prisma.user.findUnique({
       where: { id: userId },
       include: { 
         sellers: {
           select: { name: true, evolutionInstanceName: true } 
         },
-        customerReviews: { // Incluir avaliações de clientes
+        customerReviews: { 
           select: { rating: true, comment: true, createdAt: true },
           orderBy: { createdAt: 'desc' },
-          take: 20 // Pegar as 20 avaliações mais recentes como exemplo
+          take: 20 
         }
       },
     });
@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
     let reviewsInfoForPrompt = "";
     if (reviewsExist && currentUser?.customerReviews) {
       reviewsInfoForPrompt = ` O usuário possui ${currentUser.customerReviews.length} avaliações de clientes recentes. Você pode usar essas informações para análises e sugestões. Exemplo das últimas avaliações (nota e comentário): `;
-      currentUser.customerReviews.slice(0, 3).forEach(review => { // Mostrar as 3 mais recentes no prompt
+      currentUser.customerReviews.slice(0, 3).forEach(review => { 
         reviewsInfoForPrompt += `[Nota: ${review.rating || 'N/A'}, Comentário: "${review.comment.substring(0, 100)}..."] `;
       });
     } else {
@@ -87,22 +87,22 @@ export async function POST(req: NextRequest) {
       fullSystemMessage += " Importante: Atualmente, não há vendedores cadastrados no sistema. Se o usuário expressar a necessidade de gerenciar a equipe de vendas, ou se a conversa indicar que vendedores são necessários para a tarefa solicitada (como gerar relatórios de vendas por vendedor), informe que, para prosseguir, é preciso primeiro cadastrar um vendedor. Pergunte se ele gostaria de fazer isso agora. Se sim, explique que ele pode usar o comando 'cadastrar vendedor: Nome (opcional), NomeDaInstancia, ChaveDaAPI, NumeroWhatsApp' ou peça os dados individualmente: Nome do Vendedor (opcional), Nome da Instância da Evolution API, Chave da API da Evolution e o Número do WhatsApp do vendedor para que você possa ajudar no cadastro.";
     }
 
-    // Carregar histórico do chat do banco de dados
+
     const dbChatMessages = await prisma.geminiChatMessage.findMany({
       where: { 
         userId: userId,
-        isArchived: false // Considerar apenas mensagens não arquivadas para o histórico ativo
+        isArchived: false 
       },
       orderBy: { createdAt: 'asc' },
-      take: 30, // Limitar o tamanho do histórico
+      take: 30, 
     });
 
     const geminiHistory: Content[] = dbChatMessages.map(msg => ({
-      role: msg.role === 'user' ? 'user' : 'model', // DB armazena 'user' ou 'model'
+      role: msg.role === 'user' ? 'user' : 'model', 
       parts: [{ text: msg.content }],
     }));
 
-    // Salvar a mensagem atual do usuário no banco de dados
+
     await prisma.geminiChatMessage.create({
       data: {
         userId: userId,
@@ -127,9 +127,9 @@ export async function POST(req: NextRequest) {
       },
     ];
 
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY); // Recriar instância se não for global ou já configurada
+    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY); 
     const geminiModel = genAI
-      .getGenerativeModel({ model: "gemini-2.0-flash", generationConfig, safetySettings }); // Usando o modelo especificado
+      .getGenerativeModel({ model: "gemini-2.0-flash", generationConfig, safetySettings }); 
       
     const geminiStreamResult = await geminiModel.generateContentStream({ contents });
 
@@ -144,15 +144,15 @@ export async function POST(req: NextRequest) {
             controller.enqueue(new TextEncoder().encode(chunkText));
           } catch (error) {
             console.error("Error processing stream chunk:", error);
-            // Considerar enfileirar uma mensagem de erro ou tratar de forma diferente
+
           }
         }
-        // Após o stream terminar, salvar a resposta acumulada do assistente
+
         if (accumulatedAssistantResponse.trim()) {
           await prisma.geminiChatMessage.create({
             data: {
               userId: userId,
-              role: 'model', // 'model' para respostas do Gemini
+              role: 'model', 
               content: accumulatedAssistantResponse.trim(),
             },
           });
@@ -161,7 +161,7 @@ export async function POST(req: NextRequest) {
       },
       cancel(reason) {
         console.log("Stream cancelled:", reason);
-        // Decidir se a resposta parcial deve ser salva em caso de cancelamento.
+
       }
     });
 

@@ -3,14 +3,14 @@ import { Button } from "@/components/ui/button";
 import { BarChartBig, PieChart, TrendingUp, Download, Filter } from "lucide-react";
 import Link from "next/link";
 
-// Mock data para tipos de relatórios
+
 const reportTypes = [
   {
     title: "Relatório de Satisfação do Cliente",
     description: "Analise a satisfação geral e por nota dos seus clientes.",
     icon: PieChart,
     actionText: "Gerar Relatório",
-    href: "/dashboard/relatorios/satisfacao-cliente", // Rota para o relatório específico
+    href: "/dashboard/relatorios/satisfacao-cliente", 
     tags: ["Satisfação", "NPS", "Feedback"],
   },
   {
@@ -32,7 +32,7 @@ const reportTypes = [
   {
     title: "Relatório de Tempo de Resposta",
     description: "Monitore a eficiência da sua equipe no tempo de resposta às avaliações.",
-    icon: Filter, // Usando Filter como placeholder, pode ser um ícone de relógio/velocidade
+    icon: Filter, 
     actionText: "Ver Detalhes",
     href: "/dashboard/relatorios/tempo-resposta",
     tags: ["Eficiência", "SLA", "Atendimento"],
@@ -62,7 +62,7 @@ export default function RelatoriosPage() {
                 <report.icon className="h-8 w-8 text-blue-400" />
                 <CardTitle className={`text-xl ${gradientText}`}>{report.title}</CardTitle>
               </div>
-              <CardDescription className="text-gray-400 h-16">{report.description}</CardDescription> {/* Altura fixa para alinhar */}
+              <CardDescription className="text-gray-400 h-16">{report.description}</CardDescription> {}
             </CardHeader>
             <CardContent className="flex-grow">
               <div className="flex flex-wrap gap-2 mb-4">
@@ -82,7 +82,7 @@ export default function RelatoriosPage() {
         ))}
       </div>
 
-      {/* Placeholder para filtros globais ou configurações de relatório */}
+      {}
       <Card className="bg-gray-800 border-gray-700 text-white">
         <CardHeader>
           <CardTitle className={`text-lg ${gradientText}`}>Filtros Avançados</CardTitle>

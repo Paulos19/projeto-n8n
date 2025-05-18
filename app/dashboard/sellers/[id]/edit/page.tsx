@@ -28,7 +28,7 @@ export default function EditSellerPage() {
   const [formData, setFormData] = useState<SellerData>({
     name: '',
     evolutionInstanceName: '',
-    evolutionApiKey: '', // Não vamos exibir a API Key por segurança, mas ela pode ser atualizada.
+    evolutionApiKey: '', 
     sellerWhatsAppNumber: '',
     isActive: true,
   });
@@ -54,11 +54,11 @@ export default function EditSellerPage() {
           setFormData({
             name: data.name || '',
             evolutionInstanceName: data.evolutionInstanceName,
-            evolutionApiKey: '', // Não preencher o campo da API Key por segurança
+            evolutionApiKey: '', 
             sellerWhatsAppNumber: data.sellerWhatsAppNumber,
             isActive: data.isActive,
           });
-          setOriginalApiKey(data.evolutionApiKey); // Guardar a original caso não seja alterada
+          setOriginalApiKey(data.evolutionApiKey); 
         } catch (err: any) {
           setError(err.message);
           toast.error(err.message || "Erro ao buscar dados do vendedor.");
@@ -86,14 +86,14 @@ export default function EditSellerPage() {
     toast.loading("Salvando alterações...");
 
     const payload = { ...formData };
-    // Se o campo da API Key estiver vazio, significa que o usuário não quer atualizá-la.
-    // Nesse caso, não enviamos `evolutionApiKey` ou enviamos a original se a lógica da API exigir.
-    // Para esta implementação, se o campo `evolutionApiKey` no formulário estiver vazio, não o incluímos no payload de PATCH,
-    // ou a API deve ser inteligente para não atualizar se não for fornecido.
-    // Melhor: só envie a API key se ela for alterada.
+
+
+
+
+
     if (!payload.evolutionApiKey) {
       // @ts-ignore
-      delete payload.evolutionApiKey; // Não envia se estiver vazia, para não apagar a existente sem querer
+      delete payload.evolutionApiKey; 
     }
 
 
@@ -112,8 +112,8 @@ export default function EditSellerPage() {
       }
 
       toast.success('Vendedor atualizado com sucesso!');
-      router.push(`/dashboard/sellers/${sellerId}`); // Volta para a página de detalhes
-      // Ou router.push('/dashboard/sellers'); para a lista
+      router.push(`/dashboard/sellers/${sellerId}`); 
+
     } catch (err: any) {
       toast.dismiss();
       setError(err.message);
@@ -132,7 +132,7 @@ export default function EditSellerPage() {
     );
   }
 
-  if (error && !isLoading) { // Mostrar erro apenas se não estiver mais carregando
+  if (error && !isLoading) { 
      return (
         <div className="space-y-6 max-w-2xl mx-auto">
              <Button asChild variant="outline">
@@ -168,7 +168,7 @@ export default function EditSellerPage() {
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-5 pt-6">
-            {error && !isSubmitting && ( // Mostrar erro de submissão apenas se não estiver submetendo
+            {error && !isSubmitting && ( 
               <Alert variant="destructive" className="mb-4">
                 <AlertTitle>Erro!</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
@@ -209,7 +209,7 @@ export default function EditSellerPage() {
                 Nova API Key da Evolution (deixe em branco para não alterar)
               </Label>
               <Input
-                type="password" // Mudar para password para não exibir a chave
+                type="password" 
                 id="evolutionApiKey"
                 name="evolutionApiKey"
                 value={formData.evolutionApiKey}

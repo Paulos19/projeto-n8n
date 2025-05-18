@@ -1,4 +1,3 @@
-// app/dashboard/conversas/[jid]/page.tsx
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -17,17 +16,17 @@ import { ChatInteraction } from "@prisma/client";
 
 export const dynamic = 'force-dynamic';
 
-// Define a estrutura para mensagens individuais no chatHistory
+
 interface ChatMessage {
   sender: string;
   senderName: string;
   text: string;
-  timestamp: number; // Unix timestamp em segundos
+  timestamp: number; 
   messageType: string;
   fromMe: boolean;
 }
 
-// Tipo para os detalhes da conversa, garantindo que chatHistory seja tipado corretamente
+
 interface ConversaDetalhes extends Omit<ChatInteraction, 'chatHistory'> {
   chatHistory: ChatMessage[];
 }
@@ -42,14 +41,14 @@ async function getConversaDetalhes(id: string): Promise<ConversaDetalhes | null>
       return null;
     }
 
-    // Garante que chatHistory seja parseado e tipado corretamente
-    // Prisma armazena JSON como JsonValue, então precisamos fazer o cast.
-    // O campo chatHistory no banco é um JSON que corresponde a ChatMessage[]
+
+
+
     const typedChatHistory = conversa.chatHistory as unknown as ChatMessage[];
 
     return {
       ...conversa,
-      chatHistory: typedChatHistory || [], // Fallback para array vazio se for null/undefined
+      chatHistory: typedChatHistory || [], 
     };
   } catch (error) {
     console.error("Erro ao buscar detalhes da conversa:", error);
@@ -58,7 +57,7 @@ async function getConversaDetalhes(id: string): Promise<ConversaDetalhes | null>
 }
 
 export default async function ConversaDetalhePage({ params }: { params: { jid: string } }) {
-  // params.jid aqui é o ID da ChatInteraction
+
   const conversa = await getConversaDetalhes(params.jid); 
   const gradientText = "bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400";
 
@@ -95,7 +94,7 @@ export default async function ConversaDetalhePage({ params }: { params: { jid: s
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Seção de Análise */}
+          {}
           <div className="p-4 bg-gray-850 rounded-lg border border-gray-700">
             <h3 className="text-lg font-semibold text-gray-200 mb-2 flex items-center">
               <Bot className="mr-2 h-5 w-5 text-purple-400" /> Análise da Conversa
@@ -123,7 +122,7 @@ export default async function ConversaDetalhePage({ params }: { params: { jid: s
             )}
           </div>
 
-          {/* Seção de Histórico de Chat */}
+          {}
           <div>
             <h3 className="text-lg font-semibold text-gray-200 mb-3 mt-6">Histórico da Conversa</h3>
             {conversa.chatHistory && conversa.chatHistory.length > 0 ? (
@@ -138,8 +137,8 @@ export default async function ConversaDetalhePage({ params }: { params: { jid: s
                     <div
                       className={`max-w-xl p-3 rounded-lg shadow ${
                         msg.fromMe
-                          ? "bg-blue-600 text-white" // Mensagens do vendedor/atendente
-                          : "bg-gray-700 text-gray-200" // Mensagens do cliente
+                          ? "bg-blue-600 text-white" 
+                          : "bg-gray-700 text-gray-200" 
                       }`}
                     >
                       <div className="flex items-center mb-1">
@@ -154,7 +153,7 @@ export default async function ConversaDetalhePage({ params }: { params: { jid: s
                       </div>
                       <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
                       <p className="text-xs opacity-70 mt-1 text-right">
-                        {new Date(msg.timestamp * 1000).toLocaleString('pt-BR', { // Convertendo Unix timestamp (segundos) para ms
+                        {new Date(msg.timestamp * 1000).toLocaleString('pt-BR', { 
                           hour: '2-digit',
                           minute: '2-digit',
                           day: '2-digit',
