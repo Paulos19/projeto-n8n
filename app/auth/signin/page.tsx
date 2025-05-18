@@ -1,5 +1,5 @@
-// app/auth/signin/page.tsx (ou o caminho correto da sua página)
-import { SignInFormActual } from '@/components/auth/SignInFormActual';
+
+import SignInFormWrapper from '@/components/auth/SignInFormActual';
 import { Suspense } from 'react'; // Ajuste o caminho se necessário
 
 // Um componente de fallback para mostrar enquanto o formulário está carregando
@@ -15,7 +15,7 @@ function LoadingFallback() {
 export default function SignInPage() {
   return (
     <Suspense fallback={<LoadingFallback />}>
-      <SignInFormActual />
+      <SignInFormWrapper />
     </Suspense>
   );
 }

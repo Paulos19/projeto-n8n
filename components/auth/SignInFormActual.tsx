@@ -1,24 +1,35 @@
-// app/auth/signin/SignInFormActual.tsx
+// app/auth/signin/SignInFormProfessional.tsx
 "use client";
 
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
+import { AlertTriangle, LogIn, Mail, Lock, Loader2, Building, User } from "lucide-react";
 
-export function SignInFormActual() {
+// Componente wrapper para Suspense, necessário para useSearchParams no Next.js App Router
+const SignInFormWrapper = () => {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Carregando...</div>}>
+      <SignInFormProfessional />
+    </Suspense>
+  );
+};
+
+function SignInFormProfessional() {
   const router = useRouter();
-  const searchParams = useSearchParams(); // Este hook requer o Suspense boundary na página que o utiliza
+  const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const error = searchParams.get("error");
 
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar senha
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -35,75 +46,173 @@ export function SignInFormActual() {
 
     if (result?.error) {
       console.error("Erro de login:", result.error);
-      // Recarrega a página de signin com a mensagem de erro e o callbackUrl original
+      // Para exibir uma mensagem mais amigável, podemos mapear os erros
+      // ou simplesmente usar o router.push como antes, mas com uma mensagem mais clara
+      // Neste exemplo, manteremos o redirecionamento com o erro, mas o componente de erro será mais destacado.
       router.push(`/auth/signin?error=${result.error}&callbackUrl=${encodeURIComponent(callbackUrl)}`);
     } else if (result?.url) {
-      // Se next-auth retornar uma URL (pode acontecer em cenários específicos)
       router.push(result.url);
     } else {
-      // Login bem-sucedido, redireciona para o callbackUrl
       router.push(callbackUrl);
     }
   };
 
+  const gradientText = "bg-clip-text text-transparent bg-gradient-to-r from-sky-500 via-cyan-400 to-emerald-500";
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">Login R.A.I.O</CardTitle>
-          <CardDescription className="text-center">
-            Acesse o painel para visualizar as interações.
+    <div className="flex flex-col items-center justify-center min-h-screen bg-slate-100 dark:bg-slate-900 p-4 selection:bg-sky-300/70 selection:text-sky-900">
+      {/* Logo ou Nome do Produto */}
+      <div className="mb-8 text-center">
+        <Link href="/" className="inline-block">
+          <h1 className={`text-5xl font-bold ${gradientText}`}>
+            R.A.I.O
+          </h1>
+        </Link>
+        <p className="text-slate-600 dark:text-slate-400 mt-2">
+          Robô Analisador e Identificador de Oportunidades
+        </p>
+      </div>
+
+      <Card className="w-full max-w-md shadow-2xl dark:shadow-sky-500/20">
+        <CardHeader className="text-center">
+          <CardTitle className="text-3xl font-bold">Bem-vindo de volta!</CardTitle>
+          <CardDescription>
+            Acesse sua conta para continuar transformando dados em decisões.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <div className="p-3 text-sm text-center text-destructive bg-destructive/10 rounded-md">
-                Falha no login. Verifique suas credenciais ou tente novamente.
-                {error === "CredentialsSignin" && " (Identificador ou senha inválidos)"}
+        <CardContent className="space-y-6">
+          {error && (
+            <div className="flex items-center p-3 space-x-3 text-sm border rounded-md border-destructive/50 text-destructive bg-destructive/10">
+              <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+              <div>
+                <p className="font-semibold">Falha no Login</p>
+                <p>
+                  {error === "CredentialsSignin"
+                    ? "Identificador (CPF/CNPJ) ou senha inválidos. Por favor, verifique e tente novamente."
+                    : "Ocorreu um erro ao tentar fazer login. Tente novamente mais tarde."}
+                </p>
               </div>
-            )}
+            </div>
+          )}
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="identifier">Identificador (CPF/CNPJ)</Label>
-              <Input
-                id="identifier"
-                type="text"
-                placeholder="Seu CPF ou CNPJ"
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
-                required
-                disabled={isLoading}
-              />
+              <Label htmlFor="identifier" className="font-medium text-slate-700 dark:text-slate-300">Identificador (CPF/CNPJ)</Label>
+              <div className="relative flex items-center">
+                <User className="absolute w-5 h-5 left-3 text-slate-400 dark:text-slate-500" />
+                <Input
+                  id="identifier"
+                  type="text"
+                  placeholder="Digite seu CPF ou CNPJ"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  required
+                  disabled={isLoading}
+                  className="pl-10 py-6 text-base border-slate-300 dark:border-slate-700 focus:border-sky-500 dark:focus:border-sky-500 focus:ring-sky-500 dark:focus:ring-sky-500"
+                />
+              </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Sua senha"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={isLoading}
-              />
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password" className="font-medium text-slate-700 dark:text-slate-300">Senha</Label>
+                <Link
+                  href="/auth/forgot-password" // Crie esta página se necessário
+                  className="text-sm font-medium text-sky-600 hover:text-sky-500 dark:text-sky-400 dark:hover:text-sky-300 hover:underline"
+                >
+                  Esqueceu a senha?
+                </Link>
+              </div>
+              <div className="relative flex items-center">
+                <Lock className="absolute w-5 h-5 left-3 text-slate-400 dark:text-slate-500" />
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Digite sua senha"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={isLoading}
+                  className="pl-10 pr-10 py-6 text-base border-slate-300 dark:border-slate-700 focus:border-sky-500 dark:focus:border-sky-500 focus:ring-sky-500 dark:focus:ring-sky-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-400"
+                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                  disabled={isLoading}
+                >
+                  {showPassword ? <Mail size={20} /> : <Lock size={20} /> /* Usando ícones diferentes para clareza, idealmente seria eye/eye-off */}
+                </button>
+              </div>
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Entrando..." : "Entrar"}
+            
+            {/* Opção de "Lembrar-me" - funcionalidade a ser implementada */}
+            {/* <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Checkbox id="remember-me" disabled={isLoading} />
+                <Label htmlFor="remember-me" className="text-sm font-normal text-slate-600 dark:text-slate-400">Lembrar-me</Label>
+              </div>
+            </div> */}
+
+            <Button type="submit" className="w-full py-6 text-base font-semibold bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-700 hover:to-cyan-600 dark:from-sky-500 dark:to-cyan-400 dark:hover:from-sky-600 dark:hover:to-cyan-500" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Entrando...
+                </>
+              ) : (
+                <>
+                  <LogIn className="w-5 h-5 mr-2" />
+                  Entrar
+                </>
+              )}
             </Button>
           </form>
+
+          {/* Separador para "Ou continue com" */}
+          {/* <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-slate-300 dark:border-slate-700" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="px-2 bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400">
+                Ou continue com
+              </span>
+            </div>
+          </div> */}
+
+          {/* Botões de Login Social (Exemplo) */}
+          {/* <div className="space-y-3">
+            <Button variant="outline" className="w-full py-6 text-base border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800" disabled={isLoading}>
+              <Mail className="w-5 h-5 mr-2" /> {/* Substituir pelo ícone do Google */}
+          {/* Entrar com Google
+            </Button>
+            <Button variant="outline" className="w-full py-6 text-base border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800" disabled={isLoading}>
+              <Building className="w-5 h-5 mr-2" /> {/* Substituir pelo ícone do GitHub/Microsoft etc. */}
+          {/* Entrar com Microsoft
+            </Button>
+          </div> */}
+
         </CardContent>
-        <CardFooter className="flex justify-center">
-          <p className="text-sm text-muted-foreground">
+        <CardFooter className="flex flex-col items-center justify-center pt-6 border-t dark:border-slate-700">
+          <p className="text-sm text-slate-600 dark:text-slate-400">
             Não tem uma conta?{" "}
             <Link
               href="/auth/signup" // Ajuste este caminho se sua página de signup for diferente
-              className="font-medium text-primary hover:underline"
+              className="font-semibold text-sky-600 hover:text-sky-500 dark:text-sky-400 dark:hover:text-sky-300 hover:underline"
             >
-              Cadastre-se
+              Cadastre-se agora
             </Link>
           </p>
         </CardFooter>
       </Card>
+
+      <p className="mt-8 text-xs text-center text-slate-500 dark:text-slate-400">
+        &copy; {new Date().getFullYear()} R.A.I.O. Todos os direitos reservados. <br />
+        <Link href="/termos" className="hover:underline">Termos de Serviço</Link> | <Link href="/privacidade" className="hover:underline">Política de Privacidade</Link>
+      </p>
     </div>
   );
 }
+
+// Exporta o wrapper que inclui o Suspense
+export default SignInFormWrapper;
