@@ -8,6 +8,11 @@ import React, { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import { useSession, signOut } from "next-auth/react"; // Importar useSession e signOut
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // Importar Avatar
+import { motion } from "framer-motion"; // Adicionar esta linha
+
+// Defina as classes do gradiente para reutilização (se não estiver globalmente acessível)
+const gradientTextClassesSideBar = "bg-clip-text text-transparent bg-gradient-to-r from-sky-500 via-cyan-400 to-emerald-500";
+
 
 const navItems = [
   { href: "/dashboard", label: "Início", icon: Home },
@@ -47,16 +52,21 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       className={`${sidebarBaseClasses} bg-[var(--sidebar-transparent-bg)] backdrop-blur-md ${mobileClasses} ${desktopClasses}`}
     >
       <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <NextImage // Usar NextImage
-            src="/logo.svg" 
+        <motion.div
+          initial={{ opacity: 0, scale: 0.7 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
+          className="flex items-center space-x-2"
+        >
+          <NextImage
+            src="/logo.svg" // Conforme o seu código atual. Se quiser o azul, use "/logo-raio-sky.svg"
             alt="R.A.I.O Logo"
-            width={32}
-            height={32}
-            className="h-8 w-8"
+            width={26} 
+            height={39} 
+            className="h-8 w-auto" 
           />
-          <span className="text-2xl font-bold dark:text-white text-black">R.A.I.O</span>
-        </div>
+          <span className={`text-2xl font-bold ${gradientTextClassesSideBar}`}>R.A.I.O</span> {/* Aplicando o gradiente */}
+        </motion.div>
         <button
             onClick={() => setIsOpen(false)}
             className="md:hidden p-1 text-muted-foreground hover:text-foreground" 
