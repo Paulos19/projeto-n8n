@@ -466,7 +466,7 @@ const App = () => {
 
   return (
     <div className="font-sans antialiased text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 selection:bg-sky-300/70 selection:text-sky-900">
-      <Navbar /> {}
+      <Navbar /> 
       <main>
         <HeroSection />
         <ProblemSolutionSection />
@@ -474,7 +474,7 @@ const App = () => {
         <HowItWorksSection />
         <CtaSection />
       </main>
-      <Footer /> {}
+      <Footer />
       <ScrollToTopButton />
     </div>
   );
