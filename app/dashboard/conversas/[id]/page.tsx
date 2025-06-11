@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useParams, notFound, useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,8 +35,8 @@ export default function ConversaDetalhePage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  // Função para buscar os dados da conversa
-  const fetchData = async () => {
+  // **CORREÇÃO AQUI:** fetchData foi movido para o escopo do componente e envolvido com useCallback.
+  const fetchData = useCallback(async () => {
     if (!conversaId) return;
     
     setIsLoading(true);
@@ -56,11 +56,11 @@ export default function ConversaDetalhePage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [conversaId]);
 
   useEffect(() => {
     fetchData();
-  }, [conversaId]);
+  }, [fetchData]);
 
   const gradientText = "bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400";
 
@@ -93,10 +93,9 @@ export default function ConversaDetalhePage() {
                 Cliente: {conversa.customerName || 'Não Informado'} ({conversa.remoteJid})
               </CardDescription>
             </div>
-            {/* *** CORREÇÃO PRINCIPAL AQUI *** */}
-            {/* Agora estamos passando o ID da interação (conversa.id) em vez do JID do cliente */}
             <AnalysisTriggerButton
-              targetId={conversa.id} 
+              targetId={conversa.id}
+              chatHistoryId={conversa.remoteJid}
               analysisType="dashboard_summary"
               buttonText="Gerar Resumo com IA"
               className="bg-purple-600 hover:bg-purple-700 text-white"

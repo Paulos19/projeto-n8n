@@ -1,9 +1,9 @@
 // app/dashboard/avaliacao/[id]/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { useParams, notFound } from 'next/navigation';
+import { useParams, notFound, useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,43 +12,42 @@ import { Avaliacao } from "@prisma/client";
 import { AnalysisTriggerButton } from '@/components/dashboard/AnalysisTriggerButton';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
-interface AvaliacaoData extends Avaliacao { }
+interface AvaliacaoData extends Avaliacao {}
 
 export default function AvaliacaoDetalhePage() {
   const params = useParams();
-  const avaliacaoId = params.id as string; // Obtém o ID da rota
+  const avaliacaoId = params.id as string;
 
   const [avaliacao, setAvaliacao] = useState<AvaliacaoData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const router = require('next/navigation').useRouter();
+  const router = useRouter();
+
+  // **CORREÇÃO AQUI:** fetchData foi movido para o escopo do componente e envolvido com useCallback.
+  const fetchData = useCallback(async () => {
+    if (!avaliacaoId) return;
+    
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/avaliacao/${avaliacaoId}`);
+      if (!response.ok) {
+        if (response.status === 404) notFound();
+        throw new Error('Falha ao buscar dados da avaliação');
+      }
+      const data = await response.json();
+      setAvaliacao(data);
+    } catch (err) {
+      console.error(err);
+      setError((err as Error).message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [avaliacaoId]); // A dependência é o ID da avaliação.
 
   useEffect(() => {
-    if (!avaliacaoId) return;
-
-    async function fetchData() {
-      setIsLoading(true);
-      setError(null);
-      try {
-        // Corrigido: Chamando a rota de API correta
-        const response = await fetch(`/api/avaliacao/${avaliacaoId}`);
-        if (!response.ok) {
-          if (response.status === 404) {
-            notFound();
-          }
-          throw new Error('Falha ao buscar dados da avaliação');
-        }
-        const data = await response.json();
-        setAvaliacao(data);
-      } catch (err) {
-        console.error(err);
-        setError((err as Error).message);
-      } finally {
-        setIsLoading(false);
-      }
-    }
     fetchData();
-  }, [avaliacaoId]);
+  }, [fetchData]); // useEffect agora chama a função memoizada.
 
   const gradientText = "bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-teal-300 to-green-300";
 
@@ -57,33 +56,34 @@ export default function AvaliacaoDetalhePage() {
   }
 
   if (error) {
-    return (
-      <div className="text-center">
-        <p className="text-destructive">Erro: {error}</p>
-        <Button onClick={() => router.back()} variant="outline" className="mt-4">Voltar</Button>
-      </div>
-    );
+     return (
+        <div className="text-center p-8">
+            <p className="text-destructive font-semibold">Erro ao carregar a avaliação</p>
+            <p className="text-muted-foreground text-sm mb-4">{error}</p>
+            <Button onClick={() => router.back()} variant="outline" className="mt-4">Voltar</Button>
+        </div>
+     );
   }
 
   if (!avaliacao) {
     return notFound();
   }
-
+  
   const getNotaBadgeVariant = (nota: number | null): "default" | "secondary" | "destructive" | "outline" | null | undefined => {
     if (nota === null) return "secondary";
     if (nota <= 2) return "destructive";
-    if (nota <= 3) return "secondary";
-    return "default";
+    if (nota <= 3) return "secondary"; 
+    return "default"; 
   };
-
+  
   const renderField = (
     label: string,
     value: string | number | string[] | null | Date,
     Icon?: React.ElementType,
-    isBadgeList?: boolean,
+    isBadgeList?: boolean, 
     badgeVariant?: "default" | "secondary" | "destructive" | "outline" | null | undefined
   ) => {
-    if (value === null || value === undefined || (Array.isArray(value) && value.length === 0)) return null;
+    if (!value || (Array.isArray(value) && value.length === 0)) return null;
 
     let displayValue: React.ReactNode;
     if (value instanceof Date) {
@@ -128,15 +128,13 @@ export default function AvaliacaoDetalhePage() {
               </CardTitle>
               <CardDescription className="text-gray-400 mt-1">ID: {avaliacao.id}</CardDescription>
             </div>
-
-            {/* *** CORREÇÃO PRINCIPAL AQUI *** */}
             <AnalysisTriggerButton
-              targetId={avaliacao.id} // ID do registro a ser ATUALIZADO
-              chatHistoryId={avaliacao.remoteJid} // ID do CHAT a ser ANALISADO
+              targetId={avaliacao.id}
+              chatHistoryId={avaliacao.remoteJid}
               analysisType="customer_evaluation"
               buttonText="Gerar Análise com IA"
               className="bg-teal-600 hover:bg-teal-700 text-white"
-              onAnalysisComplete={fetchData}
+              onAnalysisComplete={fetchData} 
             />
           </div>
         </CardHeader>
