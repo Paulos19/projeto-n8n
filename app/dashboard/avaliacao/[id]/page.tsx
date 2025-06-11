@@ -1,71 +1,93 @@
 // app/dashboard/avaliacao/[id]/page.tsx
-'use client'; // Necessário para usar hooks e eventos
+'use client';
 
 import { useState, useEffect } from 'react';
-import prisma from "@/lib/prisma";
-import { notFound } from "next/navigation";
-import Link from "next/link";
+import Link from 'next/link';
+import { useParams, notFound } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, MessageSquare, Star, ThumbsUp, ThumbsDown, User, CalendarDays, Activity } from "lucide-react";
 import { Avaliacao } from "@prisma/client";
-import { AnalysisTriggerButton } from '@/components/dashboard/AnalysisTriggerButton'; // Importe o novo componente
+import { AnalysisTriggerButton } from '@/components/dashboard/AnalysisTriggerButton';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 interface AvaliacaoData extends Avaliacao {}
 
-export default function AvaliacaoDetalhePage({ params }: { params: { id: string } }) {
+export default function AvaliacaoDetalhePage() {
+  const params = useParams();
+  const avaliacaoId = params.id as string; // Obtém o ID da rota
+
   const [avaliacao, setAvaliacao] = useState<AvaliacaoData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const router = require('next/navigation').useRouter();
 
   useEffect(() => {
+    if (!avaliacaoId) return;
+
     async function fetchData() {
+      setIsLoading(true);
+      setError(null);
       try {
-        const response = await fetch(`/api/avaliacao-proxy/${params.id}`);
+        // Corrigido: Chamando a rota de API correta
+        const response = await fetch(`/api/avaliacao/${avaliacaoId}`);
         if (!response.ok) {
+          if (response.status === 404) {
+            notFound();
+          }
           throw new Error('Falha ao buscar dados da avaliação');
         }
         const data = await response.json();
         setAvaliacao(data);
-      } catch (error) {
-        console.error(error);
+      } catch (err) {
+        console.error(err);
+        setError((err as Error).message);
       } finally {
         setIsLoading(false);
       }
     }
     fetchData();
-  }, [params.id]);
+  }, [avaliacaoId]);
 
   const gradientText = "bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-teal-300 to-green-300";
 
   if (isLoading) {
     return <LoadingSpinner message="Carregando avaliação..." />;
   }
-  
+
+  if (error) {
+     return (
+        <div className="text-center">
+            <p className="text-destructive">Erro: {error}</p>
+            <Button onClick={() => router.back()} variant="outline" className="mt-4">Voltar</Button>
+        </div>
+     );
+  }
+
   if (!avaliacao) {
     return notFound();
   }
-
-  const getNotaBadgeVariant = (nota: number | null): "default" | "secondary" | "destructive" | "outline" | null => {
+  
+  const getNotaBadgeVariant = (nota: number | null): "default" | "secondary" | "destructive" | "outline" | null | undefined => {
     if (nota === null) return "secondary";
     if (nota <= 2) return "destructive";
-    if (nota <= 3) return "secondary"; 
-    return "default"; 
+    if (nota <= 3) return "secondary";
+    return "default";
   };
-  
+
   const renderField = (
     label: string,
     value: string | number | string[] | null | Date,
     Icon?: React.ElementType,
-    isBadgeList?: boolean, 
-    badgeVariant?: "default" | "secondary" | "destructive" | "outline" | null
+    isBadgeList?: boolean,
+    badgeVariant?: "default" | "secondary" | "destructive" | "outline" | null | undefined
   ) => {
-    if (!value || (Array.isArray(value) && value.length === 0)) return null;
+    if (value === null || value === undefined || (Array.isArray(value) && value.length === 0)) return null;
 
     let displayValue: React.ReactNode;
     if (value instanceof Date) {
-      displayValue = value.toLocaleDateString('pt-BR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      displayValue = new Date(value).toLocaleDateString('pt-BR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     } else if (isBadgeList && Array.isArray(value)) {
       displayValue = (
         <div className="flex flex-wrap gap-2">
@@ -106,12 +128,10 @@ export default function AvaliacaoDetalhePage({ params }: { params: { id: string 
               </CardTitle>
               <CardDescription className="text-gray-400 mt-1">ID: {avaliacao.id}</CardDescription>
             </div>
-             {/* Botão para gerar avaliação de desempenho */}
             <AnalysisTriggerButton
-              customerJid={avaliacao.remoteJid}
+              targetId={avaliacao.id}
               analysisType="customer_evaluation"
-              interactionId={avaliacao.id}
-              buttonText="Gerar Análise de Desempenho"
+              buttonText="Gerar Análise com IA"
               className="bg-teal-600 hover:bg-teal-700 text-white"
             />
           </div>

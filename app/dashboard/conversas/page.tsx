@@ -1,69 +1,64 @@
+// app/dashboard/conversas/page.tsx
+
 import prisma from '@/lib/prisma';
 import { SellerFilter } from './components/seller-filter';
-import { Suspense } from 'react'; 
+import { Suspense } from 'react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { ConversationList } from './components/conversation-list';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/auth'; 
+import { authOptions } from '@/auth';
+
+// Garante que a página seja renderizada dinamicamente
+export const dynamic = 'force-dynamic';
 
 interface ConversasPageProps {
   searchParams?: {
     sellerId?: string;
-
+    page?: string;
   };
 }
 
 export default async function ConversasPage({ searchParams }: ConversasPageProps) {
-  const selectedSellerId = searchParams?.sellerId;
   const session = await getServerSession(authOptions);
-  const loggedInUserId = session?.user?.id; 
+  const loggedInUserId = session?.user?.id;
 
-
-  let sellers: { id: string; name: string | null; instanceName: string }[] = [];
-
-
-
-  if (loggedInUserId) { 
-
-
-
-
+  // Busca os vendedores para o filtro.
+  // Esta lógica permanece aqui pois é necessária para o componente de filtro.
+  let sellers: { id: string; name: string | null; }[] = [];
+  if (loggedInUserId) {
     const fetchedSellers = await prisma.seller.findMany({
       where: {
-        storeOwnerId: loggedInUserId, 
-        isActive: true, 
+        storeOwnerId: loggedInUserId,
+        isActive: true,
       },
       select: {
         id: true,
-        name: true, 
-        evolutionInstanceName: true, 
+        name: true,
       },
       orderBy: {
         name: 'asc',
       },
     });
-
-
-    sellers = fetchedSellers.map(seller => ({
-      id: seller.id,
-      name: seller.name,
-      instanceName: seller.evolutionInstanceName, 
-    }));
+    sellers = fetchedSellers;
   }
 
-
-
-
+  // Extrai os parâmetros da URL de forma segura
+  const selectedSellerId = searchParams?.sellerId || 'all';
+  const currentPage = Number(searchParams?.page) || 1;
 
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-6">Conversas</h1>
 
-      <SellerFilter sellers={sellers} currentSellerId={selectedSellerId} />
+      <SellerFilter sellers={sellers} />
 
-      {}
-      <Suspense fallback={<LoadingSpinner message="Carregando conversas..." />}>
-        <ConversationList selectedSellerId={selectedSellerId} loggedInUserId={loggedInUserId} />
+      {/* O Suspense agora envolve um componente que faz o fetch dos dados */}
+      <Suspense key={selectedSellerId + currentPage} fallback={<LoadingSpinner message="Carregando conversas..." />}>
+        <ConversationList
+          selectedSellerId={selectedSellerId}
+          currentPage={currentPage}
+          loggedInUserId={loggedInUserId}
+        />
       </Suspense>
     </div>
   );
