@@ -12,7 +12,7 @@ import { Avaliacao } from "@prisma/client";
 import { AnalysisTriggerButton } from '@/components/dashboard/AnalysisTriggerButton';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
-interface AvaliacaoData extends Avaliacao {}
+interface AvaliacaoData extends Avaliacao { }
 
 export default function AvaliacaoDetalhePage() {
   const params = useParams();
@@ -57,18 +57,18 @@ export default function AvaliacaoDetalhePage() {
   }
 
   if (error) {
-     return (
-        <div className="text-center">
-            <p className="text-destructive">Erro: {error}</p>
-            <Button onClick={() => router.back()} variant="outline" className="mt-4">Voltar</Button>
-        </div>
-     );
+    return (
+      <div className="text-center">
+        <p className="text-destructive">Erro: {error}</p>
+        <Button onClick={() => router.back()} variant="outline" className="mt-4">Voltar</Button>
+      </div>
+    );
   }
 
   if (!avaliacao) {
     return notFound();
   }
-  
+
   const getNotaBadgeVariant = (nota: number | null): "default" | "secondary" | "destructive" | "outline" | null | undefined => {
     if (nota === null) return "secondary";
     if (nota <= 2) return "destructive";
@@ -128,11 +128,15 @@ export default function AvaliacaoDetalhePage() {
               </CardTitle>
               <CardDescription className="text-gray-400 mt-1">ID: {avaliacao.id}</CardDescription>
             </div>
+
+            {/* *** CORREÇÃO PRINCIPAL AQUI *** */}
             <AnalysisTriggerButton
-              targetId={avaliacao.id}
+              targetId={avaliacao.id} // ID do registro a ser ATUALIZADO
+              chatHistoryId={avaliacao.remoteJid} // ID do CHAT a ser ANALISADO
               analysisType="customer_evaluation"
               buttonText="Gerar Análise com IA"
               className="bg-teal-600 hover:bg-teal-700 text-white"
+              onAnalysisComplete={fetchData}
             />
           </div>
         </CardHeader>

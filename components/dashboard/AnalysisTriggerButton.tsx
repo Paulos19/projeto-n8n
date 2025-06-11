@@ -1,4 +1,3 @@
-// components/dashboard/AnalysisTriggerButton.tsx
 'use client';
 
 import { useState } from 'react';
@@ -6,52 +5,48 @@ import { Button } from '@/components/ui/button';
 import { Sparkles, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { useRouter } from 'next/navigation'; // Importa o useRouter para refresh
+import { useRouter } from 'next/navigation';
 
-// Define as propriedades que o nosso botão vai aceitar
 interface AnalysisTriggerButtonProps {
-  // O JID do cliente para análise de conversa, ou o ID da avaliação para análise de nota
+  // ID do registro a ser atualizado (ex: avaliacao.id ou chatInteraction.id)
   targetId: string | null;
+  // ID usado para buscar o histórico no Redis (sempre o JID do cliente)
+  chatHistoryId: string | null; 
   analysisType: 'customer_evaluation' | 'dashboard_summary';
   buttonText: string;
   className?: string;
-  onAnalysisComplete?: () => void; // Callback opcional
+  onAnalysisComplete?: () => void;
 }
 
-/**
- * Um botão reutilizável que chama a API /api/trigger-analysis
- * para iniciar um workflow de análise da IA no n8n.
- */
 export function AnalysisTriggerButton({
   targetId,
+  chatHistoryId, // <-- Novo parâmetro
   analysisType,
   buttonText,
   className,
   onAnalysisComplete,
 }: AnalysisTriggerButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter(); // Hook para refresh da página
+  const router = useRouter();
 
   const handleTriggerAnalysis = async () => {
-    if (!targetId) {
+    if (!targetId || !chatHistoryId) { // <-- Validação atualizada
       toast.error('Não foi possível iniciar a análise.', {
-        description: 'O identificador do alvo (ID da avaliação ou JID do cliente) não foi encontrado.',
+        description: 'Faltam identificadores essenciais (ID do Alvo ou ID do Histórico).',
       });
       return;
     }
 
     setIsLoading(true);
-    const toastId = toast.loading(`Iniciando análise: "${buttonText}"...`, {
-      description: 'A IA está processando os dados. Isso pode levar um momento.',
-    });
+    const toastId = toast.loading(`Iniciando análise: "${buttonText}"...`);
 
     try {
-      // Faz a chamada para a nossa nova API
       const response = await fetch('/api/trigger-analysis', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           targetId,
+          chatHistoryId, // <-- Enviando o novo parâmetro
           analysisType,
         }),
       });
@@ -64,13 +59,13 @@ export function AnalysisTriggerButton({
       }
       
       toast.success('Análise concluída!', {
-        description: "Os dados foram atualizados com os insights da IA. A página será atualizada.",
-        duration: 5000,
+        description: "Os dados foram atualizados. A página será recarregada.",
+        duration: 4000,
         onAutoClose: () => {
           if (onAnalysisComplete) {
             onAnalysisComplete();
           } else {
-            router.refresh(); // Recarrega os dados do servidor para a página atual
+            router.refresh(); 
           }
         },
       });
@@ -78,9 +73,7 @@ export function AnalysisTriggerButton({
     } catch (error) {
       toast.dismiss(toastId);
       const errorMessage = error instanceof Error ? error.message : 'Um erro desconhecido ocorreu.';
-      toast.error('Falha ao iniciar ou concluir a análise.', {
-        description: errorMessage,
-      });
+      toast.error('Falha ao concluir a análise.', { description: errorMessage });
       console.error("Erro ao disparar análise:", error);
     } finally {
       setIsLoading(false);
@@ -90,14 +83,10 @@ export function AnalysisTriggerButton({
   return (
     <Button
       onClick={handleTriggerAnalysis}
-      disabled={isLoading || !targetId}
+      disabled={isLoading || !targetId || !chatHistoryId}
       className={cn("gap-2", className)}
     >
-      {isLoading ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
-      ) : (
-        <Sparkles className="h-4 w-4" />
-      )}
+      {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
       {isLoading ? 'Analisando...' : buttonText}
     </Button>
   );
