@@ -17,11 +17,11 @@ const gradientTextClassesSideBar = "bg-clip-text text-transparent bg-gradient-to
 const navItems = [
   { href: "/dashboard", label: "Início", icon: Home },
   { href: "/dashboard/avaliacoes", label: "Avaliações", icon: MessageSquare },
-  { href: "/dashboard/conversas", label: "Conversas n8n", icon: MessageCircle },
-  { href: "/dashboard/relatorios", label: "Relatórios", icon: FileText },
+  { href: "/dashboard/conversas", label: "Conversas", icon: MessageCircle },
   { href: "/dashboard/clientes", label: "Clientes", icon: Users },
   { href: "/dashboard/sellers", label: "Vendedores", icon: UserIcon },
   { href: "/dashboard/chatbot", label: "Assistente IA", icon: Bot },
+  { href: "/dashboard/relatorios", label: "Relatórios", icon: FileText },
   { href: "/dashboard/configuracoes", label: "Configurações", icon: Settings },
 ];
 
@@ -52,6 +52,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       className={`${sidebarBaseClasses} bg-[var(--sidebar-transparent-bg)] backdrop-blur-md ${mobileClasses} ${desktopClasses}`}
     >
       <div className="mb-4 flex items-center justify-between">
+        <Link href='/'>
         <motion.div
           initial={{ opacity: 0, scale: 0.7 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -65,8 +66,10 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             height={39} 
             className="h-8 w-auto" 
           />
-          <span className={`text-2xl font-bold ${gradientTextClassesSideBar}`}>R.A.I.O</span> {}
+          
+          <span className={`text-2xl font-bold ${gradientTextClassesSideBar}`}>R.A.I.O</span>
         </motion.div>
+        </Link>
         <button
             onClick={() => setIsOpen(false)}
             className="md:hidden p-1 text-muted-foreground hover:text-foreground" 
