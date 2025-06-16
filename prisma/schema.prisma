@@ -1,4 +1,5 @@
-// prisma/schema.prisma
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
@@ -9,7 +10,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Modelos Principais da Aplicação
+// Define o Enum para as roles de usuário
+enum Role {
+  USER
+  ADMIN
+}
 
 model User {
   id            String    @id @default(cuid())
@@ -17,154 +22,125 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
-  identifier    String?   @unique // Para login sem email/senha, se aplicável
+  identifier    String?   @unique
   passwordHash  String?
-  webhookApiKey String?   @unique // Chave principal da loja/usuário (dono da loja) para webhooks
-  instanceName  String? // Nome geral da instância da loja (opcional)
+  webhookApiKey String?   @unique
+  instanceName  String?
+  // CORREÇÃO: Adiciona o campo 'role' sem assumir a existência de createdAt/updatedAt
+  role          Role      @default(USER)
 
-  // Relações NextAuth
-  accounts Account[]
-  sessions Session[]
-
-  // Relações da Aplicação
-  sellers              Seller[]              @relation("StoreOwnerToSellers")
-  avaliacoes           Avaliacao[] // Avaliações detalhadas recebidas pela loja/usuário
-  customerReviews      CustomerReview[] // Avaliações/feedback mais genéricos de clientes
-  chatInteractions     ChatInteraction[] // Todas as interações de chat associadas a esta loja/usuário
-  geminiChatMessages   GeminiChatMessage[] // Mensagens do chatbot Gemini para este usuário
-  ChatbotActiveSession ChatbotActiveSession?
-  ChatbotArchivedChat  ChatbotArchivedChat[]
-
-  @@map("users")
+  accounts             Account[]
+  sessions             Session[]
+  sellers              Seller[]
+  avaliacoes           Avaliacao[]
+  customerReviews      CustomerReview[]
+  chatInteractions     ChatInteraction[]
+  geminiChatMessages   GeminiChatMessage[]
+  chatbotActiveSession ChatbotActiveSession?
+  chatbotArchivedChats ChatbotArchivedChat[]
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
 }
 
 model Seller {
-  id                    String  @id @default(cuid())
-  name                  String? // Nome de exibição para o vendedor
-  evolutionInstanceName String // Nome da instância na Evolution API (ex: body.instance do webhook)
-  evolutionApiKey       String // Chave da Evolution API específica deste vendedor
-  sellerWhatsAppNumber  String // Número do WhatsApp da instância Evolution do vendedor
-  isActive              Boolean @default(true) // Para ativar/desativar vendedor
+  id                    String   @id @default(cuid())
+  name                  String?
+  evolutionInstanceName String
+  evolutionApiKey       String
+  sellerWhatsAppNumber  String
+  isActive              Boolean  @default(true)
+  storeOwnerId          String
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
-  // Relação com o Dono da Loja (User)
-  storeOwnerId String
-  storeOwner   User   @relation("StoreOwnerToSellers", fields: [storeOwnerId], references: [id], onDelete: Cascade)
+  storeOwner       User              @relation(fields: [storeOwnerId], references: [id], onDelete: Cascade)
+  avaliacoes       Avaliacao[]
+  chatInteractions ChatInteraction[]
 
-  // Relações com outras entidades
-  avaliacoes       Avaliacao[] // Avaliações específicas deste vendedor
-  chatInteractions ChatInteraction[] // Interações de chat atribuídas a este vendedor
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([storeOwnerId, evolutionInstanceName], name: "unique_seller_instance_per_store")
-  @@unique([storeOwnerId, evolutionApiKey], name: "unique_seller_apikey_per_store")
-  @@unique([storeOwnerId, sellerWhatsAppNumber], name: "unique_seller_whatsapp_per_store")
-  @@map("sellers")
+  @@unique([storeOwnerId, evolutionInstanceName])
+  @@unique([storeOwnerId, evolutionApiKey])
+  @@unique([storeOwnerId, sellerWhatsAppNumber])
 }
 
 model Avaliacao {
   id                  String   @id @default(cuid())
-  nota_cliente        Int? // Nota de 1 a 5, por exemplo
-  pontos_fortes       String[] // Array de strings
-  pontos_fracos       String[] // Array de strings
-  tempo_resposta      String? // Ex: "rápido", "médio", "lento"
-  clareza_comunicacao String? // Ex: "claro", "confuso"
-  resolucao_problema  String? // Ex: "resolvido", "parcialmente resolvido", "não resolvido"
-  sugestoes_melhoria  String[] // Array de strings
-  resumo_atendimento  String?  @db.Text
-  remoteJid           String? // JID do cliente que fez a avaliação, se aplicável
+  nota_cliente        Int?
+  pontos_fortes       String[]
+  pontos_fracos       String[]
+  tempo_resposta      String?
+  clareza_comunicacao String?
+  resolucao_problema  String?
+  sugestoes_melhoria  String[]
+  resumo_atendimento  String?
+  remoteJid           String?
+  userId              String?
+  sellerId            String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
-  // Relação com User (dono da loja que recebeu a avaliação, pode ser nulo se a avaliação for anônima ou não diretamente ligada ao dono)
-  userId String?
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
-
-  // Relação com Seller (vendedor que foi avaliado)
-  sellerId String?
-  seller   Seller? @relation(fields: [sellerId], references: [id], onDelete: SetNull)
-
-  // sellerEvolutionApiKey String? // Campo removido, pois a ligação é feita via sellerId para o modelo Seller que contém a API Key.
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  seller Seller? @relation(fields: [sellerId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([sellerId])
-  @@map("avaliacoes") // Nome da tabela no banco de dados
 }
 
 model CustomerReview {
-  id           String  @id @default(cuid())
-  reviewerName String? // Nome de quem fez a avaliação (opcional)
-  rating       Int? // Nota da avaliação (ex: 1 a 5, opcional)
-  comment      String  @db.Text // O texto da avaliação/feedback
+  id           String   @id @default(cuid())
+  reviewerName String?
+  rating       Int?
+  comment      String
+  userId       String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  // Relação com User (dono da loja que recebeu a avaliação)
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@map("customer_reviews")
 }
 
 model ChatInteraction {
-  id        String  @id @default(cuid())
-  remoteJid String // JID do contato externo (ex: cliente no WhatsApp)
-  messageId String? @unique // ID único da mensagem da plataforma de origem (opcional, mas útil)
-
-  // Campos adicionados para corresponder ao payload do N8N
+  id                 String   @id @default(cuid())
+  remoteJid          String
+  messageId          String?  @unique
   customerName       String?
-  chatHistory        Json?    // Para armazenar o histórico de chat como JSON
-  analysisSummary    String?  @db.Text // Para o resumo da análise
-  analysisKeywords   String[] // Para as palavras-chave da análise
-  sellerInstanceName String?  // Nome da instância do vendedor, se aplicável
+  chatHistory        Json?
+  analysisSummary    String?
+  analysisKeywords   String[]
+  sellerInstanceName String?
+  interactionType    String?
+  content            String?
+  eventTimestamp     DateTime
+  source             String?
+  status             String?
+  metadata           Json?
+  userId             String?
+  sellerId           String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
-  interactionType String? // Ex: "message_received", "message_sent", "call_log", "status_update"
-  content         String?  @db.Text // Conteúdo da mensagem, detalhes da chamada, etc.
-  eventTimestamp  DateTime // Quando a interação ocorreu (pode ser diferente de createdAt)
-  source          String? // Ex: "whatsapp", "evolution_api", "system_generated"
-  status          String? // Ex: "sent", "delivered", "read", "failed", "answered", "missed"
-  metadata        Json? // Quaisquer outros dados relevantes em formato JSON
-
-  // Relação com User (dono da loja) - opcional se a interação for apenas do vendedor
-  userId String?
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
-
-  // Relação com Seller (vendedor envolvido na interação) - opcional
-  sellerId String?
-  seller   Seller? @relation(fields: [sellerId], references: [id], onDelete: SetNull)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  seller Seller? @relation(fields: [sellerId], references: [id], onDelete: SetNull)
 
   @@index([remoteJid])
   @@index([eventTimestamp])
   @@index([userId])
   @@index([sellerId])
-  @@map("chat_interactions")
 }
 
 model GeminiChatMessage {
-  id         String  @id @default(cuid())
-  role       String // "user" ou "model" (para alinhar com Gemini)
-  content    String  @db.Text // Conteúdo da mensagem
-  isArchived Boolean @default(false) // Para arquivar mensagens/conversas
+  id         String   @id @default(cuid())
+  role       String
+  content    String
+  isArchived Boolean  @default(false)
+  userId     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  // Relação com User (dono da loja interagindo com o bot)
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
-  @@map("gemini_chat_messages")
 }
-
-// Modelos Padrão do NextAuth.js / Auth.js
 
 model Account {
   id                String  @id @default(cuid())
@@ -172,18 +148,17 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
-  @@map("accounts")
 }
 
 model Session {
@@ -192,8 +167,6 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("sessions")
 }
 
 model VerificationToken {
@@ -202,15 +175,15 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
-  @@map("verification_tokens")
 }
 
 model ChatbotActiveSession {
   id        String   @id @default(cuid())
-  userId    String   @unique // Relação com o usuário ou apenas o ID do usuário
-  messages  Json // Armazena o array de mensagens do chat
+  userId    String   @unique
+  messages  Json
   updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model ChatbotArchivedChat {
@@ -219,5 +192,13 @@ model ChatbotArchivedChat {
   name      String
   messages  Json
   timestamp DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model LegalContent {
+  id        String   @id @default(cuid())
+  pageType  String   @unique
+  content   String   @db.Text
+  updatedAt DateTime @updatedAt
 }

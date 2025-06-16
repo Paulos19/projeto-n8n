@@ -1,34 +1,36 @@
-import 'next-auth';
-import 'next-auth/jwt';
+import { Role } from "@prisma/client"; // Importe o Enum do seu Prisma Client
+import NextAuth, { DefaultSession, DefaultUser } from "next-auth";
+import { JWT, DefaultJWT } from "next-auth/jwt";
 
-declare module 'next-auth' {
+// Defina o tipo Role para uso em toda a aplicação
+type UserRole = Role; // Use o tipo gerado pelo Prisma
+
+declare module "next-auth" {
+  /**
+   * Retornado por `useSession`, `getSession` e recebido como prop para o `SessionProvider`
+   */
   interface Session {
     user: {
       id: string;
-      identifier?: string | null; // Ensure this matches your needs
-    } & DefaultSession['user']; // DefaultSession['user'] usually has name, email, image
+      role: UserRole; // Adiciona role à sessão do usuário
+      webhookApiKey?: string | null;
+    } & DefaultSession["user"]; // Mantém as propriedades padrão como name, email, image
   }
 
   /**
-   * The User object returned by the `authorize` callback and received by the `jwt` callback.
-   * It should include all properties you expect on the user object.
+   * O objeto User que você obtém do seu banco de dados e passa para o callback authorize.
    */
-  interface User {
-    id: string;
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-    identifier?: string | null; // Custom property, ensure it can be null if DB can be null
+  interface User extends DefaultUser {
+    role: UserRole; // Adiciona role ao objeto User principal
+    webhookApiKey?: string | null;
   }
 }
 
-declare module 'next-auth/jwt' {
-  /** Returned by the `jwt` callback and `getToken`, when using JWT sessions */
-  interface JWT {
-    id?: string; // Standard field often added
-    name?: string | null;
-    email?: string | null;
-    picture?: string | null; // 'image' from User often becomes 'picture' in JWT
-    identifier?: string | null; // Custom property
+declare module "next-auth/jwt" {
+  /** Retornado pelo callback `jwt` e pela função `getToken` */
+  interface JWT extends DefaultJWT {
+    id: string;
+    role: UserRole; // Adiciona role ao token JWT
+    webhookApiKey?: string | null;
   }
 }
